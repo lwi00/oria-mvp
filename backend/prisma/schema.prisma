@@ -1,0 +1,248 @@
+// ============================================================================
+// ORIA — Prisma Schema
+// Gamified crypto savings app on Avalanche
+// Version: 1.0 — Hackathon MVP
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// USER & AUTHENTICATION
+// ============================================================================
+
+/// Core user profile, created on first Privy authentication.
+/// Each user has exactly one streak record and can have multiple activities,
+/// deposits, friendships, and challenge memberships.
+model User {
+  id          String   @id @default(uuid())
+  /// Unique identifier from Privy (sub claim in JWT)
+  privyId     String   @unique @map("privy_id")
+  /// EVM wallet address (checksummed), set during onboarding
+  walletAddr  String?  @unique @map("wallet_addr")
+  /// Display name shown on leaderboard and social feed
+  displayName String?  @map("display_name")
+  /// URL to user avatar (hosted externally or base64)
+  avatarUrl   String?  @map("avatar_url")
+  /// Type of goal tracked: "running" | "cycling" | "steps"
+  goalType    String   @default("running") @map("goal_type")
+  /// Weekly target in km (e.g., 10.0 means 10 km/week to maintain streak)
+  targetKm    Float    @default(10.0) @map("target_km")
+  /// Data source for activity tracking: "manual" | "strava" | "apple_health"
+  dataSource  String   @default("manual") @map("data_source")
+  /// Strava OAuth refresh token (encrypted at rest in production)
+  stravaToken String?  @map("strava_token")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  streak           Streak?
+  activities       Activity[]
+  deposits         Deposit[]
+  feedEvents       FeedEvent[]
+  sentRequests     Friendship[]      @relation("requester")
+  receivedRequests Friendship[]      @relation("addressee")
+  createdChallenges Challenge[]      @relation("creator")
+  challengeMembers ChallengeMember[]
+
+  @@map("users")
+}
+
+// ============================================================================
+// STREAKS & GAMIFICATION
+// ============================================================================
+
+/// Tracks a user's current streak state and computed APY.
+/// One-to-one with User. Updated weekly by the evaluation cron job.
+///
+/// APY formula: APY(s) = 4 + 4 × min(1, ln(1+s) / ln(11))
+///   - s = currentCount (consecutive weeks with goal met)
+///   - Range: 4.00% (s=0) → 8.00% (s≥10)
+model Streak {
+  id           String   @id @default(uuid())
+  userId       String   @unique @map("user_id")
+  /// Number of consecutive weeks the user met their goal
+  currentCount Int      @default(0) @map("current_count")
+  /// All-time longest streak (for profile/achievements)
+  longestCount Int      @default(0) @map("longest_count")
+  /// Whether the goal was met last week (used during evaluation)
+  lastWeekMet  Boolean  @default(false) @map("last_week_met")
+  /// Current APY percentage based on streak count (4.0 – 8.0)
+  currentApy   Float    @default(4.0) @map("current_apy")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("streaks")
+}
+
+/// Weekly activity record. One entry per user per ISO week.
+/// Aggregates all activities for that week from any source.
+model Activity {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  /// Monday of the ISO week this activity belongs to
+  weekStart  DateTime @map("week_start") @db.Date
+  /// Total distance in km for the week (cumulative from all sessions)
+  distanceKm Float    @map("distance_km")
+  /// Source of the data: "manual" | "strava" | "apple_health"
+  source     String   @default("manual")
+  /// Whether distanceKm >= user.targetKm (computed on insert/update)
+  goalMet    Boolean  @default(false) @map("goal_met")
+  /// Raw activity data from source (Strava payload, etc.)
+  rawData    Json?    @map("raw_data")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// One activity record per user per week
+  @@unique([userId, weekStart])
+  @@index([weekStart])
+  @@map("activities")
+}
+
+// ============================================================================
+// WALLET & DEPOSITS
+// ============================================================================
+
+/// Records a deposit event (on-chain or simulated for MVP).
+/// Tracks the lifecycle: pending → confirmed → earning → withdrawn.
+model Deposit {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  /// Deposit amount in token's base unit (e.g., 100.0 USDC)
+  amount    Float
+  /// Token symbol: "USDC" | "WAVAX"
+  token     String   @default("USDC")
+  /// On-chain transaction hash (null if mocked)
+  txHash    String?  @unique @map("tx_hash")
+  /// Deposit lifecycle: "pending" | "confirmed" | "earning" | "withdrawn" | "failed"
+  status    String   @default("pending")
+  /// Timestamp when "Start Earning" was triggered
+  earningAt DateTime? @map("earning_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@map("deposits")
+}
+
+// ============================================================================
+// SOCIAL — FRIENDSHIPS
+// ============================================================================
+
+/// Bidirectional friendship with explicit request/accept flow.
+/// Status: "pending" → "accepted" | "rejected"
+/// To query all friends of user X: WHERE (requesterId = X OR addresseeId = X) AND status = "accepted"
+model Friendship {
+  id          String   @id @default(uuid())
+  /// User who sent the friend request
+  requesterId String   @map("requester_id")
+  /// User who received the friend request
+  addresseeId String   @map("addressee_id")
+  /// Request status: "pending" | "accepted" | "rejected"
+  status      String   @default("pending")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  requester User @relation("requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee User @relation("addressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  /// Prevent duplicate requests in either direction
+  @@unique([requesterId, addresseeId])
+  @@index([addresseeId, status])
+  @@map("friendships")
+}
+
+// ============================================================================
+// SOCIAL — ACTIVITY FEED
+// ============================================================================
+
+/// Social feed events visible to a user's friends.
+/// Event types:
+///   - "streak_milestone"  → payload: { streakCount: 5 }
+///   - "goal_met"          → payload: { weekStart: "2026-03-02", distanceKm: 12.5 }
+///   - "streak_lost"       → payload: { previousCount: 7 }
+///   - "deposit"           → payload: { amount: 100, token: "USDC" }
+///   - "challenge_joined"  → payload: { challengeId: "...", title: "..." }
+///   - "challenge_completed" → payload: { challengeId: "...", title: "..." }
+model FeedEvent {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  /// Event type identifier (see model doc above)
+  eventType String   @map("event_type")
+  /// Structured payload specific to the event type
+  payload   Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+  @@map("feed_events")
+}
+
+// ============================================================================
+// CHALLENGES — GROUP GOALS
+// ============================================================================
+
+/// A group challenge where multiple users commit to a shared weekly goal.
+/// The creator automatically becomes a member.
+/// Challenge multiplier: participants in a challenge who all meet their goals
+/// get a temporary APY boost (future feature).
+model Challenge {
+  id          String   @id @default(uuid())
+  /// User who created the challenge
+  creatorId   String   @map("creator_id")
+  /// Challenge display title (e.g., "Team 10K Week")
+  title       String
+  /// Optional description
+  description String?
+  /// Weekly km goal for all participants
+  goalKmWeek  Float    @map("goal_km_week")
+  /// Challenge start date (ISO Monday)
+  startDate   DateTime @map("start_date") @db.Date
+  /// Challenge end date (ISO Sunday)
+  endDate     DateTime @map("end_date") @db.Date
+  /// Maximum number of participants (null = unlimited)
+  maxMembers  Int?     @map("max_members")
+  /// Lifecycle: "active" | "completed" | "cancelled"
+  status      String   @default("active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  creator User              @relation("creator", fields: [creatorId], references: [id], onDelete: Cascade)
+  members ChallengeMember[]
+
+  @@index([status, startDate])
+  @@map("challenges")
+}
+
+/// Join table for challenge participation.
+/// Tracks per-member progress within a challenge.
+model ChallengeMember {
+  id          String   @id @default(uuid())
+  challengeId String   @map("challenge_id")
+  userId      String   @map("user_id")
+  /// Number of weeks the member met the challenge goal
+  weeksMet    Int      @default(0) @map("weeks_met")
+  /// Total weeks since joining
+  weeksTotal  Int      @default(0) @map("weeks_total")
+  joinedAt    DateTime @default(now()) @map("joined_at")
+
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// One membership per user per challenge
+  @@unique([challengeId, userId])
+  @@map("challenge_members")
+}

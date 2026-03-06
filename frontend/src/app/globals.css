@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gradient-brand: linear-gradient(135deg, #7c3aed, #a78bfa);
+  --gradient-surface: linear-gradient(135deg, rgba(237,233,254,0.8), rgba(221,214,254,0.5));
+}
+
+body {
+  background: #faf9ff;
+  color: #1e1b4b;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(124, 58, 237, 0.2);
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(196, 181, 253, 0.3);
+  border-radius: 4px;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.gradient-brand {
+  background: var(--gradient-brand);
+}
+
+.gradient-surface {
+  background: var(--gradient-surface);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
