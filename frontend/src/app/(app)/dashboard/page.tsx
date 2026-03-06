@@ -7,9 +7,9 @@ import { WeekDots } from "@/components/WeekDots";
 import { ProgressRing } from "@/components/ProgressRing";
 import { Avatar } from "@/components/Avatar";
 import { CardSkeleton } from "@/components/Skeleton";
-import { useUser, useStreak, useFeed, useLogActivity, useEarnings } from "@/lib/hooks";
+import { LogActivityModal } from "@/components/LogActivityModal";
+import { useUser, useStreak, useFeed, useEarnings } from "@/lib/hooks";
 import { timeAgo, getInitials, formatFeedEvent } from "@/lib/utils";
-import { useToast } from "@/components/Toast";
 
 const apySteps = [
   { s: 0, a: 4.0 }, { s: 1, a: 5.16 }, { s: 2, a: 5.83 },
@@ -23,11 +23,8 @@ export default function DashboardPage() {
   const { data: streak, isLoading: streakLoading } = useStreak();
   const { data: feed } = useFeed(3);
   const { data: earnings } = useEarnings();
-  const logActivity = useLogActivity();
 
-  const { toast } = useToast();
   const [showLogModal, setShowLogModal] = useState(false);
-  const [kmInput, setKmInput] = useState("");
 
   const isLoading = userLoading || streakLoading;
 
@@ -128,50 +125,10 @@ export default function DashboardPage() {
       </Card>
 
       {/* Log Activity Modal */}
-      {showLogModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="bg-white rounded-xl p-6 w-[340px] shadow-card-hover">
-            <h3 className="text-lg font-bold text-text-primary mb-4">Log Activity</h3>
-            <label className="text-sm text-text-secondary mb-1 block">Distance (km)</label>
-            <input
-              type="number"
-              step="0.1"
-              min="0"
-              value={kmInput}
-              onChange={(e) => setKmInput(e.target.value)}
-              placeholder="e.g. 5.5"
-              className="w-full px-4 py-3 rounded-md border border-oria bg-white/80 text-[15px] focus:border-purple-600 outline-none mb-4 tabular-nums"
-            />
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowLogModal(false)}
-                className="flex-1 py-3 rounded-md border border-oria text-text-secondary font-medium text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                disabled={!kmInput || logActivity.isPending}
-                onClick={() => {
-                  logActivity.mutate(
-                    { distanceKm: parseFloat(kmInput) },
-                    {
-                      onSuccess: () => {
-                        setShowLogModal(false);
-                        setKmInput("");
-                        toast(`Logged ${kmInput} km!`);
-                      },
-                      onError: () => toast("Failed to log activity", "error"),
-                    },
-                  );
-                }}
-                className="flex-1 py-3 rounded-md gradient-brand text-white font-semibold text-sm shadow-button disabled:opacity-50"
-              >
-                {logActivity.isPending ? "Saving..." : "Save"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <LogActivityModal
+        open={showLogModal}
+        onClose={() => setShowLogModal(false)}
+      />
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-3">

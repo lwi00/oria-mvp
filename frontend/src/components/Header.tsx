@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Avatar } from "./Avatar";
 import { useUser } from "@/lib/hooks";
 import { getInitials } from "@/lib/utils";
@@ -23,7 +24,9 @@ export function Header() {
           <span className="text-xl">🔔</span>
           <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-error-500 border-2 border-white" />
         </button>
-        <Avatar initials={initials} size={32} highlight />
+        <Link href="/profile">
+          <Avatar initials={initials} size={32} highlight />
+        </Link>
       </div>
     </header>
   );
