@@ -20,11 +20,13 @@ out/
 
 # Claude Code
 .claude/
-CLAUDE.md
-AGENTS.md
 
 # Prisma
 prisma/migrations/
+backend/prisma/migrations/
+
+# Lock files (pnpm)
+# pnpm-lock.yaml is tracked
 
 # Logs
 *.log
