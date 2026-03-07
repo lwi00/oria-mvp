@@ -10,6 +10,7 @@ import { CardSkeleton } from "@/components/Skeleton";
 import { LogActivityModal } from "@/components/LogActivityModal";
 import { useUser, useStreak, useFeed, useEarnings } from "@/lib/hooks";
 import { timeAgo, getInitials, formatFeedEvent } from "@/lib/utils";
+import Link from "next/link";
 
 const apySteps = [
   { s: 0, a: 4.0 }, { s: 1, a: 5.16 }, { s: 2, a: 5.83 },
@@ -185,7 +186,7 @@ export default function DashboardPage() {
       <Card>
         <div className="flex justify-between items-center mb-3">
           <span className="text-sm font-bold text-text-primary tracking-tight">Friends Activity</span>
-          <span className="text-xs text-purple-600 font-medium cursor-pointer">See all →</span>
+          <Link href="/social" className="text-xs text-purple-600 font-medium cursor-pointer hover:text-purple-700">See all →</Link>
         </div>
         {feed && feed.length > 0 ? (
           feed.map((f) => {

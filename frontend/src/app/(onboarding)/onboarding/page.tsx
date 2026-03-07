@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/Card";
 import { MiniJar } from "@/components/MiniJar";
+import { apiFetch } from "@/lib/api";
+import { usePrivy, useLogin } from "@privy-io/react-auth";
 
 const STEPS = 4;
 
@@ -75,36 +77,33 @@ function ConnectWalletStep({
   onNext: () => void;
   onBack: () => void;
 }) {
-  const loginOptions = [
-    {
-      label: "Continue with Email",
-      icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="2" y="4" width="20" height="16" rx="2" />
-          <path d="M22 4L12 13L2 4" />
-        </svg>
-      ),
+  const [loggingIn, setLoggingIn] = useState(false);
+  const { login } = useLogin({
+    onComplete: async (params) => {
+      setLoggingIn(false);
+      const walletAddr = params.user.wallet?.address;
+      try {
+        await apiFetch("/api/auth/verify", {
+          method: "POST",
+          body: JSON.stringify({
+            walletAddr,
+            displayName: params.user.email?.address?.split("@")[0],
+          }),
+        });
+      } catch {
+        // User creation may fail if already exists — that's fine
+      }
+      onNext();
     },
-    {
-      label: "Continue with Google",
-      icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-        </svg>
-      ),
+    onError: () => {
+      setLoggingIn(false);
     },
-    {
-      label: "Continue with Apple",
-      icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="#1e1b4b">
-          <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-        </svg>
-      ),
-    },
-  ];
+  });
+
+  const handleLogin = () => {
+    setLoggingIn(true);
+    login();
+  };
 
   return (
     <div className="flex flex-col min-h-screen px-6 py-10">
@@ -133,34 +132,19 @@ function ConnectWalletStep({
       </div>
 
       <div className="flex flex-col gap-3 mt-8">
-        {loginOptions.map((opt) => (
-          <button
-            key={opt.label}
-            onClick={onNext}
-            className="w-full flex items-center gap-4 px-5 py-4 rounded-xl bg-white/85 border border-oria backdrop-blur-[12px] shadow-card cursor-pointer text-left hover:shadow-card-hover hover:border-purple-300/30 transition-all min-h-[56px]"
-          >
-            <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0">
-              {opt.icon}
-            </div>
-            <span className="text-[15px] font-medium text-text-primary">
-              {opt.label}
-            </span>
-          </button>
-        ))}
+        <button
+          onClick={handleLogin}
+          disabled={loggingIn}
+          className="w-full flex items-center justify-center gap-3 px-5 py-4 rounded-xl gradient-brand text-white shadow-button cursor-pointer border-none min-h-[56px] text-base font-semibold disabled:opacity-50"
+        >
+          {loggingIn ? "Connecting..." : "Sign in with Privy"}
+        </button>
       </div>
 
-      <div className="flex items-center gap-4 my-8">
-        <div className="flex-1 h-px bg-purple-200/40" />
-        <span className="text-xs text-text-muted font-medium">or</span>
-        <div className="flex-1 h-px bg-purple-200/40" />
-      </div>
-
-      <button
-        onClick={onNext}
-        className="w-full py-3.5 rounded-xl border-2 border-dashed border-purple-300/50 bg-purple-50/30 text-sm font-medium text-purple-600 cursor-pointer min-h-[48px]"
-      >
-        Connect existing wallet
-      </button>
+      <p className="text-[13px] text-text-muted text-center mt-6 leading-relaxed">
+        Sign in with email, Google, or Apple. Privy will create an embedded
+        wallet for you automatically.
+      </p>
 
       <div className="mt-auto pt-8">
         <ProgressDots current={1} total={STEPS} />
@@ -474,20 +458,25 @@ export default function OnboardingPage() {
   const [goalType, setGoalType] = useState("running");
   const [targetKm, setTargetKm] = useState(10);
   const router = useRouter();
+  const { authenticated } = usePrivy();
+
+  useEffect(() => {
+    if (authenticated && step < 2) {
+      setStep(2);
+    }
+  }, [authenticated, step]);
 
   const finish = async (depositAmount: number, depositToken: string) => {
-    // Save goal settings to mock user state
-    await fetch("/api/users/me", {
+    // Save goal settings
+    await apiFetch("/api/users/me", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ goalType, targetKm }),
     });
 
     // If user chose to deposit, call the deposit API
     if (depositAmount > 0) {
-      await fetch("/api/wallet/deposit", {
+      await apiFetch("/api/wallet/deposit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: depositAmount, token: depositToken }),
       });
     }
