@@ -4,13 +4,15 @@ import { useState } from "react";
 import { Card } from "@/components/Card";
 import { Avatar } from "@/components/Avatar";
 import { CardSkeleton } from "@/components/Skeleton";
-import { useChallenges, useCreateChallenge } from "@/lib/hooks";
+import { useChallenges, useCreateChallenge, useJoinChallenge, useUser } from "@/lib/hooks";
 import { getInitials, daysUntil } from "@/lib/utils";
 import { useToast } from "@/components/Toast";
 
 export default function ChallengesPage() {
   const { data: challenges, isLoading } = useChallenges();
+  const { data: user } = useUser();
   const createChallenge = useCreateChallenge();
+  const joinChallenge = useJoinChallenge();
   const { toast } = useToast();
 
   const [showCreate, setShowCreate] = useState(false);
@@ -170,19 +172,35 @@ export default function ChallengesPage() {
                 />
               </div>
 
-              <div className="flex">
-                {c.members.slice(0, 4).map((m, i) => (
-                  <div key={m.id} style={{ marginLeft: i > 0 ? -8 : 0, zIndex: 4 - i }}>
-                    <Avatar initials={getInitials(m.user.displayName)} size={28} />
-                  </div>
-                ))}
-                {memberCount > 4 && (
-                  <div
-                    className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-[10px] font-semibold text-purple-600"
-                    style={{ marginLeft: -8 }}
+              <div className="flex items-center justify-between">
+                <div className="flex">
+                  {c.members.slice(0, 4).map((m, i) => (
+                    <div key={m.id} style={{ marginLeft: i > 0 ? -8 : 0, zIndex: 4 - i }}>
+                      <Avatar initials={getInitials(m.user.displayName)} size={28} />
+                    </div>
+                  ))}
+                  {memberCount > 4 && (
+                    <div
+                      className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-[10px] font-semibold text-purple-600"
+                      style={{ marginLeft: -8 }}
+                    >
+                      +{memberCount - 4}
+                    </div>
+                  )}
+                </div>
+                {user && !c.members.some((m) => m.userId === user.id) && (
+                  <button
+                    onClick={() =>
+                      joinChallenge.mutate(c.id, {
+                        onSuccess: () => toast("Joined challenge!"),
+                        onError: () => toast("Failed to join", "error"),
+                      })
+                    }
+                    disabled={joinChallenge.isPending}
+                    className="text-xs text-purple-600 font-semibold bg-purple-100 px-3 py-1.5 rounded-full hover:bg-purple-200 transition-colors min-h-[44px] flex items-center cursor-pointer"
                   >
-                    +{memberCount - 4}
-                  </div>
+                    Join
+                  </button>
                 )}
               </div>
             </Card>

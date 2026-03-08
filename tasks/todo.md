@@ -117,25 +117,27 @@
 - [x] Wire onboarding deposit step to mock wallet (POST `/api/wallet/deposit`)
 - [x] Add `oria_onboarded` cookie for routing: `/` → `/onboarding` or `/dashboard`
 - [x] Verify `npm run build` compiles cleanly
-- [ ] Remove unused wagmi/viem from `package.json` (dead weight, not imported anywhere)
+- [x] Remove unused wagmi/viem from `package.json` (dead weight, not imported anywhere)
 
 ## Phase 15 -- Frontend Polish & Missing Interactions
-- [ ] Dashboard "See all →" link on Friends Activity → navigate to `/social`
-- [ ] Profile page: wire "Edit Profile" to PATCH `/api/users/me` (displayName, goalType, targetKm)
-- [ ] Profile page: add "Reset Demo" button (clears cookie + reloads → back to onboarding)
-- [ ] Challenges: wire "Join Challenge" action (POST `/api/challenges/:id/join`)
-- [ ] Wallet: show deposit success toast after deposit completes
-- [ ] Add pull-to-refresh / refetch-on-focus for TanStack Query hooks
-- [ ] Tab bar: highlight active tab based on current route
-- [ ] Add page transitions (fade/slide between tabs)
+- [x] Dashboard "See all →" link on Friends Activity → navigate to `/social`
+- [x] Profile page: wire "Edit Profile" to PATCH `/api/users/me` (displayName, goalType, targetKm)
+- [x] Profile page: add "Reset Demo" button (clears cookie + reloads → back to onboarding)
+- [x] Challenges: wire "Join Challenge" action (POST `/api/challenges/:id/join`)
+- [x] Wallet: show deposit success toast after deposit completes
+- [x] Add pull-to-refresh / refetch-on-focus for TanStack Query hooks
+- [x] Tab bar: highlight active tab based on current route
+- [x] Add page transitions (fade/slide between tabs)
 
 ## Phase 16 -- Connect Real Backend
-- [ ] Point `NEXT_PUBLIC_API_URL` to Fastify backend (`http://localhost:3001`)
-- [ ] Replace mock API routes with proxy or remove them (frontend calls backend directly)
-- [ ] Integrate Privy SDK: wrap app in `PrivyProvider`, replace mock wallet step with real auth
-- [ ] Add auth token to API client (`Authorization: Bearer <privy-jwt>`)
+- [x] Point `NEXT_PUBLIC_API_URL` to Fastify backend (`http://localhost:3001`)
+- [x] Add `NEXT_PUBLIC_USE_MOCK` env toggle (mock routes vs real backend)
+- [x] Fix onboarding to use `apiFetch` instead of raw `fetch`
+- [x] Add auth token injection to API client (`Authorization: Bearer <privy-jwt>`)
+- [x] Handle auth errors: 401 interceptor clears cookie + dispatches event
+- [x] Replace mock API routes with proxy or remove them (when USE_MOCK=false, mock routes are bypassed)
+- [x] Integrate Privy SDK: wrap app in `PrivyProvider`, replace mock wallet step with real auth
 - [ ] Test full flow: Privy login → user creation → streak tracking → deposit
-- [ ] Handle auth errors: expired token redirect to login, 401 interceptor
 
 ## Phase 17 -- Deployment
 - [ ] Backend → Railway/Render

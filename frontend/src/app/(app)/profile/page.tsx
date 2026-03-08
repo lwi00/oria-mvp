@@ -8,11 +8,13 @@ import { useUser, useWalletBalance } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
 import { getInitials } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
+import { usePrivy } from "@privy-io/react-auth";
 
 export default function ProfilePage() {
   const { data: user, isLoading, refetch } = useUser();
   const { data: wallet } = useWalletBalance();
   const { toast } = useToast();
+  const { logout } = usePrivy();
 
   const [displayName, setDisplayName] = useState("");
   const [goalType, setGoalType] = useState("running");
@@ -247,8 +249,24 @@ export default function ProfilePage() {
         >
           {saving ? "Saving..." : "Save Changes"}
         </button>
-        <button className="w-full py-3 text-sm text-error-500 font-medium cursor-pointer bg-transparent border-none">
+        <button
+          onClick={async () => {
+            await logout();
+            document.cookie = "oria_onboarded=; path=/; max-age=0";
+            window.location.href = "/";
+          }}
+          className="w-full py-3 text-sm text-error-500 font-medium cursor-pointer bg-transparent border-none"
+        >
           Sign Out
+        </button>
+        <button
+          onClick={() => {
+            document.cookie = "oria_onboarded=; path=/; max-age=0";
+            window.location.href = "/";
+          }}
+          className="w-full py-3 text-sm text-text-muted font-medium cursor-pointer bg-transparent border-none hover:text-text-secondary"
+        >
+          Reset Demo
         </button>
       </div>
     </div>

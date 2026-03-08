@@ -200,11 +200,34 @@ export function useCreateChallenge() {
       durationWeeks: number;
       maxMembers?: number;
       description?: string;
-    }) =>
-      apiFetch("/api/challenges", {
+    }) => {
+      const startDate = new Date().toISOString();
+      const endDate = new Date(
+        Date.now() + data.durationWeeks * 7 * 86400_000,
+      ).toISOString();
+      return apiFetch("/api/challenges", {
         method: "POST",
-        body: JSON.stringify(data),
-      }),
+        body: JSON.stringify({
+          title: data.title,
+          goalKmWeek: data.goalKmWeek,
+          startDate,
+          endDate,
+          maxMembers: data.maxMembers,
+          description: data.description,
+        }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["challenges"] });
+    },
+  });
+}
+
+export function useJoinChallenge() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (challengeId: string) =>
+      apiFetch(`/api/challenges/${challengeId}/join`, { method: "POST" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["challenges"] });
     },
