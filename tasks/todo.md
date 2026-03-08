@@ -135,8 +135,8 @@
 - [x] Fix onboarding to use `apiFetch` instead of raw `fetch`
 - [x] Add auth token injection to API client (`Authorization: Bearer <privy-jwt>`)
 - [x] Handle auth errors: 401 interceptor clears cookie + dispatches event
-- [ ] Replace mock API routes with proxy or remove them (when USE_MOCK=false, mock routes are bypassed)
-- [ ] Integrate Privy SDK: wrap app in `PrivyProvider`, replace mock wallet step with real auth
+- [x] Replace mock API routes with proxy or remove them (when USE_MOCK=false, mock routes are bypassed)
+- [x] Integrate Privy SDK: wrap app in `PrivyProvider`, replace mock wallet step with real auth
 - [ ] Test full flow: Privy login → user creation → streak tracking → deposit
 
 ## Phase 17 -- Deployment

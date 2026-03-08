@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/Card";
 import { MiniJar } from "@/components/MiniJar";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, setAuthTokenGetter } from "@/lib/api";
 import { usePrivy, useLogin } from "@privy-io/react-auth";
 
 const STEPS = 4;
@@ -78,9 +78,12 @@ function ConnectWalletStep({
   onBack: () => void;
 }) {
   const [loggingIn, setLoggingIn] = useState(false);
+  const { getAccessToken } = usePrivy();
   const { login } = useLogin({
     onComplete: async (params) => {
       setLoggingIn(false);
+      // Eagerly register token getter so apiFetch can attach Bearer token
+      setAuthTokenGetter(() => getAccessToken());
       const walletAddr = params.user.wallet?.address;
       try {
         await apiFetch("/api/auth/verify", {
