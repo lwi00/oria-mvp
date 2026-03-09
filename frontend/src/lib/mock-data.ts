@@ -127,17 +127,50 @@ export const mockChallenges = [
 // ── Wallet / Earnings ──
 export const mockWallet = {
   walletAddr: "0x7a3B...dE4F",
-  balances: { USDC: 2450, AVAX: 12.3456 },
+  balances: { USDC: 0, AVAX: 0 },
   chain: "Avalanche C-Chain (Fuji)",
 };
 
 export const mockEarnings = {
-  totalDeposited: 2000,
-  totalEarned: 18.47,
+  totalDeposited: 0,
+  totalEarned: 0,
   currentApy: apyFromStreak(4),
-  projectedWeekly: 2.57,
-  projectedAnnual: 133.6,
+  projectedWeekly: 0,
+  projectedAnnual: 0,
 };
+
+// ── Deposit ledger ──
+interface MockDeposit {
+  id: string;
+  amount: number;
+  token: string;
+  status: string;
+  createdAt: string;
+  txHash: string | null;
+}
+
+const mockDeposits: MockDeposit[] = [];
+let depositCounter = 0;
+
+export function getDeposits(): MockDeposit[] {
+  return mockDeposits;
+}
+
+export function recalcEarnings() {
+  const now = Date.now();
+  let totalYield = 0;
+  for (const d of mockDeposits) {
+    const elapsed = (now - new Date(d.createdAt).getTime()) / (1000 * 86400 * 365);
+    totalYield += d.amount * (mockEarnings.currentApy / 100) * elapsed;
+  }
+  mockEarnings.totalEarned = parseFloat(totalYield.toFixed(2));
+  mockEarnings.projectedWeekly = parseFloat(
+    ((mockEarnings.totalDeposited * mockEarnings.currentApy / 100) / 52).toFixed(2),
+  );
+  mockEarnings.projectedAnnual = parseFloat(
+    (mockEarnings.totalDeposited * mockEarnings.currentApy / 100).toFixed(2),
+  );
+}
 
 // ── Mutation helpers (modify in-memory state) ──
 let feedCounter = 100;
@@ -160,17 +193,30 @@ export function logActivity(distanceKm: number) {
   return { success: true, distanceKm: mockStreak.currentWeek.distanceKm };
 }
 
-export function deposit(amount: number, token: string) {
+export function deposit(amount: number, token: string, txHash?: string) {
   mockEarnings.totalDeposited += amount;
   if (token === "USDC") mockWallet.balances.USDC += amount;
   else mockWallet.balances.AVAX += amount;
+
+  const createdAt = new Date().toISOString();
+
+  mockDeposits.unshift({
+    id: `dep-${++depositCounter}`,
+    amount,
+    token,
+    status: "earning",
+    createdAt,
+    txHash: txHash ?? null,
+  });
+
+  recalcEarnings();
 
   mockFeed.unshift({
     id: `fe-${++feedCounter}`,
     userId: mockUser.id,
     eventType: "deposit",
     payload: { amount, token },
-    createdAt: new Date().toISOString(),
+    createdAt,
     user: { id: mockUser.id, displayName: mockUser.displayName, avatarUrl: null },
   });
 

@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Card } from "@/components/Card";
 import { CardSkeleton } from "@/components/Skeleton";
-import { useEarnings, useWalletBalance, useDeposit, useDeposits } from "@/lib/hooks";
+import { useEarnings, useWalletBalance, useDeposits } from "@/lib/hooks";
+import { useOnChainDeposit } from "@/lib/useOnChainDeposit";
 import { useToast } from "@/components/Toast";
 import { timeAgo } from "@/lib/utils";
 
@@ -11,7 +12,7 @@ export default function WalletPage() {
   const { data: earnings, isLoading: earningsLoading } = useEarnings();
   const { data: wallet } = useWalletBalance();
   const { data: deposits } = useDeposits();
-  const deposit = useDeposit();
+  const onChainDeposit = useOnChainDeposit();
 
   const { toast } = useToast();
   const [showDeposit, setShowDeposit] = useState(false);
@@ -94,31 +95,41 @@ export default function WalletPage() {
                 </button>
               ))}
             </div>
+            {onChainDeposit.error && (
+              <div className="mb-3 p-2 rounded-md bg-red-50 border border-red-200">
+                <p className="text-xs text-red-600">{onChainDeposit.error}</p>
+              </div>
+            )}
             <div className="flex gap-3">
               <button
-                onClick={() => setShowDeposit(false)}
-                className="flex-1 py-3 rounded-md border border-oria text-text-secondary font-medium text-sm"
+                onClick={() => {
+                  setShowDeposit(false);
+                  onChainDeposit.reset();
+                }}
+                disabled={onChainDeposit.isPending}
+                className="flex-1 py-3 rounded-md border border-oria text-text-secondary font-medium text-sm disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
-                disabled={!depositAmount || deposit.isPending}
-                onClick={() => {
-                  deposit.mutate(
-                    { amount: parseFloat(depositAmount), token: depositToken },
-                    {
-                      onSuccess: () => {
-                        setShowDeposit(false);
-                        setDepositAmount("");
-                        toast(`Deposited ${depositAmount} ${depositToken}`);
-                      },
-                      onError: () => toast("Deposit failed", "error"),
-                    },
-                  );
+                disabled={!depositAmount || onChainDeposit.isPending}
+                onClick={async () => {
+                  try {
+                    await onChainDeposit.deposit(
+                      parseFloat(depositAmount),
+                      depositToken,
+                    );
+                    setShowDeposit(false);
+                    setDepositAmount("");
+                    onChainDeposit.reset();
+                    toast(`Deposited ${depositAmount} ${depositToken}`);
+                  } catch {
+                    // Error shown inline via onChainDeposit.error
+                  }
                 }}
                 className="flex-1 py-3 rounded-md gradient-brand text-white font-semibold text-sm shadow-button disabled:opacity-50"
               >
-                {deposit.isPending ? "Processing..." : "Confirm"}
+                {onChainDeposit.buttonText("Confirm")}
               </button>
             </div>
           </div>
