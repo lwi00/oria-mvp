@@ -8,7 +8,7 @@ import { ProgressRing } from "@/components/ProgressRing";
 import { Avatar } from "@/components/Avatar";
 import { CardSkeleton } from "@/components/Skeleton";
 import { LogActivityModal } from "@/components/LogActivityModal";
-import { useUser, useStreak, useFeed, useEarnings, useAppleHealthStatus, useSyncAppleHealth } from "@/lib/hooks";
+import { useUser, useStreak, useFeed, useEarnings, useAppleHealthStatus, useSyncAppleHealth, useLastRun } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
 import { timeAgo, getInitials, formatFeedEvent } from "@/lib/utils";
 import Link from "next/link";
@@ -28,6 +28,7 @@ export default function DashboardPage() {
 
   const { data: healthStatus } = useAppleHealthStatus();
   const syncHealth = useSyncAppleHealth();
+  const { data: lastRunData } = useLastRun();
   const { toast } = useToast();
 
   const [showLogModal, setShowLogModal] = useState(false);
@@ -156,6 +157,28 @@ export default function DashboardPage() {
           </div>
         </div>
       </Card>
+
+      {/* Last Run from Strava */}
+      {lastRunData?.lastRun && (
+        <Card>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#FC4C02">
+                <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-.956l2.09 4.128L3 0h4.138" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-0.5">Last Activity</p>
+              <p className="text-sm font-semibold text-text-primary truncate">{lastRunData.lastRun.name}</p>
+              <p className="text-[11px] text-text-muted">{new Date(lastRunData.lastRun.date).toLocaleDateString()}</p>
+            </div>
+            <div className="text-right flex-shrink-0">
+              <p className="text-xl font-extrabold text-text-primary tabular-nums">{lastRunData.lastRun.distanceKm} <span className="text-sm font-normal text-text-muted">km</span></p>
+              <p className="text-[11px] text-text-muted tabular-nums">{Math.floor(lastRunData.lastRun.movingTimeSec / 60)} min</p>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Log Activity Modal */}
       <LogActivityModal

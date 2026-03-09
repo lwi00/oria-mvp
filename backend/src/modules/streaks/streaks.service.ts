@@ -19,7 +19,7 @@ export async function logActivity(
   body: LogActivityBody,
 ) {
   const weekStart = body.weekStart
-    ? new Date(body.weekStart)
+    ? getWeekStart(new Date(body.weekStart))
     : getWeekStart();
 
   const user = await prisma.user.findUnique({
@@ -47,6 +47,24 @@ export async function logActivity(
       goalMet,
     },
   });
+
+  // Auto-update streak APY when goal is met so dashboard reflects immediately
+  if (goalMet) {
+    const streak = await prisma.streak.findUnique({ where: { userId } });
+    if (streak && !streak.lastWeekMet) {
+      const newCount = streak.currentCount + 1;
+      const newApy = computeApy(newCount);
+      await prisma.streak.update({
+        where: { userId },
+        data: { currentCount: newCount, lastWeekMet: true, currentApy: newApy },
+      });
+    } else if (streak) {
+      await prisma.streak.update({
+        where: { userId },
+        data: { lastWeekMet: true, currentApy: computeApy(streak.currentCount) },
+      });
+    }
+  }
 
   return activity;
 }

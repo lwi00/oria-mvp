@@ -499,13 +499,15 @@ export default function OnboardingPage() {
   }, [authenticated, step]);
 
   const finish = async () => {
-    // Save goal settings
-    await apiFetch("/api/users/me", {
-      method: "PATCH",
-      body: JSON.stringify({ goalType, targetKm }),
-    });
-
-    // Deposit is already handled by useOnChainDeposit in FundWalletStep
+    // Save goal settings (best effort — don't block navigation)
+    try {
+      await apiFetch("/api/users/me", {
+        method: "PATCH",
+        body: JSON.stringify({ goalType, targetKm }),
+      });
+    } catch {
+      // ignore — user can update settings later from profile
+    }
 
     // Set onboarded cookie (expires in 30 days)
     document.cookie = "oria_onboarded=1; path=/; max-age=2592000";

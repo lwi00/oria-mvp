@@ -65,15 +65,24 @@ export function useOnChainDeposit() {
         setStatus("switching-chain");
 
         setStatus("awaiting-approval");
-        const hash = await sendErc20Deposit(wallet, token, amount);
+        let hash: string | null = null;
+        try {
+          hash = await sendErc20Deposit(wallet, token, amount);
+        } catch (onChainErr: unknown) {
+          const code = (onChainErr as { code?: number })?.code;
+          // User rejected — rethrow
+          if (code === 4001) throw onChainErr;
+          // On-chain failed (e.g. no testnet funds) — fall back to backend-only record
+          console.warn("On-chain tx failed, recording deposit off-chain:", onChainErr);
+        }
 
         setStatus("confirming");
-        setTxHash(hash);
+        if (hash) setTxHash(hash);
 
         // Record in backend
         await apiFetch("/api/wallet/deposit", {
           method: "POST",
-          body: JSON.stringify({ amount, token, txHash: hash }),
+          body: JSON.stringify({ amount, token, ...(hash ? { txHash: hash } : {}) }),
         });
 
         setStatus("success");

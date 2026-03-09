@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/Card";
 import { Avatar } from "@/components/Avatar";
 import { CardSkeleton } from "@/components/Skeleton";
-import { useUser, useAppleHealthStatus, useConnectAppleHealth } from "@/lib/hooks";
+import { useUser, useAppleHealthStatus, useConnectAppleHealth, useStravaStatus, useStravaSync } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
 import { getInitials } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
@@ -16,6 +16,8 @@ export default function ProfilePage() {
   const { logout } = usePrivy();
   const { data: healthStatus } = useAppleHealthStatus();
   const connectHealth = useConnectAppleHealth();
+  const { data: stravaStatus } = useStravaStatus();
+  const stravaSync = useStravaSync();
 
   const [displayName, setDisplayName] = useState("");
   const [goalType, setGoalType] = useState("running");
@@ -172,9 +174,32 @@ export default function ProfilePage() {
                 <p className="text-[11px] text-text-muted">Auto-sync activities</p>
               </div>
             </div>
-            <span className="text-[11px] font-semibold text-warning-500 bg-warning-100 px-2.5 py-1 rounded-md">
-              Coming soon
-            </span>
+            {stravaStatus?.connected ? (
+              <button
+                onClick={() => stravaSync.mutate(undefined, {
+                  onSuccess: (data) => toast(`Synced ${data.synced} weeks from Strava`),
+                  onError: () => toast("Sync failed", "error"),
+                })}
+                disabled={stravaSync.isPending}
+                className="text-[11px] font-semibold text-white gradient-brand px-3 py-1.5 rounded-md cursor-pointer border-none shadow-button min-h-[32px] disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {stravaSync.isPending ? (
+                  <span className="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : "↻"} {stravaSync.isPending ? "Syncing…" : "Sync"}
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID ?? "209985";
+                  const redirectUri = process.env.NEXT_PUBLIC_STRAVA_REDIRECT_URI ?? `${window.location.origin}/strava/callback`;
+                  const url = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=activity:read_all`;
+                  window.location.href = url;
+                }}
+                className="text-[11px] font-semibold text-white gradient-brand px-3 py-1.5 rounded-md cursor-pointer border-none shadow-button min-h-[32px]"
+              >
+                Connect
+              </button>
+            )}
           </div>
           <div className="h-px bg-purple-100/50" />
           <div className="flex items-center justify-between py-2">
