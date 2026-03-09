@@ -3,6 +3,7 @@ import type { FastifyInstance, FastifyRequest } from "fastify";
 import { env } from "../config/env.js";
 import { MOCK_USER_ID, MOCK_PRIVY_ID } from "../config/constants.js";
 import { UnauthorizedError } from "../lib/errors.js";
+import { computeApy } from "../modules/streaks/apy.utils.js";
 
 export default fp(async (fastify: FastifyInstance) => {
   fastify.decorateRequest("userId", "");
@@ -30,14 +31,28 @@ export default fp(async (fastify: FastifyInstance) => {
       const verified = await privy.verifyAuthToken(token);
       request.privyId = verified.userId;
 
-      // Look up internal user ID
-      const user = await fastify.prisma.user.findUnique({
+      // Look up internal user ID, auto-create if first login
+      let user = await fastify.prisma.user.findUnique({
         where: { privyId: verified.userId },
         select: { id: true },
       });
-      if (user) {
-        request.userId = user.id;
+      if (!user) {
+        user = await fastify.prisma.user.create({
+          data: {
+            privyId: verified.userId,
+            streak: {
+              create: {
+                currentCount: 0,
+                longestCount: 0,
+                lastWeekMet: false,
+                currentApy: computeApy(0),
+              },
+            },
+          },
+          select: { id: true },
+        });
       }
+      request.userId = user.id;
     } catch {
       throw new UnauthorizedError("Invalid or expired token");
     }

@@ -16,6 +16,9 @@ export async function updateMe(
   userId: string,
   data: UpdateUserBody,
 ) {
+  // Verify user exists before updating
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new NotFoundError("User");
   return prisma.user.update({
     where: { id: userId },
     data,
