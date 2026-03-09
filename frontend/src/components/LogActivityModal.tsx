@@ -31,7 +31,7 @@ export function LogActivityModal({ open, onClose }: LogActivityModalProps) {
   const handleSubmit = () => {
     if (!km) return;
     logActivity.mutate(
-      { distanceKm: parseFloat(km) },
+      { distanceKm: parseFloat(km), weekStart: date },
       {
         onSuccess: () => {
           toast(`Logged ${km} km!`);

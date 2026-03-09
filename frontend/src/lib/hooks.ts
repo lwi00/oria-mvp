@@ -113,6 +113,41 @@ interface Deposit {
 }
 
 // Hooks
+export function useLastRun() {
+  return useQuery<{ lastRun: { name: string; distanceKm: number; date: string; movingTimeSec: number; type: string } | null }>({
+    queryKey: ["strava", "last-run"],
+    queryFn: () => apiFetch("/api/strava/last-run"),
+  });
+}
+
+export function useStravaStatus() {
+  return useQuery<{ connected: boolean }>({
+    queryKey: ["strava", "status"],
+    queryFn: () => apiFetch("/api/strava/status"),
+  });
+}
+
+interface LastRun {
+  name: string;
+  distanceKm: number;
+  date: string;
+  movingTimeSec: number;
+  type: string;
+}
+
+export function useStravaSync() {
+  const queryClient = useQueryClient();
+  return useMutation<{ synced: number; lastRun: LastRun | null }>({
+    mutationFn: () => apiFetch("/api/strava/sync", { method: "POST", body: JSON.stringify({}) }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["streak"] });
+      queryClient.invalidateQueries({ queryKey: ["activities"] });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+      queryClient.invalidateQueries({ queryKey: ["strava", "last-run"] });
+    },
+  });
+}
+
 export function useUser() {
   return useQuery<User>({
     queryKey: ["user", "me"],
@@ -179,7 +214,7 @@ export function useDeposits() {
 export function useLogActivity() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { distanceKm: number }) =>
+    mutationFn: (data: { distanceKm: number; weekStart?: string }) =>
       apiFetch("/api/activities", {
         method: "POST",
         body: JSON.stringify(data),

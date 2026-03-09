@@ -18,6 +18,9 @@ const envSchema = z.object({
     .string()
     .transform((v) => v === "true")
     .default("true"),
+  STRAVA_CLIENT_ID: z.string().optional(),
+  STRAVA_CLIENT_SECRET: z.string().optional(),
+  STRAVA_REDIRECT_URI: z.string().optional(),
   MOCK_YIELD: z
     .string()
     .transform((v) => v === "true")

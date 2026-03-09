@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Avatar } from "./Avatar";
 import { useUser } from "@/lib/hooks";
 import { getInitials } from "@/lib/utils";
@@ -12,9 +13,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between px-5 py-4 border-b border-oria bg-[rgba(250,249,255,0.8)] backdrop-blur-xl">
       <div className="flex items-center gap-3">
-        <div className="w-[30px] h-[30px] rounded-sm gradient-brand flex items-center justify-center text-sm">
-          🚀
-        </div>
+        <Image src="/Design sans titre.png" alt="Oria" width={64} height={64} className="rounded-sm" />
         <span className="text-xl font-extrabold text-text-primary tracking-tight">
           Oria
         </span>
