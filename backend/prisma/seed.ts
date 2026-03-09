@@ -96,7 +96,47 @@ async function main() {
     }),
   ]);
 
-  console.log(`Created ${users.length} users`);
+  // Create additional users NOT friended with Talam (for demo add-friend flow)
+  const extraUsers = await Promise.all([
+    prisma.user.create({
+      data: {
+        id: "00000000-0000-0000-0000-000000000006",
+        privyId: "did:privy:mock-user-006",
+        displayName: "Sarah K.",
+        goalType: "running",
+        targetKm: 12,
+        streak: {
+          create: { currentCount: 5, longestCount: 7, lastWeekMet: true, currentApy: computeApy(5) },
+        },
+      },
+    }),
+    prisma.user.create({
+      data: {
+        id: "00000000-0000-0000-0000-000000000007",
+        privyId: "did:privy:mock-user-007",
+        displayName: "Marco P.",
+        goalType: "cycling",
+        targetKm: 25,
+        streak: {
+          create: { currentCount: 8, longestCount: 8, lastWeekMet: true, currentApy: computeApy(8) },
+        },
+      },
+    }),
+    prisma.user.create({
+      data: {
+        id: "00000000-0000-0000-0000-000000000008",
+        privyId: "did:privy:mock-user-008",
+        displayName: "Lina B.",
+        goalType: "steps",
+        targetKm: 10,
+        streak: {
+          create: { currentCount: 1, longestCount: 3, lastWeekMet: true, currentApy: computeApy(1) },
+        },
+      },
+    }),
+  ]);
+
+  console.log(`Created ${users.length + extraUsers.length} users`);
 
   // Create activities for past 8 weeks
   const activityData = [

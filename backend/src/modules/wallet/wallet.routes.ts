@@ -5,9 +5,15 @@ import {
   recordDeposit,
   startEarning,
   getEarnings,
+  getDeposits,
 } from "./wallet.service.js";
 
 export default async function walletRoutes(app: FastifyInstance) {
+  app.get("/deposits", async (request, reply) => {
+    const deposits = await getDeposits(app.prisma, request.userId);
+    return reply.send(deposits);
+  });
+
   app.get("/balance", async (request, reply) => {
     const balance = await getBalance(app.prisma, request.userId);
     return reply.send(balance);

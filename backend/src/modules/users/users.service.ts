@@ -23,6 +23,38 @@ export async function updateMe(
   });
 }
 
+export async function discoverUsers(prisma: PrismaClient, userId: string) {
+  // Find users who are NOT friends with the current user
+  const friendships = await prisma.friendship.findMany({
+    where: {
+      OR: [{ requesterId: userId }, { addresseeId: userId }],
+      status: { in: ["accepted", "pending"] },
+    },
+    select: { requesterId: true, addresseeId: true },
+  });
+
+  const friendIds = new Set<string>();
+  friendIds.add(userId);
+  for (const f of friendships) {
+    friendIds.add(f.requesterId);
+    friendIds.add(f.addresseeId);
+  }
+
+  return prisma.user.findMany({
+    where: { id: { notIn: [...friendIds] } },
+    select: {
+      id: true,
+      displayName: true,
+      avatarUrl: true,
+      goalType: true,
+      streak: {
+        select: { currentCount: true, currentApy: true },
+      },
+    },
+    take: 10,
+  });
+}
+
 export async function getUser(prisma: PrismaClient, userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
