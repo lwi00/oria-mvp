@@ -68,6 +68,24 @@ export async function startEarning(
   return { updated: updated.count };
 }
 
+export async function getDeposits(
+  prisma: PrismaClient,
+  userId: string,
+) {
+  return prisma.deposit.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      amount: true,
+      token: true,
+      status: true,
+      createdAt: true,
+    },
+    take: 20,
+  });
+}
+
 export async function getEarnings(
   prisma: PrismaClient,
   userId: string,

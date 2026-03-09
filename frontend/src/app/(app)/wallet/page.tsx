@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { Card } from "@/components/Card";
 import { CardSkeleton } from "@/components/Skeleton";
-import { useEarnings, useWalletBalance, useDeposit } from "@/lib/hooks";
+import { useEarnings, useWalletBalance, useDeposit, useDeposits } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
+import { timeAgo } from "@/lib/utils";
 
 export default function WalletPage() {
   const { data: earnings, isLoading: earningsLoading } = useEarnings();
   const { data: wallet } = useWalletBalance();
+  const { data: deposits } = useDeposits();
   const deposit = useDeposit();
 
   const { toast } = useToast();
@@ -57,9 +59,6 @@ export default function WalletPage() {
             className="text-sm font-semibold py-[11px] px-7 rounded-md border-none gradient-brand text-white cursor-pointer shadow-[0_4px_16px_rgba(124,58,237,0.25)] min-h-[44px]"
           >
             Deposit
-          </button>
-          <button className="text-sm font-medium py-[11px] px-7 rounded-md border border-oria bg-white/70 text-text-secondary cursor-pointer min-h-[44px]">
-            Withdraw
           </button>
         </div>
       </Card>
@@ -149,6 +148,42 @@ export default function WalletPage() {
             </div>
           ))}
         </div>
+      </Card>
+
+      {/* Transaction History */}
+      <Card>
+        <p className="text-sm font-bold text-text-primary mb-3 tracking-tight">Recent Transactions</p>
+        {deposits && deposits.length > 0 ? (
+          deposits.map((d, i) => (
+            <div
+              key={d.id}
+              className={`flex items-center justify-between py-3 ${i < deposits.length - 1 ? "border-b border-purple-100/50" : ""}`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-sm">
+                  💰
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-text-primary">Deposit</p>
+                  <p className="text-xs text-text-muted">{timeAgo(d.createdAt)}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-bold text-text-primary tabular-nums">
+                  +{d.amount.toLocaleString()} {d.token}
+                </p>
+                <p className={`text-[11px] font-medium ${d.status === "earning" ? "text-success-500" : "text-warning-500"}`}>
+                  {d.status === "earning" ? "Earning" : "Confirmed"}
+                </p>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-6">
+            <p className="text-3xl mb-2">📭</p>
+            <p className="text-sm text-text-muted">No transactions yet. Make your first deposit!</p>
+          </div>
+        )}
       </Card>
 
       {/* On-chain Balances */}

@@ -214,6 +214,17 @@ export default function DashboardPage() {
         </div>
       </Card>
 
+      {/* Floating Action Button */}
+      <button
+        onClick={() => setShowLogModal(true)}
+        className={`fixed bottom-24 right-6 z-50 w-14 h-14 rounded-full gradient-brand text-white flex items-center justify-center shadow-button hover:shadow-[0_8px_28px_rgba(124,58,237,0.4)] hover:-translate-y-0.5 transition-all ${pct === 0 ? "animate-fab-pulse" : ""}`}
+        aria-label="Log activity"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+      </button>
+
       {/* Friends Activity Preview */}
       <Card>
         <div className="flex justify-between items-center mb-3">

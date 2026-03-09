@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/Card";
 import { Avatar } from "@/components/Avatar";
 import { CardSkeleton } from "@/components/Skeleton";
-import { useUser, useWalletBalance, useAppleHealthStatus, useConnectAppleHealth } from "@/lib/hooks";
+import { useUser, useAppleHealthStatus, useConnectAppleHealth } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
 import { getInitials } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
@@ -12,7 +12,6 @@ import { usePrivy } from "@privy-io/react-auth";
 
 export default function ProfilePage() {
   const { data: user, isLoading, refetch } = useUser();
-  const { data: wallet } = useWalletBalance();
   const { toast } = useToast();
   const { logout } = usePrivy();
   const { data: healthStatus } = useAppleHealthStatus();
@@ -22,7 +21,6 @@ export default function ProfilePage() {
   const [goalType, setGoalType] = useState("running");
   const [targetKm, setTargetKm] = useState(10);
   const [saving, setSaving] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -43,19 +41,6 @@ export default function ProfilePage() {
       </div>
     );
   }
-
-  const walletAddr = wallet?.walletAddr;
-  const truncatedAddr = walletAddr
-    ? `${walletAddr.slice(0, 6)}...${walletAddr.slice(-4)}`
-    : "No wallet connected";
-
-  const handleCopy = () => {
-    if (walletAddr) {
-      navigator.clipboard.writeText(walletAddr);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -224,35 +209,6 @@ export default function ProfilePage() {
               </button>
             )}
           </div>
-        </div>
-      </Card>
-
-      {/* Wallet Address */}
-      <Card>
-        <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2 block">
-          Wallet address
-        </label>
-        <div className="flex items-center gap-3">
-          <div className="flex-1 px-4 py-3 rounded-xl bg-oria-bg border border-oria">
-            <span className="text-sm text-text-primary font-mono tabular-nums">
-              {truncatedAddr}
-            </span>
-          </div>
-          <button
-            onClick={handleCopy}
-            className="w-10 h-10 rounded-lg bg-purple-50 border border-oria flex items-center justify-center cursor-pointer flex-shrink-0"
-          >
-            {copied ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 6L9 17l-5-5" />
-              </svg>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-              </svg>
-            )}
-          </button>
         </div>
       </Card>
 

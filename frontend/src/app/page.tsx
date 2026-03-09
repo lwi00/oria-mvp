@@ -8,6 +8,6 @@ export default function Home() {
   if (onboarded) {
     redirect("/dashboard");
   } else {
-    redirect("/onboarding");
+    redirect("/landing");
   }
 }

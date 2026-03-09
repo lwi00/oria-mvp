@@ -382,7 +382,7 @@ function FundWalletStep({
           Token
         </label>
         <div className="flex gap-2">
-          {["USDC", "AVAX"].map((t) => (
+          {["USDC", "WAVAX"].map((t) => (
             <button
               key={t}
               onClick={() => setToken(t)}

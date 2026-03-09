@@ -208,7 +208,17 @@ export default function ChallengesPage() {
         })
       ) : (
         <Card>
-          <p className="text-sm text-text-muted">No active challenges. Create one to get started!</p>
+          <div className="text-center py-6">
+            <p className="text-3xl mb-2">🏆</p>
+            <p className="text-sm font-medium text-text-primary mb-1">No active challenges yet</p>
+            <p className="text-xs text-text-muted mb-3">Challenge your friends to run more, save more, and earn more together.</p>
+            <button
+              onClick={() => setShowCreate(true)}
+              className="text-sm text-purple-600 font-semibold hover:underline"
+            >
+              Create your first challenge →
+            </button>
+          </div>
         </Card>
       )}
     </div>

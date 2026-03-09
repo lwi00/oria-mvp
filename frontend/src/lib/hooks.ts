@@ -104,6 +104,14 @@ interface Earnings {
   projectedAnnual: number;
 }
 
+interface Deposit {
+  id: string;
+  amount: number;
+  token: string;
+  status: string;
+  createdAt: string;
+}
+
 // Hooks
 export function useUser() {
   return useQuery<User>({
@@ -158,6 +166,13 @@ export function useEarnings() {
   return useQuery<Earnings>({
     queryKey: ["wallet", "earnings"],
     queryFn: () => apiFetch("/api/wallet/earnings"),
+  });
+}
+
+export function useDeposits() {
+  return useQuery<Deposit[]>({
+    queryKey: ["wallet", "deposits"],
+    queryFn: () => apiFetch("/api/wallet/deposits"),
   });
 }
 
@@ -219,6 +234,39 @@ export function useCreateChallenge() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["challenges"] });
+    },
+  });
+}
+
+// ── Social ──
+
+interface DiscoverUser {
+  id: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  goalType: string;
+  streak: { currentCount: number; currentApy: number } | null;
+}
+
+export function useDiscoverUsers() {
+  return useQuery<DiscoverUser[]>({
+    queryKey: ["users", "discover"],
+    queryFn: () => apiFetch("/api/users/discover"),
+  });
+}
+
+export function useSendFriendRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (addresseeId: string) =>
+      apiFetch("/api/friends/request", {
+        method: "POST",
+        body: JSON.stringify({ addresseeId }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users", "discover"] });
+      queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
     },
   });
 }

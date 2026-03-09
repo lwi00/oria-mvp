@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { updateUserSchema } from "./users.schemas.js";
-import { getMe, updateMe, getUser } from "./users.service.js";
+import { getMe, updateMe, getUser, discoverUsers } from "./users.service.js";
 
 export default async function usersRoutes(app: FastifyInstance) {
   app.get("/me", async (request, reply) => {
@@ -12,6 +12,11 @@ export default async function usersRoutes(app: FastifyInstance) {
     const data = updateUserSchema.parse(request.body);
     const user = await updateMe(app.prisma, request.userId, data);
     return reply.send(user);
+  });
+
+  app.get("/discover", async (request, reply) => {
+    const users = await discoverUsers(app.prisma, request.userId);
+    return reply.send(users);
   });
 
   app.get("/:id", async (request, reply) => {
