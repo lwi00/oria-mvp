@@ -10,6 +10,9 @@ function apyFromStreak(s: number): number {
   return 4 + 4 * Math.min(1, Math.log(1 + s) / Math.log(11));
 }
 
+// AVAX price in USD for demo display
+export const AVAX_PRICE_USD = 9.40;
+
 function hoursAgo(h: number): string {
   return new Date(Date.now() - h * 3600_000).toISOString();
 }
@@ -127,16 +130,18 @@ export const mockChallenges = [
 // ── Wallet / Earnings ──
 export const mockWallet = {
   walletAddr: "0x7a3B...dE4F",
-  balances: { USDC: 0, AVAX: 0 },
+  balances: { USDC: 1250, AVAX: 5.5 },
   chain: "Avalanche C-Chain (Fuji)",
 };
 
+const initialDeposited = 1250 + 5.5 * AVAX_PRICE_USD; // USDC + AVAX in USD
+
 export const mockEarnings = {
-  totalDeposited: 0,
-  totalEarned: 0,
+  totalDeposited: initialDeposited,
+  totalEarned: 18.42,
   currentApy: apyFromStreak(4),
-  projectedWeekly: 0,
-  projectedAnnual: 0,
+  projectedWeekly: parseFloat((initialDeposited * apyFromStreak(4) / 100 / 52).toFixed(2)),
+  projectedAnnual: parseFloat((initialDeposited * apyFromStreak(4) / 100).toFixed(2)),
 };
 
 // ── Deposit ledger ──
@@ -149,8 +154,12 @@ interface MockDeposit {
   txHash: string | null;
 }
 
-const mockDeposits: MockDeposit[] = [];
-let depositCounter = 0;
+const mockDeposits: MockDeposit[] = [
+  { id: "dep-init-1", amount: 1000, token: "USDC", status: "earning", createdAt: hoursAgo(14 * 24), txHash: null },
+  { id: "dep-init-2", amount: 5.5, token: "AVAX", status: "earning", createdAt: hoursAgo(10 * 24), txHash: null },
+  { id: "dep-init-3", amount: 250, token: "USDC", status: "earning", createdAt: hoursAgo(3 * 24), txHash: null },
+];
+let depositCounter = 3;
 
 export function getDeposits(): MockDeposit[] {
   return mockDeposits;
@@ -194,7 +203,8 @@ export function logActivity(distanceKm: number) {
 }
 
 export function deposit(amount: number, token: string, txHash?: string) {
-  mockEarnings.totalDeposited += amount;
+  const usdValue = (token === "USDC") ? amount : amount * AVAX_PRICE_USD;
+  mockEarnings.totalDeposited += usdValue;
   if (token === "USDC") mockWallet.balances.USDC += amount;
   else mockWallet.balances.AVAX += amount;
 
