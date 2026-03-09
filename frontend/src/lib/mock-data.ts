@@ -127,16 +127,20 @@ export const mockChallenges = [
 // ── Wallet / Earnings ──
 export const mockWallet = {
   walletAddr: "0x7a3B...dE4F",
-  balances: { USDC: 0, AVAX: 0 },
+  balances: { USDC: 1250, AVAX: 8.3472 },
   chain: "Avalanche C-Chain (Fuji)",
 };
 
+const initialDeposited = 2000;
+const initialApy = apyFromStreak(4);
+const initialEarned = 14.38;
+
 export const mockEarnings = {
-  totalDeposited: 0,
-  totalEarned: 0,
-  currentApy: apyFromStreak(4),
-  projectedWeekly: 0,
-  projectedAnnual: 0,
+  totalDeposited: initialDeposited,
+  totalEarned: initialEarned,
+  currentApy: initialApy,
+  projectedWeekly: parseFloat(((initialDeposited * initialApy / 100) / 52).toFixed(2)),
+  projectedAnnual: parseFloat((initialDeposited * initialApy / 100).toFixed(2)),
 };
 
 // ── Deposit ledger ──
@@ -149,8 +153,12 @@ interface MockDeposit {
   txHash: string | null;
 }
 
-const mockDeposits: MockDeposit[] = [];
-let depositCounter = 0;
+const mockDeposits: MockDeposit[] = [
+  { id: "dep-seed-1", amount: 1000, token: "USDC", status: "earning", createdAt: hoursAgo(14 * 24), txHash: "0xabc1...ef01" },
+  { id: "dep-seed-2", amount: 500, token: "USDC", status: "earning", createdAt: hoursAgo(7 * 24), txHash: "0xdef2...ab02" },
+  { id: "dep-seed-3", amount: 500, token: "WAVAX", status: "earning", createdAt: hoursAgo(3 * 24), txHash: "0x1234...cd03" },
+];
+let depositCounter = 3;
 
 export function getDeposits(): MockDeposit[] {
   return mockDeposits;
