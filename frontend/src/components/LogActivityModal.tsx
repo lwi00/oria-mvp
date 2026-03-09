@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useLogActivity, useUser } from "@/lib/hooks";
+import { useLogActivity, useUser, useAppleHealthStatus } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
 
 interface LogActivityModalProps {
@@ -13,6 +13,7 @@ export function LogActivityModal({ open, onClose }: LogActivityModalProps) {
   const { data: user } = useUser();
   const logActivity = useLogActivity();
   const { toast } = useToast();
+  const { data: healthStatus } = useAppleHealthStatus();
 
   const [km, setKm] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
@@ -84,11 +85,19 @@ export function LogActivityModal({ open, onClose }: LogActivityModalProps) {
               Manual entry
             </span>
           </div>
-          <div className="px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 opacity-50">
-            <span className="text-xs font-medium text-text-muted">
-              Strava
-            </span>
-          </div>
+          {healthStatus?.connected ? (
+            <div className="px-3 py-1.5 rounded-lg gradient-brand">
+              <span className="text-xs font-semibold text-white">
+                Apple Health
+              </span>
+            </div>
+          ) : (
+            <div className="px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 opacity-50">
+              <span className="text-xs font-medium text-text-muted">
+                Strava
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Distance input */}

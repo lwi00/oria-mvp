@@ -177,6 +177,29 @@ export function deposit(amount: number, token: string) {
   return { success: true };
 }
 
+// ── Apple Health ──
+export let appleHealthConnected = false;
+
+// Restore from localStorage on client
+if (typeof window !== "undefined") {
+  try {
+    appleHealthConnected = localStorage.getItem("oria_apple_health") === "true";
+    if (appleHealthConnected) mockUser.dataSource = "apple_health";
+  } catch {}
+}
+
+export function connectAppleHealth() {
+  appleHealthConnected = true;
+  mockUser.dataSource = "apple_health";
+  try { localStorage.setItem("oria_apple_health", "true"); } catch {}
+}
+
+export function syncAppleHealth() {
+  const distanceKm = parseFloat((Math.random() * 2.5 + 3).toFixed(1));
+  logActivity(distanceKm);
+  return { distanceKm, totalKm: mockStreak.currentWeek.distanceKm };
+}
+
 let challengeCounter = 10;
 
 export function createChallenge(data: { title: string; goalKmWeek: number; durationWeeks: number; maxMembers?: number }) {

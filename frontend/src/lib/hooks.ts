@@ -223,6 +223,45 @@ export function useCreateChallenge() {
   });
 }
 
+// ── Apple Health ──
+export function useAppleHealthStatus() {
+  return useQuery<{ connected: boolean }>({
+    queryKey: ["apple-health"],
+    queryFn: () => apiFetch("/api/apple-health"),
+  });
+}
+
+export function useConnectAppleHealth() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () =>
+      apiFetch("/api/apple-health", {
+        method: "POST",
+        body: JSON.stringify({ action: "connect" }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["apple-health"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+    },
+  });
+}
+
+export function useSyncAppleHealth() {
+  const queryClient = useQueryClient();
+  return useMutation<{ distanceKm: number; totalKm: number }>({
+    mutationFn: () =>
+      apiFetch("/api/apple-health", {
+        method: "POST",
+        body: JSON.stringify({ action: "sync" }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["streak"] });
+      queryClient.invalidateQueries({ queryKey: ["activities"] });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+    },
+  });
+}
+
 export function useJoinChallenge() {
   const queryClient = useQueryClient();
   return useMutation({
