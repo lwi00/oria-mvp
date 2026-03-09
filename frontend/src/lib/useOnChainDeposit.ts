@@ -79,6 +79,7 @@ export function useOnChainDeposit() {
         setStatus("success");
         queryClient.invalidateQueries({ queryKey: ["wallet"] });
         queryClient.invalidateQueries({ queryKey: ["feed"] });
+        queryClient.invalidateQueries({ queryKey: ["onchain-balances"] });
         return hash;
       } catch (err: unknown) {
         setStatus("error");

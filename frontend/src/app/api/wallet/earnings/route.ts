@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { mockEarnings } from "@/lib/mock-data";
+import { mockEarnings, recalcEarnings } from "@/lib/mock-data";
 
 export async function GET() {
+  recalcEarnings();
   return NextResponse.json(mockEarnings);
 }
