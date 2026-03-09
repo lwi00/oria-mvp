@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Card } from "@/components/Card";
 import { CardSkeleton } from "@/components/Skeleton";
 import { useEarnings, useWalletBalance, useDeposits } from "@/lib/hooks";
+import { AVAX_PRICE_USD } from "@/lib/mock-data";
 import { useOnChainDeposit } from "@/lib/useOnChainDeposit";
 import { useToast } from "@/components/Toast";
 import { timeAgo } from "@/lib/utils";
@@ -210,7 +211,10 @@ export default function WalletPage() {
           <div className="flex justify-between py-2">
             <span className="text-sm text-text-secondary">AVAX</span>
             <span className="text-sm font-bold text-text-primary tabular-nums">
-              {wallet.balances.AVAX.toFixed(4)}
+              {wallet.balances.AVAX.toFixed(4)}{" "}
+              <span className="text-text-muted font-medium">
+                (${(wallet.balances.AVAX * AVAX_PRICE_USD).toFixed(2)})
+              </span>
             </span>
           </div>
           <p className="text-[11px] text-text-muted mt-2">
