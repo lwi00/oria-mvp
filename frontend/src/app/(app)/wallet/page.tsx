@@ -5,7 +5,6 @@ import { Card } from "@/components/Card";
 import { CardSkeleton } from "@/components/Skeleton";
 import { useEarnings, useWalletBalance, useDeposits } from "@/lib/hooks";
 import { useOnChainDeposit } from "@/lib/useOnChainDeposit";
-import { useOnChainBalances } from "@/lib/useOnChainBalance";
 import { useToast } from "@/components/Toast";
 import { timeAgo } from "@/lib/utils";
 
@@ -14,7 +13,6 @@ export default function WalletPage() {
   const { data: wallet } = useWalletBalance();
   const { data: deposits } = useDeposits();
   const onChainDeposit = useOnChainDeposit();
-  const { data: onChainBalances } = useOnChainBalances();
 
   const { toast } = useToast();
   const [showDeposit, setShowDeposit] = useState(false);
@@ -206,13 +204,13 @@ export default function WalletPage() {
           <div className="flex justify-between py-2 border-b border-purple-100/50">
             <span className="text-sm text-text-secondary">USDC</span>
             <span className="text-sm font-bold text-text-primary tabular-nums">
-              {(onChainBalances?.USDC ?? wallet.balances.USDC).toLocaleString()}
+              {wallet.balances.USDC.toLocaleString()}
             </span>
           </div>
           <div className="flex justify-between py-2">
             <span className="text-sm text-text-secondary">AVAX</span>
             <span className="text-sm font-bold text-text-primary tabular-nums">
-              {(onChainBalances?.AVAX ?? wallet.balances.AVAX).toFixed(4)}
+              {wallet.balances.AVAX.toFixed(4)}
             </span>
           </div>
           <p className="text-[11px] text-text-muted mt-2">

@@ -10,7 +10,7 @@ import type { ConnectedWallet } from "@privy-io/react-auth";
 const TRANSFER_SELECTOR = "a9059cbb";
 
 /** Pad a hex string (without 0x) to 64 chars (32 bytes), left-padded with zeros. */
-export function padLeft(hex: string): string {
+function padLeft(hex: string): string {
   return hex.padStart(64, "0");
 }
 
