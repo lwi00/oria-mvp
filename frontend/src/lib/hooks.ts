@@ -223,6 +223,52 @@ export function useCreateChallenge() {
   });
 }
 
+// ── Apple Health ──
+// Client-side only — no API route needed since this is a demo feature
+
+export function useAppleHealthStatus() {
+  return useQuery<{ connected: boolean }>({
+    queryKey: ["apple-health"],
+    queryFn: () => {
+      if (typeof window === "undefined") return { connected: false };
+      return { connected: localStorage.getItem("oria_apple_health") === "true" };
+    },
+    staleTime: Infinity,
+  });
+}
+
+export function useConnectAppleHealth() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      localStorage.setItem("oria_apple_health", "true");
+      return { connected: true };
+    },
+    onSuccess: () => {
+      queryClient.setQueryData(["apple-health"], { connected: true });
+    },
+  });
+}
+
+export function useSyncAppleHealth() {
+  const queryClient = useQueryClient();
+  return useMutation<{ distanceKm: number }>({
+    mutationFn: async () => {
+      const distanceKm = parseFloat((Math.random() * 2.5 + 3).toFixed(1));
+      await apiFetch("/api/activities", {
+        method: "POST",
+        body: JSON.stringify({ distanceKm }),
+      });
+      return { distanceKm };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["streak"] });
+      queryClient.invalidateQueries({ queryKey: ["activities"] });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+    },
+  });
+}
+
 export function useJoinChallenge() {
   const queryClient = useQueryClient();
   return useMutation({

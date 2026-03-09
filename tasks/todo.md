@@ -146,8 +146,3 @@
 - [ ] Environment variables configured in hosting platforms
 - [ ] Fuji testnet AVAX faucet for demo wallet
 
-## Phase 18 -- Demo Prep
-- [ ] Write demo script (step-by-step walkthrough with talking points)
-- [ ] Seed production DB with realistic demo data
-- [ ] Record backup demo video
-- [ ] Test full flow on deployed URL end-to-end

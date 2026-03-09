@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/Card";
 import { Avatar } from "@/components/Avatar";
 import { CardSkeleton } from "@/components/Skeleton";
-import { useUser, useWalletBalance } from "@/lib/hooks";
+import { useUser, useWalletBalance, useAppleHealthStatus, useConnectAppleHealth } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
 import { getInitials } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
@@ -15,6 +15,8 @@ export default function ProfilePage() {
   const { data: wallet } = useWalletBalance();
   const { toast } = useToast();
   const { logout } = usePrivy();
+  const { data: healthStatus } = useAppleHealthStatus();
+  const connectHealth = useConnectAppleHealth();
 
   const [displayName, setDisplayName] = useState("");
   const [goalType, setGoalType] = useState("running");
@@ -201,12 +203,26 @@ export default function ProfilePage() {
                 <p className="text-sm font-medium text-text-primary">
                   Apple Health
                 </p>
-                <p className="text-[11px] text-text-muted">Sync steps & workouts</p>
+                <p className="text-[11px] text-text-muted">Sync running activities</p>
               </div>
             </div>
-            <span className="text-[11px] font-semibold text-warning-500 bg-warning-100 px-2.5 py-1 rounded-md">
-              Coming soon
-            </span>
+            {healthStatus?.connected ? (
+              <span className="text-[11px] font-semibold text-success-500 bg-success-100 px-2.5 py-1 rounded-md">
+                ✓ Connected
+              </span>
+            ) : (
+              <button
+                onClick={() => {
+                  connectHealth.mutate(undefined, {
+                    onSuccess: () => toast("Apple Health connected!"),
+                  });
+                }}
+                disabled={connectHealth.isPending}
+                className="text-[11px] font-semibold text-white gradient-brand px-3 py-1.5 rounded-md cursor-pointer border-none shadow-button min-h-[32px] disabled:opacity-50"
+              >
+                {connectHealth.isPending ? "Connecting..." : "Connect"}
+              </button>
+            )}
           </div>
         </div>
       </Card>

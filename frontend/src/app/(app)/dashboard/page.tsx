@@ -8,7 +8,8 @@ import { ProgressRing } from "@/components/ProgressRing";
 import { Avatar } from "@/components/Avatar";
 import { CardSkeleton } from "@/components/Skeleton";
 import { LogActivityModal } from "@/components/LogActivityModal";
-import { useUser, useStreak, useFeed, useEarnings } from "@/lib/hooks";
+import { useUser, useStreak, useFeed, useEarnings, useAppleHealthStatus, useSyncAppleHealth } from "@/lib/hooks";
+import { useToast } from "@/components/Toast";
 import { timeAgo, getInitials, formatFeedEvent } from "@/lib/utils";
 import Link from "next/link";
 
@@ -24,6 +25,10 @@ export default function DashboardPage() {
   const { data: streak, isLoading: streakLoading } = useStreak();
   const { data: feed } = useFeed(3);
   const { data: earnings } = useEarnings();
+
+  const { data: healthStatus } = useAppleHealthStatus();
+  const syncHealth = useSyncAppleHealth();
+  const { toast } = useToast();
 
   const [showLogModal, setShowLogModal] = useState(false);
 
@@ -115,13 +120,40 @@ export default function DashboardPage() {
         <div className="flex justify-between items-center mt-2">
           <span className="text-xs text-text-muted">
             {Math.max(0, targetKm - currentKm).toFixed(1)} km remaining
+            {healthStatus?.connected && (
+              <span className="text-purple-500 ml-1">· via Apple Health</span>
+            )}
           </span>
-          <button
-            onClick={() => setShowLogModal(true)}
-            className="text-xs text-purple-600 font-semibold cursor-pointer bg-purple-100 px-3 py-1 rounded-full hover:bg-purple-200 transition-colors min-h-[44px] flex items-center"
-          >
-            + Log activity
-          </button>
+          <div className="flex items-center gap-2">
+            {healthStatus?.connected && (
+              <button
+                onClick={() => {
+                  syncHealth.mutate(undefined, {
+                    onSuccess: (data) => toast(`Synced ${data.distanceKm} km from Apple Health`),
+                    onError: () => toast("Sync failed", "error"),
+                  });
+                }}
+                disabled={syncHealth.isPending}
+                className="text-xs text-white font-semibold cursor-pointer gradient-brand px-3 py-1 rounded-full hover:opacity-90 transition-opacity min-h-[44px] flex items-center gap-1.5 disabled:opacity-50 shadow-button"
+              >
+                {syncHealth.isPending ? (
+                  <span className="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 4v6h6" /><path d="M23 20v-6h-6" />
+                    <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" />
+                  </svg>
+                )}
+                Sync
+              </button>
+            )}
+            <button
+              onClick={() => setShowLogModal(true)}
+              className="text-xs text-purple-600 font-semibold cursor-pointer bg-purple-100 px-3 py-1 rounded-full hover:bg-purple-200 transition-colors min-h-[44px] flex items-center"
+            >
+              + Log activity
+            </button>
+          </div>
         </div>
       </Card>
 
