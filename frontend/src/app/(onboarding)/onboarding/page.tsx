@@ -6,6 +6,7 @@ import { Card } from "@/components/Card";
 import { MiniJar } from "@/components/MiniJar";
 import { apiFetch, setAuthTokenGetter } from "@/lib/api";
 import { usePrivy, useLogin } from "@privy-io/react-auth";
+import { useOnChainDeposit } from "@/lib/useOnChainDeposit";
 
 const STEPS = 4;
 
@@ -333,11 +334,12 @@ function FundWalletStep({
   onNext,
   onBack,
 }: {
-  onNext: (depositAmount: number, depositToken: string) => void;
+  onNext: () => void;
   onBack: () => void;
 }) {
   const [token, setToken] = useState("USDC");
   const [amount, setAmount] = useState("");
+  const onChainDeposit = useOnChainDeposit();
 
   const quickAmounts = [50, 100, 500, 1000];
   const fillPercent = Math.min(
@@ -345,12 +347,27 @@ function FundWalletStep({
     Math.round((parseFloat(amount || "0") / 1000) * 100),
   );
 
+  const handleDeposit = async () => {
+    const numAmount = parseFloat(amount || "0");
+    if (numAmount <= 0) {
+      onNext();
+      return;
+    }
+    try {
+      await onChainDeposit.deposit(numAmount, token);
+      onNext();
+    } catch {
+      // Error is captured in onChainDeposit.error — don't navigate
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen px-6 py-10">
       <div className="flex items-center gap-3 mb-2">
         <button
           onClick={onBack}
-          className="w-10 h-10 rounded-md flex items-center justify-center bg-purple-50 border-none cursor-pointer"
+          disabled={onChainDeposit.isPending}
+          className="w-10 h-10 rounded-md flex items-center justify-center bg-purple-50 border-none cursor-pointer disabled:opacity-50"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -386,7 +403,8 @@ function FundWalletStep({
             <button
               key={t}
               onClick={() => setToken(t)}
-              className={`flex-1 py-3 rounded-xl text-sm font-semibold cursor-pointer transition-all ${
+              disabled={onChainDeposit.isPending}
+              className={`flex-1 py-3 rounded-xl text-sm font-semibold cursor-pointer transition-all disabled:opacity-50 ${
                 token === t
                   ? "gradient-brand text-white shadow-button"
                   : "bg-purple-50 text-purple-600 border border-oria"
@@ -413,8 +431,9 @@ function FundWalletStep({
             min="0"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
+            disabled={onChainDeposit.isPending}
             placeholder="0"
-            className="w-full pl-9 pr-4 py-4 rounded-xl border border-oria bg-white/80 text-[22px] font-bold text-text-primary focus:border-purple-600 outline-none tabular-nums tracking-tight"
+            className="w-full pl-9 pr-4 py-4 rounded-xl border border-oria bg-white/80 text-[22px] font-bold text-text-primary focus:border-purple-600 outline-none tabular-nums tracking-tight disabled:opacity-50"
           />
         </div>
       </div>
@@ -425,7 +444,8 @@ function FundWalletStep({
           <button
             key={a}
             onClick={() => setAmount(String(a))}
-            className={`flex-1 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors ${
+            disabled={onChainDeposit.isPending}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors disabled:opacity-50 ${
               amount === String(a)
                 ? "gradient-brand text-white"
                 : "bg-purple-50 text-purple-600 border border-oria"
@@ -436,16 +456,25 @@ function FundWalletStep({
         ))}
       </div>
 
+      {/* Error message */}
+      {onChainDeposit.error && (
+        <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200">
+          <p className="text-sm text-red-600">{onChainDeposit.error}</p>
+        </div>
+      )}
+
       <div className="mt-auto pt-4 flex flex-col gap-3">
         <button
-          onClick={() => onNext(parseFloat(amount || "0"), token)}
-          className="w-full h-[52px] rounded-[14px] gradient-brand text-white font-semibold text-base shadow-button cursor-pointer border-none"
+          onClick={handleDeposit}
+          disabled={onChainDeposit.isPending}
+          className="w-full h-[52px] rounded-[14px] gradient-brand text-white font-semibold text-base shadow-button cursor-pointer border-none disabled:opacity-70"
         >
-          Deposit & Start Earning
+          {onChainDeposit.buttonText("Deposit & Start Earning")}
         </button>
         <button
-          onClick={() => onNext(0, token)}
-          className="w-full py-3 text-sm text-purple-400 font-medium cursor-pointer bg-transparent border-none"
+          onClick={() => onNext()}
+          disabled={onChainDeposit.isPending}
+          className="w-full py-3 text-sm text-purple-400 font-medium cursor-pointer bg-transparent border-none disabled:opacity-50"
         >
           Skip for now
         </button>
@@ -469,20 +498,14 @@ export default function OnboardingPage() {
     }
   }, [authenticated, step]);
 
-  const finish = async (depositAmount: number, depositToken: string) => {
+  const finish = async () => {
     // Save goal settings
     await apiFetch("/api/users/me", {
       method: "PATCH",
       body: JSON.stringify({ goalType, targetKm }),
     });
 
-    // If user chose to deposit, call the deposit API
-    if (depositAmount > 0) {
-      await apiFetch("/api/wallet/deposit", {
-        method: "POST",
-        body: JSON.stringify({ amount: depositAmount, token: depositToken }),
-      });
-    }
+    // Deposit is already handled by useOnChainDeposit in FundWalletStep
 
     // Set onboarded cookie (expires in 30 days)
     document.cookie = "oria_onboarded=1; path=/; max-age=2592000";

@@ -194,7 +194,7 @@ export function useLogActivity() {
 export function useDeposit() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { amount: number; token: string }) =>
+    mutationFn: (data: { amount: number; token: string; txHash?: string }) =>
       apiFetch("/api/wallet/deposit", {
         method: "POST",
         body: JSON.stringify(data),
