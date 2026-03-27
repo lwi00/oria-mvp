@@ -15,7 +15,6 @@ export const metadata: Metadata = {
   description: "Earn variable APY based on your fitness streak consistency",
   manifest: "/manifest.json",
   appleWebApp: {
-    capable: true,
     statusBarStyle: "default",
     title: "Oria",
   },
