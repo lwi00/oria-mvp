@@ -14,6 +14,14 @@ export const metadata: Metadata = {
   title: "Oria - Gamified Crypto Savings",
   description: "Earn variable APY based on your fitness streak consistency",
   manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Oria",
+  },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {

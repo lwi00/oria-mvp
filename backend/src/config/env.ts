@@ -6,8 +6,8 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   CORS_ORIGIN: z.string().default("http://localhost:3000"),
   DATABASE_URL: z.string(),
-  PRIVY_APP_ID: z.string(),
-  PRIVY_APP_SECRET: z.string(),
+  PRIVY_APP_ID: z.string().default(""),
+  PRIVY_APP_SECRET: z.string().default(""),
   AVAX_RPC_URL: z.string().default("https://api.avax-test.network/ext/bc/C/rpc"),
   AVAX_CHAIN_ID: z.coerce.number().default(43113),
   MOCK_AUTH: z
