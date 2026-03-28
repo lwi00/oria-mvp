@@ -490,13 +490,22 @@ export default function OnboardingPage() {
   const [goalType, setGoalType] = useState("running");
   const [targetKm, setTargetKm] = useState(10);
   const router = useRouter();
-  const { authenticated } = usePrivy();
+  const { ready, authenticated } = usePrivy();
 
   useEffect(() => {
-    if (authenticated && step < 2) {
+    if (ready && authenticated && step < 2) {
       setStep(2);
     }
-  }, [authenticated, step]);
+  }, [ready, authenticated, step]);
+
+  // Wait for Privy SDK to initialize (prevents wagmi store ref crash)
+  if (!ready) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-8 h-8 border-3 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const finish = async () => {
     // Save goal settings (best effort — don't block navigation)
