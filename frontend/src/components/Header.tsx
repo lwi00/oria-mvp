@@ -11,7 +11,7 @@ export function Header() {
   const initials = getInitials(user?.displayName ?? null);
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between px-5 py-4 border-b border-oria bg-[rgba(250,249,255,0.8)] backdrop-blur-xl">
+    <header className="sticky top-0 z-50 flex items-center justify-between px-5 py-4 border-b border-oria bg-oria-bg">
       <div className="flex items-center gap-3">
         <Image src="/Design sans titre.png" alt="Oria" width={64} height={64} className="rounded-sm" />
         <span className="text-xl font-extrabold text-text-primary tracking-tight">
