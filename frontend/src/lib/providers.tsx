@@ -42,6 +42,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
         embeddedWallets: {
           ethereum: { createOnLogin: "users-without-wallets" },
         },
+        externalWallets: {
+          disableAllExternalWallets: true,
+        },
       }}
     >
       <AuthBridge />
