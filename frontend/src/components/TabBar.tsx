@@ -14,7 +14,7 @@ export function TabBar() {
   const router = useRouter();
 
   return (
-    <nav className="sticky bottom-0 z-50 flex justify-around py-3 pb-4 bg-[rgba(255,255,255,0.9)] backdrop-blur-2xl border-t border-oria">
+    <nav className="sticky bottom-0 z-50 flex justify-around py-3 pb-4 bg-white border-t border-oria">
       {tabs.map((tab) => {
         const active = pathname === tab.path;
         return (

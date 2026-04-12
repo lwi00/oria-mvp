@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Card } from "@/components/Card";
 import { MiniJar } from "@/components/MiniJar";
 import { WeekDots } from "@/components/WeekDots";
 import { ProgressRing } from "@/components/ProgressRing";
 import { Avatar } from "@/components/Avatar";
 import { CardSkeleton } from "@/components/Skeleton";
-import { LogActivityModal } from "@/components/LogActivityModal";
+const LogActivityModal = lazy(() => import("@/components/LogActivityModal").then(m => ({ default: m.LogActivityModal })));
 import { useUser, useStreak, useFeed, useEarnings, useAppleHealthStatus, useSyncAppleHealth, useLastRun } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
 import { timeAgo, getInitials, formatFeedEvent } from "@/lib/utils";
@@ -181,10 +181,14 @@ export default function DashboardPage() {
       )}
 
       {/* Log Activity Modal */}
-      <LogActivityModal
-        open={showLogModal}
-        onClose={() => setShowLogModal(false)}
-      />
+      {showLogModal && (
+        <Suspense fallback={null}>
+          <LogActivityModal
+            open={showLogModal}
+            onClose={() => setShowLogModal(false)}
+          />
+        </Suspense>
+      )}
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-3">
