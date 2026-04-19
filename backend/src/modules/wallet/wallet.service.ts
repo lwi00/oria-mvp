@@ -97,7 +97,7 @@ export async function getEarnings(
     prisma.streak.findUnique({ where: { userId } }),
   ]);
 
-  const totalDeposited = deposits.reduce((sum, d) => sum + d.amount, 0);
+  const totalDeposited = deposits.reduce((sum: number, d: typeof deposits[0]) => sum + d.amount, 0);
   const apy = streak?.currentApy ?? 4.0;
 
   // Simple projected yield calculation

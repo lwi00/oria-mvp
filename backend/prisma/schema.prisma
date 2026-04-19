@@ -9,8 +9,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ============================================================================
@@ -38,6 +39,10 @@ model User {
   dataSource  String   @default("manual") @map("data_source")
   /// Strava OAuth refresh token (encrypted at rest in production)
   stravaToken String?  @map("strava_token")
+  /// Days of the week the user plans to run (0=Sun..6=Sat), e.g. [1,3,5]
+  runSchedule Json     @default("[]") @map("run_schedule")
+  /// User preferences: notifications, privacy, units, etc.
+  settings    Json     @default("{}") @map("settings")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -50,6 +55,8 @@ model User {
   receivedRequests Friendship[]      @relation("addressee")
   createdChallenges Challenge[]      @relation("creator")
   challengeMembers ChallengeMember[]
+  notifications    Notification[]
+  pushSubscriptions PushSubscription[]
 
   @@map("users")
 }
@@ -75,6 +82,20 @@ model Streak {
   lastWeekMet  Boolean  @default(false) @map("last_week_met")
   /// Current APY percentage based on streak count (4.0 – 8.0)
   currentApy   Float    @default(4.0) @map("current_apy")
+  /// Multi-factor APY bonuses (computed from Strava data)
+  regularityBonus  Float @default(0) @map("regularity_bonus")
+  longRunBonus     Float @default(0) @map("long_run_bonus")
+  progressionBonus Float @default(0) @map("progression_bonus")
+  /// Effective APY = currentApy + sum(bonuses), capped at 9%
+  effectiveApy     Float @default(4.0) @map("effective_apy")
+  /// Sessions this week (for regularity tracking)
+  weekSessions     Int   @default(0) @map("week_sessions")
+  /// Longest single run this week in km
+  weekLongestRun   Float @default(0) @map("week_longest_run")
+  /// Average pace this month (min/km), 0 = no data
+  monthAvgPace     Float @default(0) @map("month_avg_pace")
+  /// Average pace last month (min/km), for progression comparison
+  prevMonthAvgPace Float @default(0) @map("prev_month_avg_pace")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -182,6 +203,8 @@ model FeedEvent {
   eventType String   @map("event_type")
   /// Structured payload specific to the event type
   payload   Json     @default("{}")
+  likes     Int      @default(0)
+  likedBy   Json     @default("[]") @map("liked_by")
   createdAt DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -189,6 +212,49 @@ model FeedEvent {
   @@index([userId])
   @@index([createdAt(sort: Desc)])
   @@map("feed_events")
+}
+
+// ============================================================================
+// NOTIFICATIONS
+// ============================================================================
+
+/// In-app notifications (friend requests, challenge invites, etc.)
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  /// "friend_request" | "friend_accepted" | "challenge_invite"
+  type      String
+  /// Structured payload: { friendshipId, fromUserId, fromDisplayName, ... }
+  payload   Json     @default("{}")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([createdAt(sort: Desc)])
+  @@map("notifications")
+}
+
+// ============================================================================
+// PUSH SUBSCRIPTIONS
+// ============================================================================
+
+/// Web Push subscription for a user's browser/device.
+/// One user can have multiple subscriptions (multiple devices).
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  /// The push subscription endpoint URL
+  endpoint  String   @unique
+  /// Subscription keys (p256dh + auth) as JSON
+  keys      Json
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }
 
 // ============================================================================

@@ -18,18 +18,26 @@ export async function apiFetch<T>(
     ...(options.headers as Record<string, string>),
   };
 
+  // Track whether we actually sent a real token. Only if a token was sent and
+  // the server still returns 401 do we know the session is truly invalid.
+  let tokenSent = false;
   if (!USE_MOCK && getAuthToken) {
     const token = await getAuthToken();
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
+      tokenSent = true;
     }
   }
 
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
 
   if (!USE_MOCK && res.status === 401) {
-    document.cookie = "oria_onboarded=; path=/; max-age=0";
-    window.dispatchEvent(new CustomEvent("oria:unauthorized"));
+    // Only logout when a real token was sent and rejected. If no token was
+    // available yet (Privy still initializing) just throw — don't sign the user out.
+    if (tokenSent) {
+      document.cookie = "oria_onboarded=; path=/; max-age=0";
+      window.dispatchEvent(new CustomEvent("oria:unauthorized"));
+    }
     throw new Error("Unauthorized");
   }
 

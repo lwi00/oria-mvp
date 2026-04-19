@@ -1,30 +1,142 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Avatar } from "./Avatar";
-import { useUser } from "@/lib/hooks";
-import { getInitials } from "@/lib/utils";
+import {
+  useUser,
+  useUnreadCount,
+  useNotifications,
+  useMarkNotificationsRead,
+  useAcceptFriendRequest,
+  useRejectFriendRequest,
+} from "@/lib/hooks";
+import { useToast } from "./Toast";
+import { getInitials, timeAgo } from "@/lib/utils";
 
 export function Header() {
   const { data: user } = useUser();
+  const { data: unread } = useUnreadCount();
+  const { data: notifications } = useNotifications();
+  const markRead = useMarkNotificationsRead();
+  const acceptReq = useAcceptFriendRequest();
+  const rejectReq = useRejectFriendRequest();
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
   const initials = getInitials(user?.displayName ?? null);
+  const count = unread?.count ?? 0;
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    if (open) document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  function handleOpen() {
+    setOpen((v) => !v);
+    if (!open && count > 0) markRead.mutate();
+  }
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between px-5 py-4 border-b border-oria bg-[rgba(250,249,255,0.8)] backdrop-blur-xl">
-      <div className="flex items-center gap-3">
-        <Image src="/Design sans titre.png" alt="Oria" width={64} height={64} className="rounded-sm" />
-        <span className="text-xl font-extrabold text-text-primary tracking-tight">
+    <header className="sticky top-0 z-50 flex items-center justify-between px-5 py-4 border-b border-oria bg-[rgba(7,7,11,0.78)] backdrop-blur-xl">
+      <Link href="/dashboard" className="flex items-center gap-2.5 cursor-pointer">
+        <Image src="/Design sans titre.png" alt="Oria" width={36} height={36} className="rounded-md" />
+        <span className="text-[17px] font-extrabold text-text-primary tracking-tight">
           Oria
         </span>
-      </div>
-      <div className="flex items-center gap-3">
-        <button className="relative cursor-pointer w-[44px] h-[44px] flex items-center justify-center bg-transparent border-none -mr-2">
-          <span className="text-xl">🔔</span>
-          <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-error-500 border-2 border-white" />
-        </button>
-        <Link href="/profile">
-          <Avatar initials={initials} size={32} highlight />
+      </Link>
+      <div className="flex items-center gap-2">
+        <div ref={ref} className="relative">
+          <button
+            onClick={handleOpen}
+            aria-label="Notifications"
+            className="relative cursor-pointer w-11 h-11 flex items-center justify-center bg-oria-section border border-oria rounded-full text-text-secondary hover:text-accent-purple-bright transition-colors"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 01-3.46 0" />
+            </svg>
+            {count > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-accent-sport text-[10px] font-bold text-white border-2 border-oria-bg tabular-nums">
+                {count > 9 ? "9+" : count}
+              </span>
+            )}
+          </button>
+
+          {open && (
+            <div className="absolute right-0 top-14 w-[320px] max-h-[400px] overflow-y-auto rounded-2xl bg-oria-section border border-oria shadow-xl z-[60]">
+              <div className="px-4 py-3 border-b border-oria">
+                <p className="text-[14px] font-bold text-text-primary">Notifications</p>
+              </div>
+              {notifications && notifications.length > 0 ? (
+                <div className="flex flex-col">
+                  {notifications.slice(0, 20).map((n) => {
+                    const p = n.payload as { fromDisplayName?: string; friendshipId?: string; message?: string };
+                    const isFriendReq = n.type === "friend_request";
+                    const isAccepted = n.type === "friend_accepted";
+                    const isRunReminder = n.type === "run_reminder";
+                    const isPoke = n.type === "poke";
+                    return (
+                      <div
+                        key={n.id}
+                        className={`px-4 py-3 border-b border-oria last:border-b-0 ${!n.read ? "bg-accent-purple/5" : ""}`}
+                      >
+                        <p className="text-[13px] text-text-primary leading-snug">
+                          {isRunReminder ? (
+                            <>{p.message ?? "Time to run! Your scheduled session is today."}</>
+                          ) : isPoke ? (
+                            <>{p.message ?? `${p.fromDisplayName ?? "Someone"} poked you!`}</>
+                          ) : (
+                            <>
+                              <span className="font-semibold">{p.fromDisplayName ?? "Someone"}</span>{" "}
+                              {isFriendReq && "sent you a friend request"}
+                              {isAccepted && "accepted your friend request"}
+                            </>
+                          )}
+                        </p>
+                        <p className="text-[11px] text-text-muted mt-0.5">{timeAgo(n.createdAt)}</p>
+                        {isFriendReq && !n.read && p.friendshipId && (
+                          <div className="flex gap-2 mt-2">
+                            <button
+                              onClick={() =>
+                                acceptReq.mutate(p.friendshipId!, {
+                                  onSuccess: () => toast("Friend request accepted!"),
+                                })
+                              }
+                              className="text-[11px] font-semibold px-3 py-1.5 rounded-full gradient-brand text-white shadow-button"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              onClick={() =>
+                                rejectReq.mutate(p.friendshipId!, {
+                                  onSuccess: () => toast("Request declined"),
+                                })
+                              }
+                              className="text-[11px] font-semibold px-3 py-1.5 rounded-full bg-oria-chip border border-oria text-text-secondary"
+                            >
+                              Decline
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-8 text-center">
+                  <p className="text-[13px] text-text-muted">No notifications yet</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        <Link href="/profile" aria-label="Profile" className="ml-1">
+          <Avatar initials={initials} size={36} highlight />
         </Link>
       </div>
     </header>

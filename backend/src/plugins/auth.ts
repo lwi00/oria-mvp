@@ -10,8 +10,8 @@ export default fp(async (fastify: FastifyInstance) => {
   fastify.decorateRequest("privyId", "");
 
   fastify.addHook("onRequest", async (request: FastifyRequest) => {
-    // Skip auth for health check
-    if (request.url === "/health") return;
+    // Skip auth for health check, cron routes, and VAPID key
+    if (request.url === "/health" || request.url.startsWith("/api/cron/") || request.url === "/api/push/vapid-key") return;
 
     if (env.MOCK_AUTH) {
       request.userId = MOCK_USER_ID;

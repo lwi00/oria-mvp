@@ -25,6 +25,10 @@ const envSchema = z.object({
     .string()
     .transform((v) => v === "true")
     .default("true"),
+  CRON_SECRET: z.string().default("oria-cron-secret-2026"),
+  VAPID_PUBLIC_KEY: z.string().optional(),
+  VAPID_PRIVATE_KEY: z.string().optional(),
+  VAPID_SUBJECT: z.string().optional(),
 });
 
 export const env = envSchema.parse(process.env);

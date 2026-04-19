@@ -15,7 +15,8 @@ export const metadata: Metadata = {
   description: "Earn variable APY based on your fitness streak consistency",
   manifest: "/manifest.json",
   appleWebApp: {
-    statusBarStyle: "default",
+    capable: true,
+    statusBarStyle: "black-translucent",
     title: "Oria",
   },
   icons: {
@@ -27,7 +28,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#7c3aed",
+  themeColor: "#8B5CF6",
 };
 
 export default function RootLayout({

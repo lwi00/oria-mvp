@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useLogActivity, useUser, useAppleHealthStatus } from "@/lib/hooks";
+import { useLogActivity, useUser, useStreak, useAppleHealthStatus } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
+import { Celebration } from "@/components/Celebration";
 
 interface LogActivityModalProps {
   open: boolean;
@@ -11,12 +12,15 @@ interface LogActivityModalProps {
 
 export function LogActivityModal({ open, onClose }: LogActivityModalProps) {
   const { data: user } = useUser();
+  const { data: streak } = useStreak();
   const logActivity = useLogActivity();
   const { toast } = useToast();
   const { data: healthStatus } = useAppleHealthStatus();
 
   const [km, setKm] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationData, setCelebrationData] = useState<{ distanceKm: number; goalMet: boolean }>({ distanceKm: 0, goalMet: false });
 
   if (!open) return null;
 
@@ -30,13 +34,18 @@ export function LogActivityModal({ open, onClose }: LogActivityModalProps) {
 
   const handleSubmit = () => {
     if (!km) return;
+    const distanceKm = parseFloat(km);
+    const currentWeekKm = streak?.currentWeek?.distanceKm ?? 0;
+    const targetKm = user?.targetKm ?? 10;
     logActivity.mutate(
-      { distanceKm: parseFloat(km), weekStart: date },
+      { distanceKm, weekStart: date },
       {
         onSuccess: () => {
-          toast(`Logged ${km} km!`);
+          const newTotal = currentWeekKm + distanceKm;
+          const goalMet = newTotal >= targetKm;
+          setCelebrationData({ distanceKm, goalMet });
+          setShowCelebration(true);
           setKm("");
-          onClose();
         },
         onError: () => toast("Failed to log activity", "error"),
       },
@@ -65,6 +74,7 @@ export function LogActivityModal({ open, onClose }: LogActivityModalProps) {
           </h2>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center border-none cursor-pointer"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -144,6 +154,15 @@ export function LogActivityModal({ open, onClose }: LogActivityModalProps) {
           {logActivity.isPending ? "Saving..." : "Log Activity"}
         </button>
       </div>
+
+      {/* Celebration overlay */}
+      <Celebration
+        show={showCelebration}
+        onDone={() => { setShowCelebration(false); onClose(); }}
+        streakCount={(streak?.currentWeek?.distanceKm ?? 0) + celebrationData.distanceKm >= (user?.targetKm ?? 10) ? (streak?.currentCount ?? 0) + 1 : streak?.currentCount}
+        distanceKm={celebrationData.distanceKm}
+        goalMet={celebrationData.goalMet}
+      />
     </div>
   );
 }

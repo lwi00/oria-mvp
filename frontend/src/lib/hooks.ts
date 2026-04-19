@@ -11,6 +11,14 @@ interface Streak {
   longestCount: number;
   lastWeekMet: boolean;
   currentApy: number;
+  regularityBonus: number;
+  longRunBonus: number;
+  progressionBonus: number;
+  effectiveApy: number;
+  weekSessions: number;
+  weekLongestRun: number;
+  monthAvgPace: number;
+  prevMonthAvgPace: number;
   currentWeek: {
     weekStart: string;
     distanceKm: number;
@@ -26,6 +34,16 @@ interface User {
   goalType: string;
   targetKm: number;
   dataSource: string;
+  runSchedule: number[];
+  settings: {
+    notifRunReminders?: boolean;
+    notifPokes?: boolean;
+    notifFriendRequests?: boolean;
+    notifWeeklySummary?: boolean;
+    privacyShowOnLeaderboard?: boolean;
+    privacyShowActivityToFriends?: boolean;
+    unitsKm?: boolean;
+  };
   streak: {
     currentCount: number;
     longestCount: number;
@@ -58,6 +76,8 @@ interface FeedEvent {
   userId: string;
   eventType: string;
   payload: Record<string, unknown>;
+  likes: number;
+  likedBy: string[];
   createdAt: string;
   user: {
     id: string;
@@ -152,6 +172,39 @@ export function useUser() {
   return useQuery<User>({
     queryKey: ["user", "me"],
     queryFn: () => apiFetch("/api/users/me"),
+  });
+}
+
+interface UserProfile {
+  id: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  goalType: string;
+  targetKm: number;
+  createdAt: string;
+  streak: {
+    currentCount: number;
+    longestCount: number;
+    currentApy: number;
+    effectiveApy: number;
+  } | null;
+  activities: Array<{
+    weekStart: string;
+    distanceKm: number;
+    goalMet: boolean;
+  }>;
+  stats: {
+    totalKm: number;
+    weeksActive: number;
+    goalMetWeeks: number;
+  };
+}
+
+export function useUserProfile(userId: string) {
+  return useQuery<UserProfile>({
+    queryKey: ["user", "profile", userId],
+    queryFn: () => apiFetch(`/api/users/${userId}/profile`),
+    enabled: !!userId,
   });
 }
 
@@ -290,6 +343,170 @@ export function useDiscoverUsers() {
   });
 }
 
+export function useSearchUsers(q: string) {
+  return useQuery<DiscoverUser[]>({
+    queryKey: ["users", "search", q],
+    queryFn: () => apiFetch(`/api/users/search?q=${encodeURIComponent(q)}`),
+    enabled: q.trim().length >= 2,
+    staleTime: 30_000,
+  });
+}
+
+interface NotificationItem {
+  id: string;
+  type: string;
+  payload: {
+    friendshipId?: string;
+    fromUserId?: string;
+    fromDisplayName?: string;
+    fromAvatarUrl?: string | null;
+  };
+  read: boolean;
+  createdAt: string;
+}
+
+interface PendingRequest {
+  friendshipId: string;
+  user: DiscoverUser;
+  createdAt: string;
+}
+
+export function useNotifications() {
+  return useQuery<NotificationItem[]>({
+    queryKey: ["notifications"],
+    queryFn: () => apiFetch("/api/notifications"),
+  });
+}
+
+export function useUnreadCount() {
+  return useQuery<{ count: number }>({
+    queryKey: ["notifications", "unread"],
+    queryFn: () => apiFetch("/api/notifications/unread-count"),
+    refetchInterval: 15_000,
+  });
+}
+
+export function useMarkNotificationsRead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => apiFetch("/api/notifications/mark-read", { method: "POST" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+}
+
+export function usePendingRequests() {
+  return useQuery<PendingRequest[]>({
+    queryKey: ["friends", "pending"],
+    queryFn: () => apiFetch("/api/friends/pending"),
+  });
+}
+
+export function useAcceptFriendRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (friendshipId: string) =>
+      apiFetch(`/api/friends/${friendshipId}/accept`, { method: "POST" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["friends"] });
+      queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+}
+
+export function useRejectFriendRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (friendshipId: string) =>
+      apiFetch(`/api/friends/${friendshipId}/reject`, { method: "POST" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["friends"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+}
+
+interface FriendEntry {
+  friendshipId: string;
+  user: {
+    id: string;
+    displayName: string | null;
+    avatarUrl: string | null;
+    streak: { currentCount: number; currentApy: number } | null;
+  };
+}
+
+interface FriendWeeklyProgress {
+  id: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  targetKm: number;
+  isMe: boolean;
+  distanceKm: number;
+  goalMet: boolean;
+  streakCount: number;
+  weekSessions: number;
+}
+
+export function useFriendsWeekly() {
+  return useQuery<FriendWeeklyProgress[]>({
+    queryKey: ["friends", "weekly"],
+    queryFn: () => apiFetch("/api/friends/weekly"),
+  });
+}
+
+export function useFriends() {
+  return useQuery<FriendEntry[]>({
+    queryKey: ["friends", "list"],
+    queryFn: () => apiFetch("/api/friends"),
+  });
+}
+
+export function useRemoveFriend() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (friendshipId: string) =>
+      apiFetch(`/api/friends/${friendshipId}`, { method: "DELETE" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["friends"] });
+      queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+      queryClient.invalidateQueries({ queryKey: ["users", "discover"] });
+    },
+  });
+}
+
+export function useSentRequests() {
+  return useQuery<PendingRequest[]>({
+    queryKey: ["friends", "sent"],
+    queryFn: () => apiFetch("/api/friends/sent"),
+  });
+}
+
+export function useCancelFriendRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (friendshipId: string) =>
+      apiFetch(`/api/friends/sent/${friendshipId}`, { method: "DELETE" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["friends"] });
+      queryClient.invalidateQueries({ queryKey: ["users", "discover"] });
+    },
+  });
+}
+
+export function usePokeFriend() {
+  const queryClient = useQueryClient();
+  return useMutation<{ poked: boolean; message: string }, Error, string>({
+    mutationFn: (friendUserId: string) =>
+      apiFetch(`/api/friends/${friendUserId}/poke`, { method: "POST" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+}
+
 export function useSendFriendRequest() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -337,6 +554,9 @@ export function useSyncAppleHealth() {
   const queryClient = useQueryClient();
   return useMutation<{ distanceKm: number }>({
     mutationFn: async () => {
+      if (process.env.NEXT_PUBLIC_USE_MOCK !== "true") {
+        throw new Error("Apple Health sync not available yet — use Strava");
+      }
       const distanceKm = parseFloat((Math.random() * 2.5 + 3).toFixed(1));
       await apiFetch("/api/activities", {
         method: "POST",
@@ -359,6 +579,52 @@ export function useJoinChallenge() {
       apiFetch(`/api/challenges/${challengeId}/join`, { method: "POST" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["challenges"] });
+    },
+  });
+}
+
+// ── Weekly Leaderboard ──
+
+interface WeeklyLeaderboardEntry {
+  rank: number;
+  id: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  distanceKm: number;
+  isMe: boolean;
+}
+
+export function useWeeklyLeaderboard() {
+  return useQuery<WeeklyLeaderboardEntry[]>({
+    queryKey: ["leaderboard", "weekly"],
+    queryFn: () => apiFetch("/api/leaderboard/weekly"),
+  });
+}
+
+// ── Feed Reactions ──
+
+export function useLikeFeedEvent() {
+  const queryClient = useQueryClient();
+  return useMutation<{ likes: number; liked: boolean }, Error, string>({
+    mutationFn: (eventId: string) =>
+      apiFetch(`/api/feed/${eventId}/like`, { method: "POST" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+    },
+  });
+}
+
+// ── Streak Recovery ──
+
+export function useRecoverStreak() {
+  const queryClient = useQueryClient();
+  return useMutation<{ recovered: boolean; newCount: number }>({
+    mutationFn: () =>
+      apiFetch("/api/streaks/recover", { method: "POST" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["streak"] });
+      queryClient.invalidateQueries({ queryKey: ["wallet"] });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
     },
   });
 }

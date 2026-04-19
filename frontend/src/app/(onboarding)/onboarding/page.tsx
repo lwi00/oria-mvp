@@ -30,7 +30,7 @@ function ProgressDots({ current, total }: { current: number; total: number }) {
 }
 
 // ─── Step 1: Welcome ───
-function WelcomeStep({ onNext }: { onNext: () => void }) {
+function WelcomeStep({ onNext, onSignIn }: { onNext: () => void; onSignIn: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-8 py-10">
       <div className="flex flex-col items-center gap-2 mb-8">
@@ -62,9 +62,12 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
         >
           Get Started
         </button>
-        <span className="text-[13px] text-purple-400 cursor-pointer">
+        <button
+          onClick={onSignIn}
+          className="text-[13px] text-purple-400 cursor-pointer bg-transparent border-none hover:text-purple-600 transition-colors"
+        >
           Already have an account? Sign in
-        </span>
+        </button>
       </div>
     </div>
   );
@@ -74,9 +77,11 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
 function ConnectWalletStep({
   onNext,
   onBack,
+  onSignIn,
 }: {
   onNext: () => void;
   onBack: () => void;
+  onSignIn: () => void;
 }) {
   const [loggingIn, setLoggingIn] = useState(false);
   const { getAccessToken } = usePrivy();
@@ -86,18 +91,26 @@ function ConnectWalletStep({
       // Eagerly register token getter so apiFetch can attach Bearer token
       setAuthTokenGetter(() => getAccessToken());
       const walletAddr = params.user.wallet?.address;
+      let isNew = true;
       try {
-        await apiFetch("/api/auth/verify", {
+        const data = await apiFetch("/api/auth/verify", {
           method: "POST",
           body: JSON.stringify({
             walletAddr,
             displayName: params.user.email?.address?.split("@")[0],
           }),
-        });
+        }) as { isNew?: boolean };
+        if (data?.isNew === false) isNew = false;
       } catch {
-        // User creation may fail if already exists — that's fine
+        // ignore — treat as new user on error
       }
-      onNext();
+      if (isNew) {
+        onNext();
+      } else {
+        // Returning user — skip onboarding steps, go straight to dashboard
+        document.cookie = "oria_onboarded=1; path=/; max-age=2592000";
+        onSignIn();
+      }
     },
     onError: () => {
       setLoggingIn(false);
@@ -493,10 +506,12 @@ export default function OnboardingPage() {
   const { ready, authenticated } = usePrivy();
 
   useEffect(() => {
-    if (ready && authenticated && step < 2) {
-      setStep(2);
+    // Already logged-in user lands on onboarding → skip straight to dashboard
+    if (ready && authenticated && step === 0) {
+      document.cookie = "oria_onboarded=1; path=/; max-age=2592000";
+      router.replace("/dashboard");
     }
-  }, [ready, authenticated, step]);
+  }, [ready, authenticated, step, router]);
 
   // Wait for Privy SDK to initialize (prevents wagmi store ref crash)
   if (!ready) {
@@ -524,11 +539,13 @@ export default function OnboardingPage() {
     router.push("/dashboard");
   };
 
+  const goToDashboard = () => router.replace("/dashboard");
+
   return (
     <>
-      {step === 0 && <WelcomeStep onNext={() => setStep(1)} />}
+      {step === 0 && <WelcomeStep onNext={() => setStep(1)} onSignIn={() => setStep(1)} />}
       {step === 1 && (
-        <ConnectWalletStep onNext={() => setStep(2)} onBack={() => setStep(0)} />
+        <ConnectWalletStep onNext={() => setStep(2)} onBack={() => setStep(0)} onSignIn={goToDashboard} />
       )}
       {step === 2 && (
         <ChooseGoalStep

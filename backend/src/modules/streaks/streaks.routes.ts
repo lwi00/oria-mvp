@@ -7,6 +7,7 @@ import {
   logActivity,
   getActivities,
   getMyStreak,
+  recoverStreak,
   evaluateStreaks,
 } from "./streaks.service.js";
 
@@ -26,6 +27,11 @@ export default async function streaksRoutes(app: FastifyInstance) {
   app.get("/streaks/me", async (request, reply) => {
     const streak = await getMyStreak(app.prisma, request.userId);
     return reply.send(streak);
+  });
+
+  app.post("/streaks/recover", async (request, reply) => {
+    const result = await recoverStreak(app.prisma, request.userId);
+    return reply.send(result);
   });
 
   app.post("/streaks/evaluate", async (_request, reply) => {

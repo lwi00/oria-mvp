@@ -1,7 +1,8 @@
 import type { PrismaClient } from "@prisma/client";
-import { computeApy } from "./apy.utils.js";
-import { STREAK_MILESTONES } from "../../config/constants.js";
-import { NotFoundError } from "../../lib/errors.js";
+import { computeApy, computeMultipliers } from "./apy.utils.js";
+import { STREAK_MILESTONES, APY } from "../../config/constants.js";
+import { BadRequestError, NotFoundError } from "../../lib/errors.js";
+import { sendPushToUser } from "../push/push.service.js";
 import type { LogActivityBody } from "./streaks.schemas.js";
 
 function getWeekStart(date: Date = new Date()): Date {
@@ -28,14 +29,21 @@ export async function logActivity(
   });
   if (!user) throw new NotFoundError("User");
 
-  const goalMet = body.distanceKm >= user.targetKm;
+  // Accumulate distance for the week (don't replace)
+  const previousActivity = await prisma.activity.findUnique({
+    where: { userId_weekStart: { userId, weekStart } },
+  });
+  const previousDistance = previousActivity?.distanceKm ?? 0;
+  const wasGoalAlreadyMet = previousActivity?.goalMet ?? false;
+  const totalDistance = previousDistance + body.distanceKm;
+  const goalMet = totalDistance >= user.targetKm;
 
   const activity = await prisma.activity.upsert({
     where: {
       userId_weekStart: { userId, weekStart },
     },
     update: {
-      distanceKm: body.distanceKm,
+      distanceKm: totalDistance,
       source: body.source,
       goalMet,
     },
@@ -48,21 +56,34 @@ export async function logActivity(
     },
   });
 
-  // Auto-update streak APY when goal is met so dashboard reflects immediately
-  if (goalMet) {
+  // Update streak in real-time only when goal transitions to met for the first time this week
+  if (goalMet && !wasGoalAlreadyMet) {
     const streak = await prisma.streak.findUnique({ where: { userId } });
-    if (streak && !streak.lastWeekMet) {
+    if (streak) {
       const newCount = streak.currentCount + 1;
-      const newApy = computeApy(newCount);
+      const baseApy = computeApy(newCount);
+      const longRunThreshold = user.targetKm * APY.LONG_RUN_MULTIPLIER;
+      const m = computeMultipliers(
+        baseApy, streak.weekSessions, streak.weekLongestRun,
+        longRunThreshold, streak.monthAvgPace, streak.prevMonthAvgPace,
+      );
       await prisma.streak.update({
         where: { userId },
-        data: { currentCount: newCount, lastWeekMet: true, currentApy: newApy },
+        data: {
+          currentCount: newCount,
+          lastWeekMet: true,
+          currentApy: baseApy,
+          ...m,
+        },
       });
-    } else if (streak) {
-      await prisma.streak.update({
-        where: { userId },
-        data: { lastWeekMet: true, currentApy: computeApy(streak.currentCount) },
-      });
+
+      // Push notification for goal met
+      sendPushToUser(prisma, userId, {
+        title: "Weekly Goal Crushed!",
+        body: `You hit ${totalDistance.toFixed(1)}km — streak is now ${newCount} weeks!`,
+        url: "/streak",
+        tag: "goal-met",
+      }).catch(() => {});
     }
   }
 
@@ -106,6 +127,39 @@ export async function getMyStreak(prisma: PrismaClient, userId: string) {
   };
 }
 
+export async function recoverStreak(prisma: PrismaClient, userId: string) {
+  const streak = await prisma.streak.findUnique({ where: { userId } });
+  if (!streak) throw new NotFoundError("Streak");
+  if (streak.lastWeekMet) throw new BadRequestError("Your streak is active — no recovery needed!");
+  if (streak.currentCount === 0) throw new BadRequestError("No streak to recover");
+
+  // Check if user has enough deposit balance (5 USDC cost)
+  const RECOVERY_COST = 5;
+  const deposits = await prisma.deposit.aggregate({
+    where: { userId, status: "earning" },
+    _sum: { amount: true },
+  });
+  const balance = deposits._sum.amount ?? 0;
+  if (balance < RECOVERY_COST) throw new BadRequestError(`Need at least $${RECOVERY_COST} deposited to recover streak`);
+
+  // Restore the streak
+  await prisma.streak.update({
+    where: { userId },
+    data: { lastWeekMet: true },
+  });
+
+  // Create a feed event
+  await prisma.feedEvent.create({
+    data: {
+      userId,
+      eventType: "streak_recovered",
+      payload: { streakCount: streak.currentCount, cost: RECOVERY_COST },
+    },
+  });
+
+  return { recovered: true, streakCount: streak.currentCount, cost: RECOVERY_COST };
+}
+
 export async function evaluateStreaks(prisma: PrismaClient) {
   const weekStart = getWeekStart();
   const users = await prisma.user.findMany({
@@ -122,9 +176,16 @@ export async function evaluateStreaks(prisma: PrismaClient) {
     });
 
     const goalMet = activity?.goalMet ?? false;
-    const newCount = goalMet ? user.streak.currentCount + 1 : 0;
+    // If lastWeekMet is already true and goal is met, logActivity already incremented — don't double-count
+    const alreadyIncremented = user.streak.lastWeekMet && goalMet;
+    const newCount = goalMet ? (alreadyIncremented ? user.streak.currentCount : user.streak.currentCount + 1) : 0;
     const newLongest = Math.max(user.streak.longestCount, newCount);
-    const newApy = computeApy(newCount);
+    const baseApy = computeApy(newCount);
+    const longRunThreshold = user.targetKm * APY.LONG_RUN_MULTIPLIER;
+    const m = computeMultipliers(
+      baseApy, user.streak.weekSessions, user.streak.weekLongestRun,
+      longRunThreshold, user.streak.monthAvgPace, user.streak.prevMonthAvgPace,
+    );
 
     await prisma.streak.update({
       where: { userId: user.id },
@@ -132,7 +193,11 @@ export async function evaluateStreaks(prisma: PrismaClient) {
         currentCount: newCount,
         longestCount: newLongest,
         lastWeekMet: goalMet,
-        currentApy: newApy,
+        currentApy: baseApy,
+        // Reset multiplier tracking for new week
+        weekSessions: 0,
+        weekLongestRun: 0,
+        ...m,
       },
     });
 
@@ -172,7 +237,7 @@ export async function evaluateStreaks(prisma: PrismaClient) {
       userId: user.id,
       goalMet,
       newCount,
-      newApy,
+      newApy: baseApy,
     });
   }
 

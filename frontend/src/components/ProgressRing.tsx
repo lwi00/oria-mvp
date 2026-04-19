@@ -23,19 +23,25 @@ export function ProgressRing({ percent, size = 64, stroke = 5 }: ProgressRingPro
       <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
         <circle
           cx={size / 2} cy={size / 2} r={r}
-          fill="none" stroke="#ede9fe" strokeWidth={stroke}
+          fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke}
         />
         <circle
           cx={size / 2} cy={size / 2} r={r}
-          fill="none" stroke="#7c3aed" strokeWidth={stroke}
+          fill="none" stroke="url(#ringGrad)" strokeWidth={stroke}
           strokeDasharray={circ}
           strokeDashoffset={circ - (animated / 100) * circ}
           strokeLinecap="round"
           className="transition-all duration-[1200ms] ease-oria-bounce"
         />
+        <defs>
+          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#F59E0B" />
+            <stop offset="100%" stopColor="#FC4C02" />
+          </linearGradient>
+        </defs>
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-sm font-semibold text-purple-600 tabular-nums">
+        <span className="text-sm font-bold text-accent-gold tabular-nums">
           {Math.round(animated)}%
         </span>
       </div>

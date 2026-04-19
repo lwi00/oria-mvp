@@ -11,6 +11,8 @@ import socialRoutes from "./modules/social/social.routes.js";
 import challengesRoutes from "./modules/challenges/challenges.routes.js";
 import walletRoutes from "./modules/wallet/wallet.routes.js";
 import stravaRoutes from "./modules/strava/strava.routes.js";
+import cronRoutes from "./modules/cron/cron.routes.js";
+import pushRoutes from "./modules/push/push.routes.js";
 
 export async function buildApp() {
   const app = Fastify({
@@ -53,6 +55,8 @@ export async function buildApp() {
   await app.register(challengesRoutes, { prefix: "/api" });
   await app.register(walletRoutes, { prefix: "/api/wallet" });
   await app.register(stravaRoutes, { prefix: "/api/strava" });
+  await app.register(cronRoutes, { prefix: "/api/cron" });
+  await app.register(pushRoutes);
 
   return app;
 }

@@ -2,18 +2,17 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { usePrivy } from "@privy-io/react-auth";
 import { apiFetch } from "@/lib/api";
+import { useAppAuth } from "@/lib/providers";
 
 function StravaCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { authenticated, ready } = usePrivy();
+  const { ready, authenticated, authVerified } = useAppAuth();
   const [status, setStatus] = useState<"loading" | "error">("loading");
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Wait for Privy to initialize before making authenticated requests
     if (!ready) return;
 
     const code = searchParams.get("code");
@@ -31,6 +30,10 @@ function StravaCallbackContent() {
       return;
     }
 
+    // Wait until the Privy token getter is registered — otherwise apiFetch
+    // sends no Authorization header and the backend returns 401.
+    if (!authVerified) return;
+
     apiFetch("/api/strava/exchange", {
       method: "POST",
       body: JSON.stringify({ code }),
@@ -40,7 +43,7 @@ function StravaCallbackContent() {
         setError(e.message ?? "Connection failed.");
         setStatus("error");
       });
-  }, [ready, authenticated, searchParams, router]);
+  }, [ready, authenticated, authVerified, searchParams, router]);
 
   if (status === "error") {
     return (

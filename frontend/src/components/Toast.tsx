@@ -40,13 +40,21 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`px-4 py-3 rounded-lg shadow-card-hover text-sm font-medium backdrop-blur-xl animate-[slideDown_0.3s_ease-out] ${
+            className={`px-4 py-3 rounded-lg shadow-card-hover text-sm font-medium backdrop-blur-xl animate-[slideDown_0.3s_ease-out] flex items-center gap-2.5 ${
               t.type === "error"
-                ? "bg-red-50/90 text-error-500 border border-red-200"
-                : "bg-white/90 text-purple-600 border border-purple-200"
+                ? "bg-[rgba(220,38,38,0.15)] text-red-400 border border-red-500/30"
+                : "bg-[rgba(139,92,246,0.15)] text-accent-purple-bright border border-accent-purple/30"
             }`}
           >
-            {t.type === "error" ? "✕ " : "✓ "}
+            {t.type === "error" ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="shrink-0">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            )}
             {t.message}
           </div>
         ))}
