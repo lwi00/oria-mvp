@@ -9,15 +9,6 @@ import { formatMoney } from "@/lib/utils";
 
 const MILESTONES = [1, 2, 4, 6, 8, 12, 16, 24];
 
-const APY_TIERS: ReadonlyArray<readonly [number, number]> = [
-  [16, 8.0], [12, 7.5], [8, 7.0], [6, 6.5], [4, 6.0], [2, 5.5], [1, 5.0], [0, 4.0],
-];
-function computeApy(s: number) {
-  if (s <= 0) return 4.0;
-  for (const [t, a] of APY_TIERS) if (s >= t) return a;
-  return 4.0;
-}
-
 export default function StreakDetailPage() {
   const { data: streak, isLoading: streakLoading } = useStreak();
   const { data: user, isLoading: userLoading } = useUser();
@@ -47,6 +38,20 @@ export default function StreakDetailPage() {
   const pct = Math.min(100, Math.round((currentKm / targetKm) * 100));
   const canRecover = !streak?.lastWeekMet && count === 0 && longest > 0;
 
+  // Pool-model APY context (replaces the legacy tiered 4→8% ramp).
+  const breakdown = streak?.apyBreakdown;
+  const baselineApy = breakdown?.baseline ?? 3;
+  const vaultMax = breakdown?.vaultRate ?? 5;
+  const effectiveApy = streak?.effectiveApy ?? baselineApy;
+  // Projected effective APY at a given streak length, holding the other
+  // activity-score components flat. Linear ramp from baseline (0 w) to
+  // vault-rate ceiling (16 w+). Good-enough visual; the real model is
+  // computed server-side per request.
+  const projectedApy = (weeks: number): number => {
+    const norm = Math.min(1, weeks / 16);
+    return baselineApy + (vaultMax - baselineApy) * norm;
+  };
+
   // Build weekly history from activities
   const weekHistory = (activities ?? []).map((a) => ({
     week: new Date(a.weekStart).toLocaleDateString("en", { month: "short", day: "numeric" }),
@@ -65,21 +70,33 @@ export default function StreakDetailPage() {
         <Link href="/dashboard" className="w-9 h-9 rounded-xl bg-oria-card border border-oria flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
         </Link>
-        <h1 className="text-xl font-bold text-text-primary tracking-tight">Streak Details</h1>
+        <h1 className="text-xl font-bold text-text-primary tracking-tight">Streak details</h1>
       </div>
 
-      {/* Big streak display */}
+      {/* Hero — flame + streak count + effective APY (matches Home treatment) */}
       <Card className="relative overflow-hidden !p-6 text-center">
-        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[300px] h-[300px] rounded-full bg-[radial-gradient(circle,rgba(252,76,2,0.2)_0%,transparent_60%)] blur-[30px] pointer-events-none" />
+        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[320px] h-[320px] rounded-full bg-[radial-gradient(circle,rgba(252,76,2,0.20)_0%,transparent_60%)] blur-[28px] pointer-events-none" />
+        <div className="absolute -bottom-24 left-1/2 -translate-x-1/2 w-[260px] h-[260px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.18)_0%,transparent_60%)] blur-[24px] pointer-events-none" />
         <div className="relative">
-          <div className="w-[120px] h-[120px] rounded-full gradient-sport flex items-center justify-center shadow-sport-glow mx-auto">
-            <span className="text-[56px] font-extrabold text-white leading-none tabular-nums">{count}</span>
+          <div className="flex items-baseline justify-center gap-2">
+            <span
+              className="text-[56px] leading-none drop-shadow-[0_2px_14px_rgba(252,76,2,0.45)]"
+              aria-hidden
+            >
+              🔥
+            </span>
+            <span className="text-[80px] font-extrabold text-text-primary leading-none tracking-tight tabular-nums">
+              {count}
+            </span>
           </div>
           <p className="text-lg font-bold text-text-primary mt-4">
             {count === 0 ? "No active streak" : `${count} week${count > 1 ? "s" : ""} strong`}
           </p>
-          <p className="text-sm text-text-secondary mt-1">
-            Longest ever: {longest} week{longest !== 1 ? "s" : ""}
+          <p className="text-sm text-accent-purple-bright font-semibold mt-1 tabular-nums">
+            Earning <span className="font-extrabold">{effectiveApy.toFixed(2)}% APY</span>
+          </p>
+          <p className="text-[12px] text-text-muted mt-2">
+            Longest ever · <span className="text-text-secondary font-semibold">{longest} week{longest !== 1 ? "s" : ""}</span>
           </p>
         </div>
       </Card>
@@ -97,39 +114,59 @@ export default function StreakDetailPage() {
           />
         </div>
         <p className="text-[12px] text-text-muted mt-2">
-          {nextMilestone - count} more week{nextMilestone - count > 1 ? "s" : ""} to unlock {nextMilestone}-week badge
+          {nextMilestone - count} more week{nextMilestone - count > 1 ? "s" : ""} to unlock the {nextMilestone}-week badge.
         </p>
       </Card>
 
-      {/* APY impact */}
+      {/* APY impact — projected effective APY at each streak length, under the
+          current vault rate. Baseline anchors the left, vault ceiling the right. */}
       <Card className="!p-4">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-3">Streak APY Impact</p>
+        <div className="flex justify-between items-baseline mb-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">Streak APY impact</p>
+          <p className="text-[10px] text-text-muted tabular-nums">
+            {baselineApy.toFixed(2)}% baseline · {vaultMax.toFixed(2)}% max
+          </p>
+        </div>
         <div className="flex flex-col gap-3">
-          {MILESTONES.filter(m => m <= 20).map((m) => {
-            const apyAtM = computeApy(m);
+          {MILESTONES.filter((m) => m <= 20).map((m) => {
+            const apyAtM = projectedApy(m);
             const reached = count >= m;
+            const widthPct = vaultMax > baselineApy
+              ? Math.max(2, ((apyAtM - baselineApy) / (vaultMax - baselineApy)) * 100)
+              : 0;
             return (
               <div key={m} className="flex items-center gap-3">
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${
-                  reached ? "gradient-sport text-white" : m === nextMilestone ? "bg-accent-gold/15 border border-accent-gold/30 text-accent-gold" : "bg-oria-chip text-text-muted"
+                  reached
+                    ? "bg-gradient-to-br from-accent-purple to-accent-purple-bright text-white shadow-button"
+                    : m === nextMilestone
+                      ? "bg-accent-gold/15 border border-accent-gold/30 text-accent-gold"
+                      : "bg-oria-chip text-text-muted"
                 }`}>
                   {m}
                 </div>
                 <div className="flex-1">
                   <div className="h-1.5 rounded-full bg-oria-chip overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all duration-500 ${reached ? "gradient-sport" : "bg-oria-chip"}`}
-                      style={{ width: `${(apyAtM / 8) * 100}%` }}
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        reached
+                          ? "bg-gradient-to-r from-accent-purple to-accent-purple-bright"
+                          : "bg-accent-purple/15"
+                      }`}
+                      style={{ width: `${widthPct}%` }}
                     />
                   </div>
                 </div>
-                <span className={`text-[13px] font-semibold tabular-nums w-16 text-right ${reached ? "text-accent-sport" : "text-text-muted"}`}>
+                <span className={`text-[13px] font-semibold tabular-nums w-16 text-right ${reached ? "text-accent-purple-bright" : "text-text-muted"}`}>
                   {apyAtM.toFixed(2)}%
                 </span>
               </div>
             );
           })}
         </div>
+        <p className="text-[10px] text-text-muted mt-3 leading-relaxed">
+          Projected effective APY at each streak length, assuming the vault rate stays where it is today.
+        </p>
       </Card>
 
       {/* This week status */}
