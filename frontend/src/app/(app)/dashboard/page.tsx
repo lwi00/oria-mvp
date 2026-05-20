@@ -15,7 +15,6 @@ import {
   useStravaStatus, useStravaSync,
   useActivities, useLikeFeedEvent,
 } from "@/lib/hooks";
-import { ProgressChart } from "@/components/ProgressChart";
 import { useToast } from "@/components/Toast";
 import { timeAgo, getInitials, formatFeedEvent, formatMoney, lastNWeeks } from "@/lib/utils";
 
@@ -305,14 +304,49 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Bottom row: streak → APY ramp. The marker is positioned on the
-            baseline-to-vault axis using the user's actual effective APY. */}
+        {/* Bottom row: APY-per-week line chart driven by the user's actual
+            goal-met history. Each week steps up the streak (and the
+            projected APY) when the goal was met, and resets to baseline
+            when it was missed — so the curve makes resilience visible. */}
         {(() => {
           const breakdown = streak?.apyBreakdown;
           const baselineApy = breakdown?.baseline ?? 3;
           const vaultMax = breakdown?.vaultRate ?? 5;
           const range = Math.max(0.01, vaultMax - baselineApy);
-          const markerPct = Math.max(0, Math.min(100, ((effectiveApy - baselineApy) / range) * 100));
+
+          // 8 most recent ISO weeks, oldest first
+          const padded = lastNWeeks(activities ?? [], 8).slice().reverse();
+
+          // Replay streak from the oldest week we have. We seed with
+          // max(0, currentStreak - meetCount) so the visible window starts
+          // close to today's actual streak when most weeks were met.
+          const meetCount = padded.filter((w) => w.goalMet).length;
+          let runningStreak = Math.max(0, streakCount - meetCount);
+          const projectedApy = (s: number) => baselineApy + (vaultMax - baselineApy) * Math.min(1, s / 16);
+          const points = padded.map((w) => {
+            if (w.goalMet) runningStreak = runningStreak + 1;
+            else runningStreak = 0;
+            return { weekStart: w.weekStart, goalMet: w.goalMet, streak: runningStreak, apy: projectedApy(runningStreak) };
+          });
+
+          // SVG geometry
+          const W = 100; // viewBox width (%) — responsive via preserveAspectRatio="none" on the line area
+          const H = 80;  // viewBox height
+          const padX = 4;
+          const padY = 6;
+          const x = (i: number) => padX + ((W - 2 * padX) * (points.length <= 1 ? 0 : i / (points.length - 1)));
+          const y = (apy: number) => {
+            const t = (apy - baselineApy) / range; // 0..1+
+            const clamped = Math.max(0, Math.min(1, t));
+            return H - padY - clamped * (H - 2 * padY);
+          };
+          const linePath = points.length > 0
+            ? "M " + points.map((p, i) => `${x(i)} ${y(p.apy)}`).join(" L ")
+            : "";
+          const areaPath = points.length > 0
+            ? `M ${x(0)} ${H - padY} L ${points.map((p, i) => `${x(i)} ${y(p.apy)}`).join(" L ")} L ${x(points.length - 1)} ${H - padY} Z`
+            : "";
+
           const remainingWeeks = Math.max(0, 16 - streakCount);
           const subtitle =
             streakCount === 0
@@ -320,29 +354,67 @@ export default function DashboardPage() {
               : streakCount >= 16
                 ? "You've maxed the streak component — you're earning at the ceiling."
                 : `${remainingWeeks} more goal-met week${remainingWeeks > 1 ? "s" : ""} to max your share.`;
+
           return (
             <div className="mt-5 pt-4 border-t border-oria relative">
               <div className="flex justify-between items-baseline mb-2">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">Streak → APY</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">Streak → APY · last {points.length}w</p>
                 <Link href="/apy" className="text-[10px] font-semibold text-accent-purple-bright">
                   Details →
                 </Link>
               </div>
-              <div className="relative h-2 rounded-full bg-gradient-to-r from-accent-purple/25 via-accent-purple/55 to-accent-purple-bright overflow-visible">
-                {/* tick marks every 25% */}
-                {[25, 50, 75].map((p) => (
-                  <span key={p} className="absolute top-0 bottom-0 w-px bg-white/10" style={{ left: `${p}%` }} />
-                ))}
-                {/* marker pin */}
-                <div
-                  className="absolute -top-1.5 w-5 h-5 rounded-full bg-white border-2 border-accent-purple-bright shadow-button transform -translate-x-1/2"
-                  style={{ left: `${markerPct}%` }}
-                  aria-label="Your current APY position"
-                />
+
+              <div className="relative">
+                {/* y-axis labels */}
+                <div className="absolute -left-0.5 inset-y-0 flex flex-col justify-between text-[9px] text-text-muted tabular-nums pointer-events-none">
+                  <span>{vaultMax.toFixed(2)}%</span>
+                  <span>{baselineApy.toFixed(2)}%</span>
+                </div>
+                <svg
+                  viewBox={`0 0 ${W} ${H}`}
+                  preserveAspectRatio="none"
+                  className="w-full h-[110px] ml-9"
+                  aria-label="APY per week — last 8 weeks"
+                >
+                  <defs>
+                    <linearGradient id="apyGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#a78bfa" stopOpacity="0.35" />
+                      <stop offset="100%" stopColor="#a78bfa" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  {/* grid: baseline + ceiling */}
+                  <line x1={padX} x2={W - padX} y1={y(baselineApy)} y2={y(baselineApy)} stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" strokeDasharray="2 2" />
+                  <line x1={padX} x2={W - padX} y1={y(vaultMax)} y2={y(vaultMax)} stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" strokeDasharray="2 2" />
+                  {/* area + line */}
+                  {areaPath && <path d={areaPath} fill="url(#apyGrad)" />}
+                  {linePath && <path d={linePath} stroke="#a78bfa" strokeWidth="1.5" fill="none" vectorEffect="non-scaling-stroke" />}
+                  {/* dots */}
+                  {points.map((p, i) => (
+                    <circle
+                      key={p.weekStart}
+                      cx={x(i)}
+                      cy={y(p.apy)}
+                      r={i === points.length - 1 ? 1.6 : 1}
+                      fill={p.goalMet ? "#22c55e" : "#fc4c02"}
+                      stroke={i === points.length - 1 ? "#fff" : "none"}
+                      strokeWidth={i === points.length - 1 ? 0.6 : 0}
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  ))}
+                </svg>
               </div>
-              <div className="flex justify-between mt-2.5 text-[10px] text-text-muted tabular-nums">
-                <span>0w · {baselineApy.toFixed(2)}%</span>
-                <span>16w · {vaultMax.toFixed(2)}%</span>
+
+              {/* x labels (just first + last to keep it light) */}
+              {points.length > 0 && (
+                <div className="flex justify-between text-[9px] text-text-muted tabular-nums mt-1 ml-9">
+                  <span>{new Date(points[0].weekStart).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
+                  <span>This week</span>
+                </div>
+              )}
+
+              <div className="flex items-center gap-3 mt-3 text-[10px] text-text-muted">
+                <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-success-500" /> goal met</span>
+                <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-accent-sport" /> missed</span>
               </div>
               <p className="text-[11px] text-text-secondary mt-2 leading-relaxed">{subtitle}</p>
             </div>
@@ -350,20 +422,10 @@ export default function DashboardPage() {
         })()}
       </Card>
 
-      {/* Progress chart — last 8 consecutive weeks (0-km weeks included) */}
-      {activities && (() => {
-        const padded = lastNWeeks(activities, 8);
-        const hasAnyData = padded.some((w) => w.distanceKm > 0);
-        if (!hasAnyData) return null;
-        return (
-          <Card className="!p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-3">
-              Weekly progress
-            </p>
-            <ProgressChart data={padded} targetKm={targetKm} />
-          </Card>
-        );
-      })()}
+      {/* The standalone "Weekly progress" (km-by-week area chart) used to live
+          here. It was folded into the streak/this-week card above as an
+          APY-by-week line, so the same plot communicates the actual value
+          the user cares about (yield) instead of just distance. */}
 
       {/* "Last run" and "Weekly consistency — you + friends" used to live here.
           They moved off Home so the page stays focused on the fintech ↔ sport
