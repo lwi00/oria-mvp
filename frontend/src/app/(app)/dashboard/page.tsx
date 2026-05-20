@@ -314,19 +314,32 @@ export default function DashboardPage() {
           const vaultMax = breakdown?.vaultRate ?? 5;
           const range = Math.max(0.01, vaultMax - baselineApy);
 
-          // 8 most recent ISO weeks, oldest first
+          // 8 most recent ISO weeks, oldest first.
           const padded = lastNWeeks(activities ?? [], 8).slice().reverse();
 
-          // Replay streak from the oldest week we have. We seed with
-          // max(0, currentStreak - meetCount) so the visible window starts
-          // close to today's actual streak when most weeks were met.
-          const meetCount = padded.filter((w) => w.goalMet).length;
-          let runningStreak = Math.max(0, streakCount - meetCount);
+          // Derive the streak trajectory *backwards* from the current streak
+          // count so the rightmost point always matches what the rest of the
+          // card claims (effectiveApy). Activity history is only used to mark
+          // dot colours and labels — the curve is anchored on streakCount.
+          // For week index i (0 = oldest, n-1 = this week), weeksFromEnd
+          // = n - 1 - i. If that week is within the active streak, the
+          // streak at that moment was streakCount - weeksFromEnd.
           const projectedApy = (s: number) => baselineApy + (vaultMax - baselineApy) * Math.min(1, s / 16);
-          const points = padded.map((w) => {
-            if (w.goalMet) runningStreak = runningStreak + 1;
-            else runningStreak = 0;
-            return { weekStart: w.weekStart, goalMet: w.goalMet, streak: runningStreak, apy: projectedApy(runningStreak) };
+          const points = padded.map((w, i) => {
+            const weeksFromEnd = padded.length - 1 - i;
+            const isThisWeek = weeksFromEnd === 0;
+            const inActiveStreak = weeksFromEnd < streakCount;
+            const streakAt = inActiveStreak ? streakCount - weeksFromEnd : 0;
+            // Anchor "this week" on the user's real effective APY so the
+            // curve agrees with the headline number; older weeks use the
+            // linear projection.
+            const apy = isThisWeek ? effectiveApy : projectedApy(streakAt);
+            return {
+              weekStart: w.weekStart,
+              goalMet: inActiveStreak || w.goalMet, // mark met if part of the live streak
+              streak: streakAt,
+              apy,
+            };
           });
 
           // SVG geometry
