@@ -18,6 +18,7 @@ import {
   useFriends,
   useRemoveFriend,
   usePokeFriend,
+  useFriendsWeekly,
 } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
 import { getInitials } from "@/lib/utils";
@@ -136,6 +137,7 @@ function UserActionButton({
 
 export default function SocialPage() {
   const { data: board, isLoading: boardLoading, isError: boardError, refetch: refetchBoard } = useLeaderboard();
+  const { data: friendsWeekly } = useFriendsWeekly();
   const { data: discoverUsers } = useDiscoverUsers();
   const { data: friends } = useFriends();
   const { data: sentRequests } = useSentRequests();
@@ -368,6 +370,53 @@ export default function SocialPage() {
               </div>
             )}
           </Card>
+
+          {/* Weekly consistency — you + friends (moved from Home) */}
+          {friendsWeekly && friendsWeekly.length > 0 && (
+            <Card className="!p-5">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-base font-bold text-text-primary tracking-tight">Weekly consistency</p>
+                <p className="text-[11px] text-text-muted">This week&apos;s km vs goal</p>
+              </div>
+              <div className="flex flex-col gap-3">
+                {friendsWeekly.slice(0, 8).map((f) => {
+                  const pctF = Math.min(100, Math.round((f.distanceKm / f.targetKm) * 100));
+                  return (
+                    <div
+                      key={f.id}
+                      className={`rounded-xl ${f.isMe ? "bg-accent-purple/8 border border-accent-purple/15 p-2.5" : "p-0.5"}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Avatar initials={getInitials(f.displayName)} size={28} highlight={f.isMe} src={f.avatarUrl} />
+                        <span className="text-[13px] font-semibold text-text-primary flex-1 truncate">
+                          {f.isMe ? "You" : (f.displayName ?? "User")}
+                        </span>
+                        <span className="text-[12px] font-bold tabular-nums text-text-primary">
+                          {f.distanceKm.toFixed(1)}
+                          <span className="text-text-muted font-medium">/{f.targetKm}</span>
+                        </span>
+                        {f.goalMet ? (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 6L9 17l-5-5" />
+                          </svg>
+                        ) : (
+                          <span className="text-[11px] font-semibold text-text-muted tabular-nums w-[14px] text-center">
+                            {pctF}%
+                          </span>
+                        )}
+                      </div>
+                      <div className="h-1 rounded-full bg-oria-chip overflow-hidden mt-1.5">
+                        <div
+                          className={`h-full rounded-full animate-bar ${f.goalMet ? "bg-success-500" : "bg-gradient-to-r from-accent-sport to-accent-gold"}`}
+                          style={{ width: `${pctF}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          )}
 
           {/* Leaderboard */}
           <Card>

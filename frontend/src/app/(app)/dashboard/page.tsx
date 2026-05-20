@@ -7,14 +7,13 @@ import { PlanModal } from "@/components/PlanModal";
 import { ReferFriendsModal } from "@/components/ReferFriendsModal";
 import { Avatar } from "@/components/Avatar";
 import { QuickAction } from "@/components/QuickAction";
-import { ProgressRing } from "@/components/ProgressRing";
 import { CardSkeleton, ErrorCard } from "@/components/Skeleton";
 import { Celebration } from "@/components/Celebration";
 import { RunWelcome } from "@/components/RunWelcome";
 import {
   useUser, useStreak, useFeed, useEarnings,
-  useStravaStatus, useStravaSync, useLastRun,
-  useFriendsWeekly, useActivities, useLikeFeedEvent,
+  useStravaStatus, useStravaSync,
+  useActivities, useLikeFeedEvent,
 } from "@/lib/hooks";
 import { ProgressChart } from "@/components/ProgressChart";
 import { useToast } from "@/components/Toast";
@@ -26,11 +25,9 @@ export default function DashboardPage() {
   const { data: feed } = useFeed(15);
   const likeFeed = useLikeFeedEvent();
   const { data: earnings } = useEarnings();
-  const { data: friendsWeekly } = useFriendsWeekly();
   const { data: activities } = useActivities(8);
   const { data: stravaStatus } = useStravaStatus();
   const stravaSync = useStravaSync();
-  const { data: lastRunData } = useLastRun();
   const { toast } = useToast();
 
   const [showSyncCelebration, setShowSyncCelebration] = useState(false);
@@ -218,53 +215,16 @@ export default function DashboardPage() {
         />
       </section>
 
-      {/* Coming soon — explore */}
-      <section className="grid grid-cols-2 gap-2.5">
-        {[
-          {
-            label: "Events",
-            description: "Run together with the community",
-            icon: (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <path d="M16 2v4M8 2v4M3 10h18" />
-              </svg>
-            ),
-          },
-          {
-            label: "Map",
-            description: "Discover Oria runners near you",
-            icon: (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" />
-                <path d="M8 2v16M16 6v16" />
-              </svg>
-            ),
-          },
-        ].map((item) => (
-          <button
-            key={item.label}
-            onClick={() => toast(`${item.label} — Coming soon`)}
-            className="relative text-left p-4 rounded-2xl bg-oria-card border border-oria backdrop-blur-[18px] shadow-card cursor-pointer hover:bg-oria-card-hover transition-colors group min-h-[88px]"
-          >
-            <span className="absolute top-2.5 right-2.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-accent-purple/20 text-accent-purple-bright border border-accent-purple/25">
-              Soon
-            </span>
-            <div className="w-9 h-9 rounded-xl bg-accent-purple/15 border border-accent-purple/25 flex items-center justify-center text-accent-purple-bright mb-2">
-              {item.icon}
-            </div>
-            <p className="text-[13px] font-bold text-text-primary">{item.label}</p>
-            <p className="text-[11px] text-text-muted mt-0.5 leading-snug line-clamp-2">{item.description}</p>
-          </button>
-        ))}
-      </section>
+      {/* Streak × APY hero — the single card that makes the app's promise readable:
+          your streak (left), this week's progress (middle band), and a ramp
+          that visually links streak → effective APY (bottom band). */}
+      <Card className="relative overflow-hidden !p-5">
+        <div className="absolute -top-16 -right-10 w-[240px] h-[240px] rounded-full bg-[radial-gradient(circle,rgba(252,76,2,0.18)_0%,transparent_60%)] blur-[24px] pointer-events-none" />
+        <div className="absolute -bottom-20 -left-12 w-[200px] h-[200px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.18)_0%,transparent_60%)] blur-[24px] pointer-events-none" />
 
-      {/* Streak Hero */}
-      <Link href="/streak" className="block">
-        <Card className="relative overflow-hidden !p-5 cursor-pointer active:scale-[0.98] transition-transform">
-          <div className="absolute -top-16 -right-10 w-[240px] h-[240px] rounded-full bg-[radial-gradient(circle,rgba(252,76,2,0.18)_0%,transparent_60%)] blur-[24px] pointer-events-none" />
-          <div className="absolute -bottom-20 -left-12 w-[200px] h-[200px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.18)_0%,transparent_60%)] blur-[24px] pointer-events-none" />
-          <div className="flex items-center gap-4 relative">
+        {/* Top row: streak count + APY callout */}
+        <Link href="/streak" className="block relative">
+          <div className="flex items-center gap-4">
             <div className="flex items-baseline gap-1.5 flex-shrink-0">
               <span
                 className="text-[44px] leading-none drop-shadow-[0_2px_12px_rgba(252,76,2,0.45)]"
@@ -280,83 +240,114 @@ export default function DashboardPage() {
               <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-sport">
                 Current streak
               </p>
-              <p className="text-[17px] font-bold text-text-primary mt-0.5">
+              <p className="text-[14px] font-bold text-text-primary mt-0.5">
                 {streakCount === 0
                   ? "Start your streak this week"
                   : `${streakCount} week${streakCount > 1 ? "s" : ""} strong`}
               </p>
-              <p className="text-[12px] text-text-secondary mt-0.5">
-                {streakCount >= 16
-                  ? `Max base APY — ${effectiveApy > 8 ? `${effectiveApy.toFixed(2)}% with bonuses` : "8.00%"}`
-                  : `${(8 - apy).toFixed(2)}% to unlock max base APY`}
+              <p className="text-[13px] text-accent-purple-bright font-semibold mt-1 tabular-nums">
+                Earning <span className="font-extrabold">{effectiveApy.toFixed(2)}% APY</span>
               </p>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-text-muted flex-shrink-0"><path d="M9 18l6-6-6-6" /></svg>
           </div>
-        </Card>
-      </Link>
+        </Link>
 
-      {/* This week progress */}
-      <Card className="!p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
-              This week
-            </p>
-            <p className="text-[24px] font-extrabold text-text-primary mt-1 tabular-nums leading-none">
-              {currentKm.toFixed(1)}
-              <span className="text-[14px] text-text-secondary font-medium"> / {targetKm} km</span>
+        {/* Middle row: this week's progress */}
+        <div className="mt-5 pt-4 border-t border-oria relative">
+          <div className="flex justify-between items-baseline mb-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">This week</p>
+            <p className="text-[13px] font-bold text-text-primary tabular-nums">
+              {currentKm.toFixed(1)}<span className="text-text-secondary font-medium"> / {targetKm} km</span>
             </p>
           </div>
-          <ProgressRing percent={pct} />
-        </div>
-        <div className="h-1.5 rounded-full bg-oria-chip overflow-hidden">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-accent-sport to-accent-gold animate-bar"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <div className="flex justify-between items-center mt-3">
-          <span className="text-[12px] text-text-muted">
-            {Math.max(0, targetKm - currentKm).toFixed(1)} km remaining
+          <div className="h-1.5 rounded-full bg-oria-chip overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-accent-sport to-accent-gold animate-bar"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <div className="flex justify-between items-center mt-2">
+            <span className="text-[11px] text-text-muted">
+              {currentKm >= targetKm
+                ? "Goal hit — streak +1 this week"
+                : `${Math.max(0, targetKm - currentKm).toFixed(1)} km to lock this week's streak`}
+            </span>
             {stravaStatus?.connected && (
-              <span className="text-accent-sport ml-1">· via Strava</span>
+              <button
+                onClick={() =>
+                  stravaSync.mutate(undefined, {
+                    onSuccess: (d) => {
+                      if (d.synced > 0 && d.lastRun) {
+                        setSyncedKm(d.lastRun.distanceKm);
+                        setShowSyncCelebration(true);
+                      } else {
+                        toast(`Synced ${d.synced} weeks from Strava`);
+                      }
+                    },
+                    onError: () => toast("Sync failed", "error"),
+                  })
+                }
+                disabled={stravaSync.isPending}
+                className="text-[10px] font-semibold text-accent-purple-bright cursor-pointer bg-accent-purple/15 border border-accent-purple/25 px-2.5 py-1 rounded-full flex items-center gap-1 disabled:opacity-50"
+              >
+                {stravaSync.isPending ? (
+                  <span className="inline-block w-3 h-3 border-2 border-accent-purple-bright/30 border-t-accent-purple-bright rounded-full animate-spin" />
+                ) : (
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 4v6h6" /><path d="M23 20v-6h-6" />
+                    <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" />
+                  </svg>
+                )}
+                Sync
+              </button>
             )}
-          </span>
-          {stravaStatus?.connected && (
-            <button
-              onClick={() =>
-                stravaSync.mutate(undefined, {
-                  onSuccess: (d) => {
-                    if (d.synced > 0 && d.lastRun) {
-                      setSyncedKm(d.lastRun.distanceKm);
-                      setShowSyncCelebration(true);
-                    } else {
-                      toast(`Synced ${d.synced} weeks from Strava`);
-                    }
-                  },
-                  onError: () => toast("Sync failed", "error"),
-                })
-              }
-              disabled={stravaSync.isPending}
-              className="text-[11px] font-semibold text-accent-purple-bright cursor-pointer bg-accent-purple/15 border border-accent-purple/25 px-3 py-1.5 rounded-full min-h-[32px] flex items-center gap-1.5 disabled:opacity-50"
-            >
-              {stravaSync.isPending ? (
-                <span className="inline-block w-3 h-3 border-2 border-accent-purple-bright/30 border-t-accent-purple-bright rounded-full animate-spin" />
-              ) : (
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M1 4v6h6" /><path d="M23 20v-6h-6" />
-                  <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" />
-                </svg>
-              )}
-              Sync
-            </button>
-          )}
+          </div>
         </div>
-        <Link href="/activities" className="flex items-center justify-center gap-1 mt-3 pt-2 border-t border-oria text-[12px] text-accent-purple-bright font-semibold">
-          View all activities
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-        </Link>
+
+        {/* Bottom row: streak → APY ramp. The marker is positioned on the
+            baseline-to-vault axis using the user's actual effective APY. */}
+        {(() => {
+          const breakdown = streak?.apyBreakdown;
+          const baselineApy = breakdown?.baseline ?? 3;
+          const vaultMax = breakdown?.vaultRate ?? 5;
+          const range = Math.max(0.01, vaultMax - baselineApy);
+          const markerPct = Math.max(0, Math.min(100, ((effectiveApy - baselineApy) / range) * 100));
+          const remainingWeeks = Math.max(0, 16 - streakCount);
+          const subtitle =
+            streakCount === 0
+              ? "Stay consistent — each goal-met week boosts your share of the bonus pool."
+              : streakCount >= 16
+                ? "You've maxed the streak component — you're earning at the ceiling."
+                : `${remainingWeeks} more goal-met week${remainingWeeks > 1 ? "s" : ""} to max your share.`;
+          return (
+            <div className="mt-5 pt-4 border-t border-oria relative">
+              <div className="flex justify-between items-baseline mb-2">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">Streak → APY</p>
+                <Link href="/apy" className="text-[10px] font-semibold text-accent-purple-bright">
+                  Details →
+                </Link>
+              </div>
+              <div className="relative h-2 rounded-full bg-gradient-to-r from-accent-purple/25 via-accent-purple/55 to-accent-purple-bright overflow-visible">
+                {/* tick marks every 25% */}
+                {[25, 50, 75].map((p) => (
+                  <span key={p} className="absolute top-0 bottom-0 w-px bg-white/10" style={{ left: `${p}%` }} />
+                ))}
+                {/* marker pin */}
+                <div
+                  className="absolute -top-1.5 w-5 h-5 rounded-full bg-white border-2 border-accent-purple-bright shadow-button transform -translate-x-1/2"
+                  style={{ left: `${markerPct}%` }}
+                  aria-label="Your current APY position"
+                />
+              </div>
+              <div className="flex justify-between mt-2.5 text-[10px] text-text-muted tabular-nums">
+                <span>0w · {baselineApy.toFixed(2)}%</span>
+                <span>16w · {vaultMax.toFixed(2)}%</span>
+              </div>
+              <p className="text-[11px] text-text-secondary mt-2 leading-relaxed">{subtitle}</p>
+            </div>
+          );
+        })()}
       </Card>
 
       {/* Progress chart — last 8 consecutive weeks (0-km weeks included) */}
@@ -374,85 +365,10 @@ export default function DashboardPage() {
         );
       })()}
 
-      {/* Last run */}
-      {lastRunData?.lastRun && (
-        <Card className="!p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-accent-sport/15 border border-accent-sport/25 flex items-center justify-center flex-shrink-0">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#FC4C02">
-                <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-.956l2.09 4.128L3 0h4.138" />
-              </svg>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
-                Last activity
-              </p>
-              <p className="text-[14px] font-semibold text-text-primary truncate">{lastRunData.lastRun.name}</p>
-              <p className="text-[11px] text-text-muted">{new Date(lastRunData.lastRun.date).toLocaleDateString()}</p>
-            </div>
-            <div className="text-right flex-shrink-0">
-              <p className="text-[20px] font-extrabold text-text-primary tabular-nums leading-none">
-                {lastRunData.lastRun.distanceKm}<span className="text-[12px] text-text-muted font-medium"> km</span>
-              </p>
-              <p className="text-[11px] text-text-muted tabular-nums mt-0.5">
-                {Math.floor(lastRunData.lastRun.movingTimeSec / 60)} min
-                {lastRunData.lastRun.distanceKm > 0 && (() => {
-                  const paceMin = lastRunData.lastRun.movingTimeSec / 60 / lastRunData.lastRun.distanceKm;
-                  const m = Math.floor(paceMin);
-                  const s = Math.round((paceMin - m) * 60);
-                  return <> · <span className="text-text-secondary font-semibold">{m}:{String(s).padStart(2, "0")}</span><span className="text-text-muted"> /km</span></>;
-                })()}
-              </p>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {/* Weekly consistency — you + friends */}
-      {friendsWeekly && friendsWeekly.length > 0 && (
-        <Card className="!p-5">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm font-bold text-text-primary tracking-tight">Weekly consistency</p>
-            <Link href="/social" className="text-[12px] text-accent-purple-bright font-semibold hover:text-accent-purple">
-              See all →
-            </Link>
-          </div>
-          <div className="flex flex-col gap-3">
-            {friendsWeekly.slice(0, 5).map((f) => {
-              const pctF = Math.min(100, Math.round((f.distanceKm / f.targetKm) * 100));
-              return (
-                <div key={f.id} className={`rounded-xl ${f.isMe ? "bg-accent-purple/8 border border-accent-purple/15 p-2.5" : "p-0.5"}`}>
-                  <div className="flex items-center gap-2.5">
-                    <Avatar initials={getInitials(f.displayName)} size={28} highlight={f.isMe} src={f.avatarUrl} />
-                    <span className="text-[13px] font-semibold text-text-primary flex-1 truncate">
-                      {f.isMe ? "You" : (f.displayName ?? "User")}
-                    </span>
-                    <span className="text-[12px] font-bold tabular-nums text-text-primary">
-                      {f.distanceKm.toFixed(1)}
-                      <span className="text-text-muted font-medium">/{f.targetKm}</span>
-                    </span>
-                    {f.goalMet ? (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20 6L9 17l-5-5" />
-                      </svg>
-                    ) : (
-                      <span className="text-[11px] font-semibold text-text-muted tabular-nums w-[14px] text-center">
-                        {pctF}%
-                      </span>
-                    )}
-                  </div>
-                  <div className="h-1 rounded-full bg-oria-chip overflow-hidden mt-1.5">
-                    <div
-                      className={`h-full rounded-full animate-bar ${f.goalMet ? "bg-success-500" : "bg-gradient-to-r from-accent-sport to-accent-gold"}`}
-                      style={{ width: `${pctF}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-      )}
+      {/* "Last run" and "Weekly consistency — you + friends" used to live here.
+          They moved off Home so the page stays focused on the fintech ↔ sport
+          link: last-activity details are in the activity feed below; the
+          consistency leaderboard now lives on /social. */}
 
       {/* Coaching plan */}
       {(() => {
