@@ -662,6 +662,48 @@ export default function DashboardPage() {
         );
       })()}
 
+      {/* Coming soon — explore. Sits at the bottom of Home so the focal
+          area stays on streak/yield/feed; events + map are aspirational. */}
+      <section className="grid grid-cols-2 gap-2.5 pt-2">
+        {[
+          {
+            label: "Events",
+            description: "Run together with the community",
+            icon: (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" />
+              </svg>
+            ),
+          },
+          {
+            label: "Map",
+            description: "Discover Oria runners near you",
+            icon: (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" />
+                <path d="M8 2v16M16 6v16" />
+              </svg>
+            ),
+          },
+        ].map((item) => (
+          <button
+            key={item.label}
+            onClick={() => toast(`${item.label} — Coming soon`)}
+            className="relative text-left p-4 rounded-2xl bg-oria-card border border-oria backdrop-blur-[18px] shadow-card cursor-pointer hover:bg-oria-card-hover transition-colors group min-h-[88px]"
+          >
+            <span className="absolute top-2.5 right-2.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-accent-purple/20 text-accent-purple-bright border border-accent-purple/25">
+              Soon
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-accent-purple/15 border border-accent-purple/25 flex items-center justify-center text-accent-purple-bright mb-2">
+              {item.icon}
+            </div>
+            <p className="text-[13px] font-bold text-text-primary">{item.label}</p>
+            <p className="text-[11px] text-text-muted mt-0.5 leading-snug line-clamp-2">{item.description}</p>
+          </button>
+        ))}
+      </section>
+
       {/* Run welcome celebration — shows on app open if new km */}
       {showRunWelcome && (
         <RunWelcome
