@@ -1,5 +1,7 @@
 # Activity feed
 
+![Activity feed — friends' goals, streak milestones and reactions](.gitbook/assets/04-activity-feed.png)
+
 The activity feed lives on the **Home** page (it used to be on /social — moved to make Home the central hub). It surfaces what your friends just did and lets you react with a single tap.
 
 ## What shows up
@@ -31,6 +33,16 @@ Without it, two `goal_met` events looked identical — same icon, same text patt
 
 * `GET /api/feed?limit=N&cursor=...` — paginated, newest first, includes the author's current streak count in `user.streakCount`.
 * `POST /api/feed/:id/like` — toggle a like on the current user.
+
+## The Friends tab
+
+![Friends — leaderboard, requests, discovery](.gitbook/assets/08-friends-top.png)
+
+The Friends tab focuses on people. Above the leaderboard you now see a **Weekly consistency** strip — each friend's current week vs their goal — alongside Eva's own row highlighted in purple:
+
+![Friends weekly consistency](.gitbook/assets/09-friends-weekly.png)
+
+It used to live on Home; it moved here so Home stays focused on the fintech ↔ sport story while Friends becomes the comparison surface.
 
 ## A note on demo / backfill
 

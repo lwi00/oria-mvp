@@ -1,5 +1,7 @@
 # Activity score
 
+![The streak detail page projects your APY at each milestone](.gitbook/assets/13-streak-detail.png)
+
 The activity score sits in `[0, 1]` and drives your slice of the bonus pool. It's a weighted sum of four components, each tied to a behavior we want to reward.
 
 | Component | Weight | How you unlock it |

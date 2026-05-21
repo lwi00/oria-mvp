@@ -4,6 +4,8 @@ description: Save more. Move more. Earn more.
 
 # Welcome
 
+![Oria landing page hero](.gitbook/assets/01-landing.png)
+
 **Oria** is a crypto savings app that rewards your consistency. Park your USDC in curated Morpho vaults, log your runs (or rides, or steps), and earn a variable APY that grows with your weekly activity.
 
 Everyone earns a guaranteed **3 % baseline**. On top of that, a redistribution pool boosts the APY of the most consistent users — capped by the underlying vault's actual yield, so the math always stays sustainable.

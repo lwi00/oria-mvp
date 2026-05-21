@@ -1,5 +1,7 @@
 # Wallet & vaults
 
+![Wallet tab — balance, quick actions, earning status and per-vault positions](.gitbook/assets/07-wallet.png)
+
 The Wallet tab is where deposits, investments, and withdrawals happen — and where you see your real on-chain balances in real time.
 
 ## Receive

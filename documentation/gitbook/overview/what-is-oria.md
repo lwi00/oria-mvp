@@ -1,5 +1,7 @@
 # What is Oria
 
+![Home — your streak, weekly progress and APY-per-week chart sit on one card](.gitbook/assets/02-home-top.png)
+
 Oria is a mobile-first PWA that bridges **DeFi savings** and **personal fitness goals**:
 
 * You deposit USDC.

@@ -1,5 +1,7 @@
 # Challenges
 
+![The challenges list — your joined groups + discoverable ones](.gitbook/assets/10-challenges-list.png)
+
 A challenge is a shared weekly goal with a fixed start and end date. Members commit to hitting the same km/week target across the challenge window. Challenges are the most communal surface of the app: a real-time team consistency grid plus five collective milestones that the whole group can chase together.
 
 Challenges don't grant an APY multiplier — they're purely a social and motivational construct. The thinking: real emulation comes from watching a teammate hit their goal, not from a marginal yield bonus.
@@ -20,6 +22,8 @@ Tap "Join" on any challenge card on the Challenges page. Member count updates in
 
 ## Detail page
 
+![Challenge detail — collective consistency, milestones, weekly participation](.gitbook/assets/11-challenge-detail-top.png)
+
 Each challenge has its own route (`/challenges/:id`) that opens when you tap a card. The detail page shows:
 
 * **Hero** — the team's collective consistency percentage (= weeks-met across all members ÷ total possible weeks).
@@ -32,6 +36,8 @@ Each challenge has its own route (`/challenges/:id`) that opens when you tap a c
 * **Weekly participation chart** — per-week bars showing what % of members hit the goal that week.
 * **Consistency grid** — heatmap, rows = members ordered by weeks-met, columns = weeks. Filled cells = met, empty cells = missed, dashed cells = still upcoming. Hover a cell to see the member's km that week.
 * **Leaderboard** — members sorted by weeks-met, with a per-member progress bar.
+
+![Consistency grid — rows are members, columns are weeks; filled cells = goal met](.gitbook/assets/12-challenge-grid.png)
 
 ## Owner edit
 
