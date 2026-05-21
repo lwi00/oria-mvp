@@ -319,26 +319,30 @@ export default function DashboardPage() {
 
           // Derive the streak trajectory *backwards* from the current streak
           // count so the rightmost point always matches what the rest of the
-          // card claims (effectiveApy). Activity history is only used to mark
-          // dot colours and labels — the curve is anchored on streakCount.
+          // card claims (effectiveApy). Activity history only sets dot
+          // colours; the curve itself is anchored on streakCount.
           // For week index i (0 = oldest, n-1 = this week), weeksFromEnd
           // = n - 1 - i. If that week is within the active streak, the
           // streak at that moment was streakCount - weeksFromEnd.
-          const projectedApy = (s: number) => baselineApy + (vaultMax - baselineApy) * Math.min(1, s / 16);
+          //
+          // We scale the projection by streakCount (not the constant 16) so
+          // the value at the current streak lands exactly on effectiveApy,
+          // giving a continuous curve from baseline up to today instead of
+          // a visible jump on the last point.
+          const currentBonus = Math.max(0, effectiveApy - baselineApy);
+          const projectedApy = (s: number) =>
+            streakCount <= 0
+              ? baselineApy
+              : baselineApy + currentBonus * Math.min(1, s / streakCount);
           const points = padded.map((w, i) => {
             const weeksFromEnd = padded.length - 1 - i;
-            const isThisWeek = weeksFromEnd === 0;
             const inActiveStreak = weeksFromEnd < streakCount;
             const streakAt = inActiveStreak ? streakCount - weeksFromEnd : 0;
-            // Anchor "this week" on the user's real effective APY so the
-            // curve agrees with the headline number; older weeks use the
-            // linear projection.
-            const apy = isThisWeek ? effectiveApy : projectedApy(streakAt);
             return {
               weekStart: w.weekStart,
               goalMet: inActiveStreak || w.goalMet, // mark met if part of the live streak
               streak: streakAt,
-              apy,
+              apy: projectedApy(streakAt),
             };
           });
 

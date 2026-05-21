@@ -22,6 +22,13 @@ interface FriendSpec {
 }
 
 const EVA_NAME = "Eva";
+// Eva's own state — picked so the streak/APY chart on Home shows a clean
+// 8-week ramp from baseline up to whatever the pool model gives her today.
+const EVA_SPEC: { streakCount: number; weekSessions: number; weekLongestRunKm: number } = {
+  streakCount: 8,
+  weekSessions: 4,
+  weekLongestRunKm: 14,
+};
 const FRIENDS: FriendSpec[] = [
   { displayName: "Talam D.", streakCount: 3, weekSessions: 3, weekLongestRunKm: 12 },
   { displayName: "Louis D.", streakCount: 18, weekSessions: 4, weekLongestRunKm: 18 },
@@ -37,6 +44,27 @@ async function main() {
     process.exit(1);
   }
   console.log(`Eva: id=${eva.id} · current streak ${eva.streak?.currentCount ?? "(none)"}`);
+
+  // 0) Update Eva's own state — feeds the Home page streak + APY chart.
+  await prisma.streak.upsert({
+    where: { userId: eva.id },
+    create: {
+      userId: eva.id,
+      currentCount: EVA_SPEC.streakCount,
+      longestCount: EVA_SPEC.streakCount,
+      lastWeekMet: true,
+      weekSessions: EVA_SPEC.weekSessions,
+      weekLongestRun: EVA_SPEC.weekLongestRunKm,
+    },
+    update: {
+      currentCount: EVA_SPEC.streakCount,
+      longestCount: { set: Math.max(eva.streak?.longestCount ?? 0, EVA_SPEC.streakCount) },
+      lastWeekMet: true,
+      weekSessions: EVA_SPEC.weekSessions,
+      weekLongestRun: EVA_SPEC.weekLongestRunKm,
+    },
+  });
+  console.log(`  ✓ Eva       streak=${EVA_SPEC.streakCount}`);
 
   for (const spec of FRIENDS) {
     const friend = await prisma.user.findFirst({ where: { displayName: spec.displayName } });
