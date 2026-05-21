@@ -26,7 +26,7 @@ Withdraw whenever you want. Your funds stay in ERC-4626 vault shares.
 
 ***
 
-![The Home page is the daily check-in: streak, this week's progress, APY-per-week](.gitbook/assets/03-streak-apy-chart.png)
+![The Home page is the daily check-in: streak, this week's progress, APY-per-week](../.gitbook/assets/03-streak-apy-chart.png)
 
 ## What happens each week
 

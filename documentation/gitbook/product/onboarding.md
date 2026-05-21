@@ -1,6 +1,6 @@
 # Onboarding
 
-![Landing page — the first impression](.gitbook/assets/01-landing.png)
+![Landing page — the first impression](../.gitbook/assets/01-landing.png)
 
 Four steps, designed to be done in under two minutes.
 

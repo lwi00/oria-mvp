@@ -1,6 +1,6 @@
 # Baseline + bonus pool
 
-![APY details — baseline, bonus pool and your share](.gitbook/assets/05-apy-details.png)
+![APY details — baseline, bonus pool and your share](../.gitbook/assets/05-apy-details.png)
 
 Every user's APY has two parts. A **guaranteed baseline** that doesn't depend on behavior, and a **bonus** funded by a shared pool that's redistributed based on how active each user is.
 
@@ -35,7 +35,7 @@ Imagine the Morpho vault is yielding **4.89 %** and there are five users with th
 
 High-streak users plateau at the vault rate. Mid-streak users spread out below it. Inactive users stay at the baseline.
 
-![How your APY is built — baseline, pool, your bonus, your total](.gitbook/assets/06-apy-breakdown.png)
+![How your APY is built — baseline, pool, your bonus, your total](../.gitbook/assets/06-apy-breakdown.png)
 
 ## What the user sees on `/apy`
 
