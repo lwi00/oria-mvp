@@ -626,20 +626,23 @@ export async function getLeaderboard(
   const users = await prisma.user.findMany({
     where: { id: { in: userIds } },
     include: { streak: true },
-    orderBy: { streak: { currentCount: "desc" } },
   });
 
   // Live-recompute the current user's APY so it matches Home / APY details.
   // Friends keep the persisted value (cheaper, refreshed on the weekly cron).
   const myLive = await getMyStreak(prisma, userId).catch(() => null);
 
-  return users.map((u: typeof users[0], i: number) => {
+  // Build the row payload first, then sort. Primary key is streak count
+  // (matches the visible "Nw" badge), secondary key is APY so two friends
+  // tied on streak don't end up in arbitrary order — the one earning more
+  // takes the higher rank. Without this, e.g. Eva on streak 8 / 3.36 % was
+  // landing above Emma D. on streak 8 / 3.54 %.
+  const rows = users.map((u: typeof users[0]) => {
     const isMe = u.id === userId;
     const apy = isMe
       ? (myLive?.effectiveApy ?? myLive?.currentApy ?? u.streak?.effectiveApy ?? APY.BASELINE)
       : (u.streak?.effectiveApy ?? u.streak?.currentApy ?? APY.BASELINE);
     return {
-      rank: i + 1,
       id: u.id,
       displayName: u.displayName,
       avatarUrl: u.avatarUrl,
@@ -648,4 +651,6 @@ export async function getLeaderboard(
       isMe,
     };
   });
+  rows.sort((a, b) => (b.streak - a.streak) || (b.apy - a.apy));
+  return rows.map((r, i) => ({ rank: i + 1, ...r }));
 }
