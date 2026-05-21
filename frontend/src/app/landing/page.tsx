@@ -295,6 +295,11 @@ export default function LandingPage() {
             onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "rgba(196,181,253,0.7)"; }}>
             APY
           </a>
+          <Link href="/docs" className="hidden sm:inline text-sm font-medium transition-colors duration-200 cursor-pointer" style={{ color: "rgba(196,181,253,0.7)" }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#c4b5fd"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "rgba(196,181,253,0.7)"; }}>
+            Docs
+          </Link>
           <Link
             href="/onboarding"
             className="text-sm font-semibold px-5 py-2 rounded-xl text-white transition-all duration-200 cursor-pointer"
