@@ -1,35 +1,36 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 /**
- * Discipline chip rendered next to the balance on Home.
- * Today the only live discipline is running; tap opens a popover that teases
- * the upcoming disciplines (cycling, sleep, walking) with "Coming soon" pills.
+ * Discipline chip rendered next to the balance on Home. Tap opens a full-
+ * screen overlay (blurred backdrop) with the 4 disciplines as floating cards
+ * in a 2x2 grid — Running active, the others "Coming soon".
  */
 export function DisciplinePicker() {
   const [open, setOpen] = useState(false);
-  const wrapRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
 
+  useEffect(() => setMounted(true), []);
+
+  // Lock body scroll while the overlay is up + escape-to-close
   useEffect(() => {
     if (!open) return;
-    const onDoc = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
-    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const onEsc = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
-    document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onEsc);
     return () => {
-      document.removeEventListener("mousedown", onDoc);
+      document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onEsc);
     };
   }, [open]);
 
   return (
-    <div ref={wrapRef} className="relative inline-flex">
+    <>
       <button
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
+        onClick={() => setOpen(true)}
         aria-label="Switch discipline"
         className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-accent-purple/15 border border-accent-purple/30 text-accent-purple-bright shadow-button active:scale-95 transition-transform cursor-pointer"
       >
@@ -44,71 +45,141 @@ export function DisciplinePicker() {
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`transition-transform ${open ? "rotate-180" : ""}`}
         >
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </button>
 
-      {open && (
-        <div
-          role="menu"
-          className="absolute right-0 top-[110%] z-50 min-w-[220px] p-2 rounded-2xl bg-[#0F0F16] border border-oria shadow-card backdrop-blur-md"
-        >
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted px-3 pt-1 pb-2">
-            Active
+      {mounted && open && createPortal(<DisciplineOverlay onClose={() => setOpen(false)} />, document.body)}
+    </>
+  );
+}
+
+function DisciplineOverlay({ onClose }: { onClose: () => void }) {
+  // Drive the enter-animation by toggling a "visible" class one tick after mount.
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  return (
+    <div
+      onClick={onClose}
+      className={`fixed inset-0 z-[200] flex items-center justify-center px-6 transition-all duration-300 ease-out ${
+        visible ? "bg-black/55 backdrop-blur-xl opacity-100" : "bg-black/0 backdrop-blur-none opacity-0"
+      }`}
+      style={{ WebkitBackdropFilter: visible ? "blur(20px)" : "none" }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Choose discipline"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={`w-full max-w-[420px] flex flex-col items-center gap-5 transition-all duration-400 ease-out ${
+          visible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-4 scale-95"
+        }`}
+      >
+        {/* Header */}
+        <div className="text-center">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent-purple-bright/80 mb-1.5">
+            Discipline
           </p>
-          <DisciplineRow active label="Running" icon={<RunningIcon />} />
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted px-3 pt-3 pb-2">
-            Coming soon
+          <h2 className="text-[22px] font-extrabold text-white tracking-tight">
+            Choose what you train
+          </h2>
+          <p className="text-[12px] text-text-muted mt-1.5">
+            Running is live today — more disciplines arriving soon.
           </p>
-          <DisciplineRow label="Cycling" icon={<BikeIcon />} />
-          <DisciplineRow label="Sleep" icon={<SleepIcon />} />
-          <DisciplineRow label="Walking" icon={<WalkIcon />} />
         </div>
-      )}
+
+        {/* 2x2 grid */}
+        <div className="grid grid-cols-2 gap-3 w-full">
+          <DisciplineTile label="Running" icon={<RunningIcon size={28} />} active delay={0} />
+          <DisciplineTile label="Cycling" icon={<BikeIcon size={28} />} delay={60} />
+          <DisciplineTile label="Sleep" icon={<SleepIcon size={28} />} delay={120} />
+          <DisciplineTile label="Walking" icon={<WalkIcon size={28} />} delay={180} />
+        </div>
+
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className="mt-2 text-[12px] font-semibold text-text-muted hover:text-white transition-colors cursor-pointer"
+        >
+          Close
+        </button>
+      </div>
     </div>
   );
 }
 
-function DisciplineRow({ active, label, icon }: { active?: boolean; label: string; icon: React.ReactNode }) {
+function DisciplineTile({
+  label,
+  icon,
+  active,
+  delay = 0,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  active?: boolean;
+  delay?: number;
+}) {
+  // Each tile fades + lifts on enter, staggered by `delay` ms.
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 100 + delay);
+    return () => clearTimeout(t);
+  }, [delay]);
+
   return (
     <div
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl ${
+      className={`relative aspect-square rounded-2xl overflow-hidden border transition-all duration-500 ease-out ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+      } ${
         active
-          ? "bg-accent-purple/15 border border-accent-purple/25"
-          : "opacity-70"
+          ? "bg-gradient-to-br from-accent-purple/30 via-accent-purple/12 to-transparent border-accent-purple/40 shadow-[0_12px_36px_rgba(124,58,237,0.4)]"
+          : "bg-white/[0.04] border-white/10 opacity-90"
       }`}
+      style={{ transitionDelay: visible ? "0ms" : `${delay}ms` }}
+      aria-disabled={!active}
     >
+      {/* Subtle ambient glow on the active tile */}
+      {active && (
+        <div
+          className="absolute -top-12 -right-12 w-[180px] h-[180px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(167,139,250,0.35) 0%, transparent 60%)", filter: "blur(20px)" }}
+        />
+      )}
+
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4">
+        <div
+          className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
+            active ? "bg-accent-purple/25 text-accent-purple-bright shadow-button" : "bg-oria-chip text-text-secondary"
+          }`}
+        >
+          {icon}
+        </div>
+        <p className={`text-[15px] font-bold ${active ? "text-white" : "text-text-secondary"}`}>{label}</p>
+      </div>
+
+      {/* Badge */}
       <span
-        className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+        className={`absolute top-2.5 right-2.5 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
           active
-            ? "bg-accent-purple/25 text-accent-purple-bright"
-            : "bg-oria-chip text-text-secondary"
+            ? "bg-success-500/15 border-success-500/30 text-success-500"
+            : "bg-accent-purple/20 border-accent-purple/30 text-accent-purple-bright"
         }`}
       >
-        {icon}
+        {active ? "Live" : "Soon"}
       </span>
-      <span className={`text-[13px] font-semibold flex-1 ${active ? "text-text-primary" : "text-text-secondary"}`}>
-        {label}
-      </span>
-      {active ? (
-        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-success-500/15 border border-success-500/25 text-success-500">
-          Live
-        </span>
-      ) : (
-        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-accent-purple/20 border border-accent-purple/25 text-accent-purple-bright">
-          Soon
-        </span>
-      )}
     </div>
   );
 }
 
 /* ── Icons ── */
-function RunningIcon() {
+function RunningIcon({ size = 14 }: { size?: number }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="17" cy="4" r="2" />
       <path d="M15.59 13.51l2.66-2.66a1 1 0 00-1.42-1.42l-3.07 3.07a2 2 0 01-1.41.59H10.5L8 15.5" />
       <path d="M5.11 18.39A2 2 0 107.94 15.56L10.5 13H8l-4.5 4.5" />
@@ -116,9 +187,9 @@ function RunningIcon() {
     </svg>
   );
 }
-function BikeIcon() {
+function BikeIcon({ size = 16 }: { size?: number }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="18.5" cy="17.5" r="3.5" />
       <circle cx="5.5" cy="17.5" r="3.5" />
       <circle cx="15" cy="5" r="1" />
@@ -126,16 +197,16 @@ function BikeIcon() {
     </svg>
   );
 }
-function SleepIcon() {
+function SleepIcon({ size = 16 }: { size?: number }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
     </svg>
   );
 }
-function WalkIcon() {
+function WalkIcon({ size = 16 }: { size?: number }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="13" cy="4" r="2" />
       <path d="M9 20l3-6 2 2 4-1" />
       <path d="M6 8l3-1 3 5-3 3" />
