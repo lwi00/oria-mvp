@@ -113,6 +113,7 @@ interface Challenge {
   endDate: string;
   maxMembers: number | null;
   status: string;
+  visibility: "public" | "friends";
   members: Array<{
     id: string;
     userId: string;
@@ -287,6 +288,7 @@ export interface ChallengeDetail {
   endDate: string;
   maxMembers: number | null;
   status: string;
+  visibility: "public" | "friends";
   creator: { id: string; displayName: string | null };
   weeks: string[];
   elapsedWeeks: number;
@@ -372,6 +374,7 @@ export function useCreateChallenge() {
       durationWeeks: number;
       maxMembers?: number;
       description?: string;
+      visibility?: "public" | "friends";
     }) => {
       const startDate = new Date().toISOString();
       const endDate = new Date(
@@ -386,6 +389,7 @@ export function useCreateChallenge() {
           endDate,
           maxMembers: data.maxMembers,
           description: data.description,
+          visibility: data.visibility ?? "public",
         }),
       });
     },

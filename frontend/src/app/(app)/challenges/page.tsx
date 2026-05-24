@@ -11,6 +11,21 @@ import { useChallenges, useCreateChallenge, useJoinChallenge, useDeleteChallenge
 import { getInitials, daysUntil } from "@/lib/utils";
 import { useToast } from "@/components/Toast";
 
+function VisibilityPill({ kind }: { kind: "public" | "friends" }) {
+  if (kind === "public") return null; // implicit, no badge needed
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent-purple/15 border border-accent-purple/30 text-accent-purple-bright text-[10px] font-bold uppercase tracking-wider shrink-0">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 00-3-3.87" />
+        <path d="M16 3.13a4 4 0 010 7.75" />
+      </svg>
+      Friends
+    </span>
+  );
+}
+
 export default function ChallengesPage() {
   const { data: challenges, isLoading, isError, refetch } = useChallenges();
   const { data: user } = useUser();
@@ -28,6 +43,7 @@ export default function ChallengesPage() {
   const [duration, setDuration] = useState("4");
   const [maxMembers, setMaxMembers] = useState("");
   const [description, setDescription] = useState("");
+  const [visibility, setVisibility] = useState<"public" | "friends">("public");
 
   // ?propose=<friendId>&name=<friendName> — coming from a friend profile.
   // Auto-opens the create modal and pre-fills the title with the friend's
@@ -42,6 +58,9 @@ export default function ChallengesPage() {
     if (friendly) {
       setTitle(`Run with ${friendly}`);
       setDescription(`A friendly challenge with ${friendly} — set the weekly goal and let's go.`);
+      // When the user comes from a friend profile, default the visibility to
+      // friends-only — they're proposing to a friend, not opening to all.
+      setVisibility("friends");
     }
     setShowCreate(true);
     // Strip the query so a reload doesn't keep re-opening the modal.
@@ -54,6 +73,7 @@ export default function ChallengesPage() {
     setDuration("4");
     setMaxMembers("");
     setDescription("");
+    setVisibility("public");
   };
 
   const myChallenges = challenges?.filter(
@@ -190,8 +210,51 @@ export default function ChallengesPage() {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What's this challenge about?"
               rows={2}
-              className="w-full px-4 py-3 rounded-2xl border border-oria bg-oria-section text-[15px] text-text-primary placeholder:text-text-muted focus:border-accent-purple outline-none mb-5 resize-none"
+              className="w-full px-4 py-3 rounded-2xl border border-oria bg-oria-section text-[15px] text-text-primary placeholder:text-text-muted focus:border-accent-purple outline-none mb-4 resize-none"
             />
+
+            <label className="text-[12px] font-medium text-text-secondary mb-1.5 block">Who can join</label>
+            <div className="grid grid-cols-2 gap-2 mb-5">
+              {(["public", "friends"] as const).map((opt) => {
+                const active = visibility === opt;
+                const label = opt === "public" ? "Everyone" : "Friends only";
+                const sub = opt === "public" ? "Open to all Oria users" : "Visible to your friends only";
+                const Icon = opt === "public"
+                  ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="2" y1="12" x2="22" y2="12" />
+                      <path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
+                    </svg>
+                  )
+                  : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M23 21v-2a4 4 0 00-3-3.87" />
+                      <path d="M16 3.13a4 4 0 010 7.75" />
+                    </svg>
+                  );
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => setVisibility(opt)}
+                    className={`text-left p-3 rounded-2xl border transition-colors cursor-pointer ${
+                      active
+                        ? "bg-accent-purple/15 border-accent-purple/40 text-accent-purple-bright"
+                        : "bg-oria-section border-oria text-text-secondary hover:text-text-primary"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`w-7 h-7 rounded-lg flex items-center justify-center ${active ? "bg-accent-purple/25" : "bg-oria-chip"}`}>{Icon}</span>
+                      <span className={`text-[13px] font-bold ${active ? "text-text-primary" : ""}`}>{label}</span>
+                    </div>
+                    <p className="text-[10px] text-text-muted mt-1.5 leading-snug">{sub}</p>
+                  </button>
+                );
+              })}
+            </div>
 
             <div className="flex gap-3">
               <button
@@ -208,6 +271,7 @@ export default function ChallengesPage() {
                       title,
                       goalKmWeek: parseFloat(goalKm),
                       durationWeeks: parseInt(duration) || 4,
+                      visibility,
                       ...(maxMembers ? { maxMembers: parseInt(maxMembers) } : {}),
                       ...(description.trim() ? { description: description.trim() } : {}),
                     },
@@ -248,7 +312,10 @@ export default function ChallengesPage() {
                 <Card className="!p-4 !border-accent-purple/20 cursor-pointer hover:bg-oria-card-hover transition-colors">
                 <div className="flex justify-between items-start mb-2 gap-3">
                   <div className="min-w-0">
-                    <p className="text-[15px] font-bold text-text-primary tracking-tight truncate">{c.title}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-[15px] font-bold text-text-primary tracking-tight truncate">{c.title}</p>
+                      {c.visibility === "friends" && <VisibilityPill kind="friends" />}
+                    </div>
                     <p className="text-[11px] text-text-muted mt-0.5 tabular-nums">
                       {c.goalKmWeek} km/week · {weeksLeft > 0 ? `${weeksLeft}w left` : "ended"}
                     </p>
@@ -376,7 +443,10 @@ export default function ChallengesPage() {
                 <Card className="!p-4 cursor-pointer hover:bg-oria-card-hover transition-colors">
                 <div className="flex justify-between items-start mb-2 gap-3">
                   <div className="min-w-0">
-                    <p className="text-[15px] font-bold text-text-primary tracking-tight truncate">{c.title}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-[15px] font-bold text-text-primary tracking-tight truncate">{c.title}</p>
+                      {c.visibility === "friends" && <VisibilityPill kind="friends" />}
+                    </div>
                     <p className="text-[11px] text-text-muted mt-0.5 tabular-nums">
                       {c.goalKmWeek} km/week · ends in {ends}
                     </p>

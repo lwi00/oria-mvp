@@ -295,6 +295,9 @@ model Challenge {
   maxMembers  Int?     @map("max_members")
   /// Lifecycle: "active" | "completed" | "cancelled"
   status      String   @default("active")
+  /// Who can see and join the challenge: "public" (anyone) | "friends"
+  /// (only the creator + their accepted friends).
+  visibility  String   @default("public")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 

@@ -7,6 +7,7 @@ export const createChallengeSchema = z.object({
   startDate: z.string(),
   endDate: z.string(),
   maxMembers: z.number().min(2).max(100).optional(),
+  visibility: z.enum(["public", "friends"]).default("public"),
 });
 
 export type CreateChallengeBody = z.infer<typeof createChallengeSchema>;
@@ -19,6 +20,7 @@ export const updateChallengeSchema = z.object({
   bannerUrl: z.string().max(700_000).nullable().optional(),
   goalKmWeek: z.number().min(1).max(200).optional(),
   maxMembers: z.number().min(2).max(100).nullable().optional(),
+  visibility: z.enum(["public", "friends"]).optional(),
 });
 
 export type UpdateChallengeBody = z.infer<typeof updateChallengeSchema>;

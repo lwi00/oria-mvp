@@ -37,6 +37,7 @@ export async function createChallenge(
       startDate: new Date(body.startDate),
       endDate: new Date(body.endDate),
       maxMembers: body.maxMembers,
+      visibility: body.visibility,
       members: {
         create: { userId },
       },
@@ -47,21 +48,39 @@ export async function createChallenge(
   return challenge;
 }
 
+// Helper: ids of users who have an accepted friendship with `userId`.
+async function getFriendIds(prisma: PrismaClient, userId: string): Promise<Set<string>> {
+  const friendships = await prisma.friendship.findMany({
+    where: {
+      status: "accepted",
+      OR: [{ requesterId: userId }, { addresseeId: userId }],
+    },
+    select: { requesterId: true, addresseeId: true },
+  });
+  const set = new Set<string>();
+  for (const f of friendships) {
+    set.add(f.requesterId === userId ? f.addresseeId : f.requesterId);
+  }
+  return set;
+}
+
 export async function listChallenges(
   prisma: PrismaClient,
   userId: string,
 ) {
+  // Friends-only challenges are visible to: the creator, accepted friends of
+  // the creator, and anyone who's already a member (in case a friendship
+  // gets removed after joining).
+  const friendIds = await getFriendIds(prisma, userId);
+  const visibleCreatorIds = [userId, ...friendIds];
+
   return prisma.challenge.findMany({
     where: {
       status: "active",
       OR: [
+        { visibility: "public" },
+        { visibility: "friends", creatorId: { in: visibleCreatorIds } },
         { members: { some: { userId } } },
-        { maxMembers: null },
-        {
-          maxMembers: {
-            gt: 0,
-          },
-        },
       ],
     },
     include: {
@@ -94,6 +113,16 @@ export async function joinChallenge(
   }
   if (challenge.maxMembers && challenge._count.members >= challenge.maxMembers) {
     throw new BadRequestError("Challenge is full");
+  }
+
+  // Friends-only gate: only the creator or an accepted friend of the
+  // creator can join. The creator is always allowed (they're auto-joined
+  // at creation anyway).
+  if (challenge.visibility === "friends" && challenge.creatorId !== userId) {
+    const creatorFriends = await getFriendIds(prisma, challenge.creatorId);
+    if (!creatorFriends.has(userId)) {
+      throw new ForbiddenError("This challenge is friends-only");
+    }
   }
 
   return prisma.challengeMember.create({
@@ -278,6 +307,7 @@ export async function getChallengeDetails(
     endDate: challenge.endDate,
     maxMembers: challenge.maxMembers,
     status: challenge.status,
+    visibility: challenge.visibility,
     creator: challenge.creator,
     weeks: weeks.map((w) => w.toISOString().slice(0, 10)),
     elapsedWeeks,
