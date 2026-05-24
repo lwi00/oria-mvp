@@ -24,6 +24,7 @@ import { useToast } from "@/components/Toast";
 import { getInitials } from "@/lib/utils";
 
 function PodiumRow({
+  id,
   rank,
   name,
   streak,
@@ -32,6 +33,7 @@ function PodiumRow({
   initials,
   avatarUrl,
 }: {
+  id: string;
   rank: number;
   name: string;
   streak: number;
@@ -41,12 +43,16 @@ function PodiumRow({
   avatarUrl?: string | null;
 }) {
   const medalFill = rank === 1 ? "#F59E0B" : rank === 2 ? "#94A3B8" : rank === 3 ? "#CD7F32" : null;
+  // Tap a row → go to the friend's profile (unless it's the current user).
+  const Wrapper = isMe
+    ? ({ children }: { children: React.ReactNode }) => <div className="flex items-center gap-3 p-3 rounded-2xl bg-accent-purple/12 border border-accent-purple/25">{children}</div>
+    : ({ children }: { children: React.ReactNode }) => (
+        <Link href={`/friend/${id}`} className="flex items-center gap-3 p-3 rounded-2xl cursor-pointer hover:bg-oria-card-hover transition-colors group">
+          {children}
+        </Link>
+      );
   return (
-    <div
-      className={`flex items-center gap-3 p-3 rounded-2xl ${
-        isMe ? "bg-accent-purple/12 border border-accent-purple/25" : ""
-      }`}
-    >
+    <Wrapper>
       {medalFill ? (
         <span className="inline-flex items-center justify-center w-6 h-6" aria-label={`#${rank}`}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill={medalFill} stroke="rgba(0,0,0,0.3)" strokeWidth="0.8">
@@ -58,7 +64,7 @@ function PodiumRow({
       )}
       <Avatar initials={initials} size={34} highlight={isMe} src={avatarUrl ?? null} />
       <div className="flex-1 min-w-0">
-        <p className="text-[14px] font-semibold text-text-primary truncate">
+        <p className={`text-[14px] font-semibold text-text-primary truncate ${isMe ? "" : "group-hover:text-accent-purple-bright transition-colors"}`}>
           {name}{" "}
           {isMe && <span className="text-[11px] text-accent-purple-bright font-semibold">· you</span>}
         </p>
@@ -72,7 +78,7 @@ function PodiumRow({
           </svg>
         </span>
       </div>
-    </div>
+    </Wrapper>
   );
 }
 
@@ -387,10 +393,19 @@ export default function SocialPage() {
                       className={`rounded-xl ${f.isMe ? "bg-accent-purple/8 border border-accent-purple/15 p-2.5" : "p-0.5"}`}
                     >
                       <div className="flex items-center gap-2.5">
-                        <Avatar initials={getInitials(f.displayName)} size={28} highlight={f.isMe} src={f.avatarUrl} />
-                        <span className="text-[13px] font-semibold text-text-primary flex-1 truncate">
-                          {f.isMe ? "You" : (f.displayName ?? "User")}
-                        </span>
+                        {f.isMe ? (
+                          <Avatar initials={getInitials(f.displayName)} size={28} highlight src={f.avatarUrl} />
+                        ) : (
+                          <Link href={`/friend/${f.id}`} className="flex items-center gap-2.5 flex-1 min-w-0 group">
+                            <Avatar initials={getInitials(f.displayName)} size={28} src={f.avatarUrl} />
+                            <span className="text-[13px] font-semibold text-text-primary truncate group-hover:text-accent-purple-bright transition-colors">
+                              {f.displayName ?? "User"}
+                            </span>
+                          </Link>
+                        )}
+                        {f.isMe && (
+                          <span className="text-[13px] font-semibold text-text-primary flex-1 truncate">You</span>
+                        )}
                         <span className="text-[12px] font-bold tabular-nums text-text-primary">
                           {f.distanceKm.toFixed(1)}
                           <span className="text-text-muted font-medium">/{f.targetKm}</span>
@@ -426,6 +441,7 @@ export default function SocialPage() {
                 {sortedBoard.map((p) => (
                   <PodiumRow
                     key={p.id}
+                    id={p.id}
                     rank={p.rank}
                     name={p.displayName ?? "User"}
                     streak={p.streak}

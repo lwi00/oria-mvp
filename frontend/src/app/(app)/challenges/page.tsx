@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Card } from "@/components/Card";
 import { Avatar } from "@/components/Avatar";
 import { CardSkeleton, ErrorCard } from "@/components/Skeleton";
@@ -27,6 +28,25 @@ export default function ChallengesPage() {
   const [duration, setDuration] = useState("4");
   const [maxMembers, setMaxMembers] = useState("");
   const [description, setDescription] = useState("");
+
+  // ?propose=<friendId>&name=<friendName> — coming from a friend profile.
+  // Auto-opens the create modal and pre-fills the title with the friend's
+  // name so the user only has to set the goal + duration.
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  useEffect(() => {
+    const proposeId = searchParams.get("propose");
+    const proposeName = searchParams.get("name");
+    if (!proposeId) return;
+    const friendly = (proposeName ?? "").trim();
+    if (friendly) {
+      setTitle(`Run with ${friendly}`);
+      setDescription(`A friendly challenge with ${friendly} — set the weekly goal and let's go.`);
+    }
+    setShowCreate(true);
+    // Strip the query so a reload doesn't keep re-opening the modal.
+    router.replace("/challenges", { scroll: false });
+  }, [searchParams, router]);
 
   const resetForm = () => {
     setTitle("");

@@ -619,7 +619,16 @@ export default function DashboardPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[13px] text-text-primary leading-snug">
-                          <span className="font-semibold">{isMine ? "You" : (f.user.displayName ?? "User")}</span>{" "}
+                          {isMine ? (
+                            <span className="font-semibold">You</span>
+                          ) : (
+                            <Link
+                              href={`/friend/${f.userId}`}
+                              className="font-semibold hover:text-accent-purple-bright transition-colors"
+                            >
+                              {f.user.displayName ?? "User"}
+                            </Link>
+                          )}{" "}
                           <span className="text-text-secondary">{text}</span>
                           <span className="ml-1">{emoji}</span>
                         </p>
