@@ -7,6 +7,7 @@ import { PlanModal } from "@/components/PlanModal";
 import { ReferFriendsModal } from "@/components/ReferFriendsModal";
 import { Avatar } from "@/components/Avatar";
 import { QuickAction } from "@/components/QuickAction";
+import { DisciplinePicker } from "@/components/DisciplinePicker";
 import { CardSkeleton, ErrorCard } from "@/components/Skeleton";
 import { Celebration } from "@/components/Celebration";
 import { RunWelcome } from "@/components/RunWelcome";
@@ -135,6 +136,12 @@ export default function DashboardPage() {
             {intWithCommas}
           </span>
           <span className="text-[22px] text-text-muted font-bold tabular-nums">.{decPartRaw}</span>
+          {/* Discipline picker — sits next to the balance so the "fitness ↔ wealth"
+              link is visible at a glance; opens a menu teasing cycling / sleep
+              / walking, which all ship "Coming soon" until we expand. */}
+          <div className="ml-auto self-center">
+            <DisciplinePicker />
+          </div>
         </div>
         <div className="mt-2 flex items-center gap-3 text-[13px]">
           <span className="text-success-500 font-semibold tabular-nums">
