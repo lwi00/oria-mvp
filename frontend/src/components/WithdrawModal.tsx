@@ -132,7 +132,7 @@ export function WithdrawModal({ open, onClose }: Props) {
           </button>
         </div>
         <p className="text-[13px] text-text-muted mb-4 leading-relaxed">
-          Sélectionne le vault depuis lequel retirer.
+          Pick the vault to withdraw from.
         </p>
 
         {/* Vault picker with position per vault */}

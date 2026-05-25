@@ -106,7 +106,7 @@ export function InvestModal({ open, onClose }: Props) {
           </button>
         </div>
         <p className="text-[13px] text-text-muted mb-4 leading-relaxed">
-          Choisis le vault Morpho. Tu peux passer d&apos;un vault à l&apos;autre — chacun a son propre rendement et chaîne.
+          Choose a Morpho vault. You can switch between them — each has its own yield and chain.
         </p>
 
         {/* Vault picker */}
