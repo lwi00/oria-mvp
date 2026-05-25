@@ -7,7 +7,6 @@ export default function HowItWorksPage() {
   const { data: streak } = useStreak();
   const { data: user } = useUser();
   const streakCount = streak?.currentCount ?? 0;
-  const effectiveApy = streak?.effectiveApy ?? 3;
   const targetKm = user?.targetKm ?? 10;
   const sport = user?.goalType === "cycling" ? "ride" : "run";
 
@@ -36,7 +35,7 @@ export default function HowItWorksPage() {
 
       <h2>How Oria turns that yield into your rate</h2>
       <p>
-        The Morpho vault pays a yield. Oria captures it as a set rate for the week, then splits it between users by how consistent they&apos;ve been with their training. Everyone earns the <strong>3% baseline</strong> no matter what — your activity only decides how the bonus pool on top gets divided.
+        The Morpho vault pays a yield. Oria turns it into a rate for the week, then splits it between users by how consistent they&apos;ve been with their training. Everyone earns a <strong>baseline slice</strong> no matter what — your activity only decides how the bonus pool on top gets divided. None of this is a fixed rate: it tracks what the vault is actually paying.
       </p>
       <p>Your weekly activity score is built from four things:</p>
       <ul>
@@ -50,11 +49,11 @@ export default function HowItWorksPage() {
       </p>
       {streakCount > 0 ? (
         <p>
-          You&apos;re on <strong>{streakCount} week{streakCount > 1 ? "s" : ""}</strong> of streak, sitting at <strong>{effectiveApy.toFixed(2)}%</strong>. The consistency factor maxes out at 16 weeks.
+          You&apos;re on <strong>{streakCount} week{streakCount > 1 ? "s" : ""}</strong> of streak, so you&apos;re already pulling a bonus on top of the baseline. The consistency factor maxes out at 16 weeks.
         </p>
       ) : (
         <p>
-          Hit your first weekly goal and your rate starts climbing above the 3% baseline. The consistency factor maxes out at 16 weeks.
+          Hit your first weekly goal and your rate starts climbing above the baseline. The consistency factor maxes out at 16 weeks.
         </p>
       )}
 

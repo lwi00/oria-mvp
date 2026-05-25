@@ -82,8 +82,6 @@ export default function ApyDetailPage() {
         open={showLearnSheet}
         onClose={() => setShowLearnSheet(false)}
         streakCount={count}
-        effectiveApy={effective}
-        baselineApy={baseline}
       />
 
       {/* Big APY display */}

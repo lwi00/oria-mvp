@@ -79,14 +79,14 @@ const QUESTIONS: QA[] = [
     ),
   },
   {
-    q: "Why do you guarantee 3% when the market could drop lower?",
+    q: "Is the baseline a fixed rate?",
     a: (
       <>
         <p>
-          The 3% baseline isn't permanently locked. Today the Morpho vault generates well above 3% + our spread, so we can hold the line. If the market dropped below that, the baseline would drop too.
+          No. The baseline isn&apos;t a fixed, permanently-locked rate — it tracks what the Morpho vault is actually paying. Today the vault generates comfortably above it, so the baseline holds. If the market dropped far enough, the baseline would move with it.
         </p>
         <p>
-          So the 3% is a <strong>market-conditional promise</strong>. We hold it as long as we can and we'll say so clearly if it ever needs to move.
+          So treat it as a <strong>market-conditional floor</strong>, not a guaranteed number. We hold it as long as the vault allows, and we&apos;ll say so clearly if it ever needs to move.
         </p>
       </>
     ),

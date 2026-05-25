@@ -8,16 +8,16 @@ interface Props {
   open: boolean;
   onClose: () => void;
   streakCount: number;
-  effectiveApy: number;
-  baselineApy: number;
 }
 
+const SCREENS = 5;
+
 /**
- * Three swipable screens explaining the yield in plain English — opens from
- * the APY chip on Home and from the APY details page. Screen 3 closes on a
- * calm "you stay in control" beat rather than on the risk list.
+ * Swipable primer explaining how Oria works, built for someone with zero DeFi
+ * background: lending → why it's protected → what you hold → how the rate is
+ * set each week → risk. No fixed rates are quoted — the yield is variable.
  */
-export function LearnBottomSheet({ open, onClose, streakCount, effectiveApy, baselineApy }: Props) {
+export function LearnBottomSheet({ open, onClose, streakCount }: Props) {
   const [mounted, setMounted] = useState(false);
   const [page, setPage] = useState(0);
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -44,11 +44,6 @@ export function LearnBottomSheet({ open, onClose, streakCount, effectiveApy, bas
     const el = scrollerRef.current;
     if (el) el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" });
   };
-
-  const bonus = Math.max(0, effectiveApy - baselineApy);
-  const bonusFmt = bonus.toFixed(2);
-  const apyFmt = effectiveApy.toFixed(2);
-  const baseFmt = baselineApy.toFixed(2);
 
   return createPortal(
     <div
@@ -91,58 +86,84 @@ export function LearnBottomSheet({ open, onClose, streakCount, effectiveApy, bas
           style={{ scrollbarWidth: "none" }}
         >
           <div className="flex">
-            {/* Screen 1 — Where your rate comes from */}
+            {/* Screen 1 — What lending on a blockchain is */}
             <div className="min-w-full snap-start px-6 py-6 flex flex-col gap-4">
               <h2 className="text-[22px] font-extrabold text-white tracking-tight leading-tight">
-                Your <span className="text-accent-purple-bright">{apyFmt}%</span> is two things
+                Lending, in plain terms
               </h2>
-              <div className="flex flex-col gap-2">
-                <div className="rounded-2xl border border-accent-purple/25 bg-accent-purple/8 p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-purple-bright">Baseline</p>
-                  <p className="text-[20px] font-extrabold text-text-primary mt-1 tabular-nums">{baseFmt}%</p>
-                  <p className="text-[12px] text-text-muted mt-1 leading-snug">
-                    Guaranteed to everyone, regardless of activity.
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-accent-sport/25 bg-accent-sport/8 p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-sport">Consistency bonus</p>
-                  <p className="text-[20px] font-extrabold text-text-primary mt-1 tabular-nums">+{bonusFmt}%</p>
-                  <p className="text-[12px] text-text-muted mt-1 leading-snug">
-                    {streakCount > 0
-                      ? `You're on a ${streakCount}-week streak — each weekly goal hit increases your share of the shared pool.`
-                      : `Start a streak this week and your bonus starts climbing. The more consistent you are, the larger your slice.`}
-                  </p>
-                </div>
-              </div>
-              <p className="text-[12px] text-text-muted leading-relaxed">
-                The bonus pool isn't free money — it redistributes what inactive users don't claim to the active ones.
+              <p className="text-[14px] text-text-secondary leading-relaxed">
+                A bank takes your deposit, lends it out, and keeps most of the interest. <span className="text-text-primary font-semibold">DeFi</span> — finance that runs on open software instead of a bank — lets you lend directly.
+              </p>
+              <p className="text-[14px] text-text-secondary leading-relaxed">
+                When someone borrows what you&apos;ve put in, they pay interest. That interest is your yield — no branch, no middleman, just public code matching lenders and borrowers.
               </p>
             </div>
 
-            {/* Screen 2 — Where your money sits */}
+            {/* Screen 2 — Why it's protected */}
             <div className="min-w-full snap-start px-6 py-6 flex flex-col gap-4">
               <h2 className="text-[22px] font-extrabold text-white tracking-tight leading-tight">
-                Where your money sits
+                Why a borrower can&apos;t run off with it
               </h2>
               <p className="text-[14px] text-text-secondary leading-relaxed">
-                Your USDC isn't held on our servers. When you deposit, it goes into a <span className="text-text-primary font-semibold">Morpho vault</span> — a lending protocol on Ethereum.
+                To borrow anything, they first lock up <span className="text-text-primary font-semibold">more value than they take out</span> — borrow $100 and you might post $150 of collateral.
               </p>
-              <div className="rounded-2xl border border-oria bg-oria-section p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">Morpho</p>
-                <p className="text-[16px] font-bold text-text-primary mt-1">~$7.4 B deposited</p>
+              <div className="rounded-2xl border border-accent-purple/25 bg-accent-purple/8 p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-purple-bright">Over-collateralised</p>
                 <p className="text-[12px] text-text-muted mt-1.5 leading-snug">
-                  Borrowers post collateral to borrow USDC and pay interest. Morpho passes that interest to the lenders — you.
+                  If a borrower stops repaying, the system automatically sells their collateral to pay lenders back — before the loan can ever go underwater.
                 </p>
               </div>
               <p className="text-[13px] text-text-secondary leading-relaxed">
-                The wallet that holds your vault shares is <span className="text-text-primary font-semibold">yours</span> — Privy-issued, no seed phrase, and Oria never signs on your behalf.
-              </p>
-              <p className="text-[13px] text-text-secondary leading-relaxed">
-                You can <span className="text-text-primary font-semibold">withdraw any time</span>. No lock-ups, no approvals to ask for.
+                Your loan is always backed by collateral worth more than the loan itself. That&apos;s the core protection, and it runs on its own.
               </p>
             </div>
 
-            {/* Screen 3 — Is it risky? */}
+            {/* Screen 3 — What you actually hold */}
+            <div className="min-w-full snap-start px-6 py-6 flex flex-col gap-4">
+              <h2 className="text-[22px] font-extrabold text-white tracking-tight leading-tight">
+                What you actually hold
+              </h2>
+              <p className="text-[14px] text-text-secondary leading-relaxed">
+                You don&apos;t lend regular dollars — you lend <span className="text-text-primary font-semibold">USDC</span>: a digital token worth $1, issued by Circle and backed by real dollars and US Treasury bills. The dollar, in a form a blockchain can move.
+              </p>
+              <div className="rounded-2xl border border-oria bg-oria-section p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">Morpho</p>
+                <p className="text-[16px] font-bold text-text-primary mt-1">~$7.4B deposited</p>
+                <p className="text-[12px] text-text-muted mt-1.5 leading-snug">
+                  Your USDC sits in a Morpho vault — the lending protocol matching it with those collateralised borrowers.
+                </p>
+              </div>
+              <p className="text-[13px] text-text-secondary leading-relaxed">
+                The wallet holding your position is <span className="text-text-primary font-semibold">yours</span> — Privy-issued, no seed phrase — and you can withdraw any time. Oria never signs on your behalf.
+              </p>
+            </div>
+
+            {/* Screen 4 — How your rate is set each week */}
+            <div className="min-w-full snap-start px-6 py-6 flex flex-col gap-4">
+              <h2 className="text-[22px] font-extrabold text-white tracking-tight leading-tight">
+                How your rate is set each week
+              </h2>
+              <p className="text-[14px] text-text-secondary leading-relaxed">
+                The vault pays a yield. <span className="text-text-primary font-semibold">Everyone earns a baseline share</span> of it, whatever they do. The rest goes into a bonus pool that&apos;s split by how consistent you&apos;ve been.
+              </p>
+              <div className="rounded-2xl border border-accent-sport/25 bg-accent-sport/8 p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-sport">Your activity score</p>
+                <ul className="text-[12px] text-text-muted mt-2 leading-relaxed flex flex-col gap-1">
+                  <li><span className="text-text-secondary font-semibold">Consistency</span> — your weekly streak (the biggest factor)</li>
+                  <li><span className="text-text-secondary font-semibold">Regularity</span> — three or more sessions a week</li>
+                  <li><span className="text-text-secondary font-semibold">Long run</span> — hitting your long-session target</li>
+                  <li><span className="text-text-secondary font-semibold">Progression</span> — beating your recent average pace</li>
+                </ul>
+              </div>
+              <p className="text-[13px] text-text-secondary leading-relaxed">
+                Every <span className="text-text-primary font-semibold">Sunday at 12:00</span>, your score is recalculated and your rate is locked in for the week ahead.{" "}
+                {streakCount > 0
+                  ? `You're on a ${streakCount}-week streak — keep the weeks coming and your slice of the pool grows.`
+                  : "Hit your first weekly goal and your slice of the pool starts to grow."}
+              </p>
+            </div>
+
+            {/* Screen 5 — Is it risky? */}
             <div className="min-w-full snap-start px-6 py-6 flex flex-col gap-4">
               <h2 className="text-[22px] font-extrabold text-white tracking-tight leading-tight">
                 Is it risky?
@@ -160,12 +181,12 @@ export function LearnBottomSheet({ open, onClose, streakCount, effectiveApy, bas
                   body="USDC is backed by Circle and pegged to the dollar. In 2023 the peg briefly drifted. Rare, but real."
                 />
                 <RiskRow
-                  label="Variable APY"
-                  body="If borrowing demand on Morpho drops, your yield drops too. Nothing here is fixed."
+                  label="Variable yield"
+                  body="If borrowing demand on Morpho drops, your yield drops too. Nothing here is a fixed rate."
                 />
               </div>
               <p className="text-[13px] text-text-secondary leading-relaxed pt-1 border-t border-oria">
-                Oria doesn't touch your funds, doesn't take leverage, doesn't promise a fixed return. You hold the keys, you withdraw whenever, and you can track your position on Morpho directly.
+                Oria doesn&apos;t touch your funds, doesn&apos;t take leverage, doesn&apos;t promise a fixed return. You hold the keys, you withdraw whenever, and you can track your position on Morpho directly.
               </p>
               <div className="mt-auto pt-2 flex flex-col gap-2">
                 <Link
@@ -190,7 +211,7 @@ export function LearnBottomSheet({ open, onClose, streakCount, effectiveApy, bas
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4b5fd" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           </button>
           <div className="flex gap-1.5">
-            {[0, 1, 2].map((i) => (
+            {Array.from({ length: SCREENS }).map((_, i) => (
               <button
                 key={i}
                 onClick={() => goTo(i)}
@@ -201,13 +222,13 @@ export function LearnBottomSheet({ open, onClose, streakCount, effectiveApy, bas
               />
             ))}
           </div>
-          {page < 2 ? (
+          {page < SCREENS - 1 ? (
             <button
-              onClick={() => goTo(Math.min(2, page + 1))}
+              onClick={() => goTo(Math.min(SCREENS - 1, page + 1))}
               aria-label="Next"
               className="w-9 h-9 rounded-full bg-accent-purple/20 border border-accent-purple/30 flex items-center justify-center"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4b5fd" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4b5fd" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6 6-6" /></svg>
             </button>
           ) : (
             <button

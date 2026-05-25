@@ -19,7 +19,7 @@ const ENTRIES: Entry[] = [
   },
   {
     term: "Baseline",
-    def: <>The yield guaranteed to <strong>everyone</strong> on Oria (3% today). You earn it even with no activity.</>,
+    def: <>The slice of the vault yield that goes to <strong>everyone</strong> on Oria, regardless of activity. It tracks the market — not a fixed rate — and you earn it even with no activity.</>,
   },
   {
     term: "Bonus pool",
@@ -68,10 +68,6 @@ const ENTRIES: Entry[] = [
   {
     term: "Peg",
     def: <>The mechanism that keeps a stablecoin at parity (1 USDC = $1). A <em>depeg</em> happens when parity briefly drifts — usually due to a liquidity shock. Rare but possible.</>,
-  },
-  {
-    term: "Spread",
-    def: <>The slice Oria takes on the Morpho yield to run the product. We'd rather talk about what you receive than what we keep.</>,
   },
 ];
 

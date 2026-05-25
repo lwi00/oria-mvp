@@ -6,40 +6,35 @@ import { useStreak } from "@/lib/hooks";
 export default function YieldPage() {
   const { data: streak } = useStreak();
   const streakCount = streak?.currentCount ?? 0;
-  const effectiveApy = streak?.effectiveApy ?? 3;
-  const breakdown = streak?.apyBreakdown;
-  const baseline = breakdown?.baseline ?? 3;
-  const vaultMax = breakdown?.vaultRate ?? 5;
-  const bonus = Math.max(0, effectiveApy - baseline);
 
   return (
-    <LearnShell title="Where the yield comes from" intro="Three layers: Morpho generates the yield, we guarantee a slice to everyone, and the rest redistributes by consistency.">
+    <LearnShell title="Where the yield comes from" intro="Three layers: Morpho generates the yield, everyone earns a baseline slice, and the rest redistributes by consistency.">
       <h2>Layer 1 — Morpho generates the yield</h2>
       <p>
-        Your USDC sits in a <strong>Morpho vault</strong> on Base or Ethereum (you pick in Wallet → Invest). The vault lends those USDC to borrowers who've posted collateral. Borrowers pay interest, the vault collects it, and it flows back to you.
+        Your USDC sits in a <strong>Morpho vault</strong> on Base or Ethereum (you pick in Wallet → Invest). The vault lends those USDC to borrowers who&apos;ve posted collateral. Borrowers pay interest, the vault collects it, and it flows back to you.
       </p>
       <p>
-        Right now the market gives about <strong>{vaultMax.toFixed(2)}%</strong> annualised on that vault. The rate moves with supply and demand for credit — up when borrowing demand rises, down when it cools.
+        That rate is <strong>not fixed</strong> — it moves with supply and demand for credit, up when borrowing demand rises, down when it cools.
       </p>
 
-      <h2>Layer 2 — The guaranteed baseline</h2>
+      <h2>Layer 2 — The baseline everyone earns</h2>
       <p>
-        Oria guarantees <strong>{baseline.toFixed(2)}%</strong> baseline to everyone, regardless of activity. Sit still, and you still earn that.
+        Whatever the vault is paying, a <strong>baseline slice</strong> of it goes to everyone, regardless of activity. Sit still, and you still earn that share.
       </p>
       <p>
-        We picked this deliberately — the product should stay reassuring for someone discovering DeFi, not a zero-sum game where you have to grind to get anything back.
+        We do this deliberately — the product should stay reassuring for someone discovering DeFi, not a zero-sum game where you have to grind to get anything back.
       </p>
 
       <h2>Layer 3 — The bonus pool, redistributed by consistency</h2>
       <p>
-        The rest of the yield (roughly <strong>{Math.max(0, vaultMax - baseline).toFixed(2)}%</strong>) sits in a shared pool. That pool is <strong>redistributed weekly</strong> based on each user's activity score. The more consistent you are, the bigger your slice.
+        The rest of the yield sits in a shared <strong>bonus pool</strong>, <strong>redistributed weekly</strong> based on each user&apos;s activity score. The more consistent you are, the bigger your slice.
       </p>
       <p>
-        The activity score is made of four ingredients: streak (60% weight), weekly regularity (15%), long run (15%), pace progression (10%).
+        The activity score is made of four ingredients: streak (60% weight), weekly regularity (15%), long run (15%), pace progression (10%). Your score is recalculated every <strong>Sunday at 12:00</strong>, which sets your rate for the week ahead.
       </p>
       {streakCount > 0 ? (
         <p>
-          With {streakCount} week{streakCount > 1 ? "s" : ""} of streak, you currently pull <strong>+{bonus.toFixed(2)}%</strong> of bonus, which puts you at <strong>{effectiveApy.toFixed(2)}%</strong>.
+          With {streakCount} week{streakCount > 1 ? "s" : ""} of streak, you&apos;re already pulling a bonus on top of the baseline. The streak ingredient keeps growing your slice until it caps at 16 weeks.
         </p>
       ) : (
         <p>
@@ -49,15 +44,7 @@ export default function YieldPage() {
 
       <h2>The ceiling: never above what Morpho pays</h2>
       <p>
-        We capped the effective APY at the vault rate itself: <strong>your APY can never exceed what Morpho generates</strong>. If Morpho pays {vaultMax.toFixed(2)}%, the most you can earn here is {vaultMax.toFixed(2)}%.
-      </p>
-      <p>
-        The bonus pool only redistributes what inactive users leave on the table — it doesn't create yield out of thin air.
-      </p>
-
-      <h2>What Oria takes</h2>
-      <p>
-        Oria takes a fixed slice (the <em>spread</em>) on the Morpho yield to run the product. We don't surface the exact figure in the app — we'd rather highlight what you receive than what we keep. Ask if you want the number.
+        Your effective rate can <strong>never exceed what the Morpho vault generates</strong>. The bonus pool only redistributes what inactive users leave on the table — it doesn&apos;t create yield out of thin air.
       </p>
     </LearnShell>
   );
