@@ -45,9 +45,16 @@ function PodiumRow({
   const medalFill = rank === 1 ? "#F59E0B" : rank === 2 ? "#94A3B8" : rank === 3 ? "#CD7F32" : null;
   // Tap a row → go to the friend's profile (unless it's the current user).
   const Wrapper = isMe
-    ? ({ children }: { children: React.ReactNode }) => <div className="flex items-center gap-3 p-3 rounded-2xl bg-accent-purple/12 border border-accent-purple/25">{children}</div>
+    ? ({ children }: { children: React.ReactNode }) => (
+        <div className="flex items-center gap-3 p-3 rounded-2xl bg-accent-purple/12 border border-accent-purple/25">
+          {children}
+        </div>
+      )
     : ({ children }: { children: React.ReactNode }) => (
-        <Link href={`/friend/${id}`} className="flex items-center gap-3 p-3 rounded-2xl cursor-pointer hover:bg-oria-card-hover transition-colors group">
+        <Link
+          href={`/friend/${id}`}
+          className="flex items-center gap-3 p-3 rounded-2xl cursor-pointer hover:bg-oria-card-hover transition-colors group"
+        >
           {children}
         </Link>
       );
@@ -55,18 +62,31 @@ function PodiumRow({
     <Wrapper>
       {medalFill ? (
         <span className="inline-flex items-center justify-center w-6 h-6" aria-label={`#${rank}`}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill={medalFill} stroke="rgba(0,0,0,0.3)" strokeWidth="0.8">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill={medalFill}
+            stroke="rgba(0,0,0,0.3)"
+            strokeWidth="0.8"
+          >
             <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
           </svg>
         </span>
       ) : (
-        <span className="text-[13px] font-bold w-6 text-center tabular-nums text-text-muted">#{rank}</span>
+        <span className="text-[13px] font-bold w-6 text-center tabular-nums text-text-muted">
+          #{rank}
+        </span>
       )}
       <Avatar initials={initials} size={34} highlight={isMe} src={avatarUrl ?? null} />
       <div className="flex-1 min-w-0">
-        <p className={`text-[14px] font-semibold text-text-primary truncate ${isMe ? "" : "group-hover:text-accent-purple-bright transition-colors"}`}>
+        <p
+          className={`text-[14px] font-semibold text-text-primary truncate ${isMe ? "" : "group-hover:text-accent-purple-bright transition-colors"}`}
+        >
           {name}{" "}
-          {isMe && <span className="text-[11px] text-accent-purple-bright font-semibold">· you</span>}
+          {isMe && (
+            <span className="text-[11px] text-accent-purple-bright font-semibold">· you</span>
+          )}
         </p>
         <p className="text-[11px] text-text-muted tabular-nums">{apy.toFixed(2)}% APY</p>
       </div>
@@ -142,7 +162,12 @@ function UserActionButton({
 }
 
 export default function SocialPage() {
-  const { data: board, isLoading: boardLoading, isError: boardError, refetch: refetchBoard } = useLeaderboard();
+  const {
+    data: board,
+    isLoading: boardLoading,
+    isError: boardError,
+    refetch: refetchBoard,
+  } = useLeaderboard();
   const { data: friendsWeekly } = useFriendsWeekly();
   const { data: discoverUsers } = useDiscoverUsers();
   const { data: friends } = useFriends();
@@ -167,8 +192,14 @@ export default function SocialPage() {
 
   // Build sets for O(1) status lookups
   const friendIds = useMemo(() => new Set((friends ?? []).map((f) => f.user.id)), [friends]);
-  const sentIds = useMemo(() => new Set((sentRequests ?? []).map((r) => r.user.id)), [sentRequests]);
-  const pendingIds = useMemo(() => new Set((pendingRequests ?? []).map((r) => r.user.id)), [pendingRequests]);
+  const sentIds = useMemo(
+    () => new Set((sentRequests ?? []).map((r) => r.user.id)),
+    [sentRequests],
+  );
+  const pendingIds = useMemo(
+    () => new Set((pendingRequests ?? []).map((r) => r.user.id)),
+    [pendingRequests],
+  );
 
   const getStatus = (userId: string) => getRelationStatus(userId, friendIds, sentIds, pendingIds);
 
@@ -197,7 +228,11 @@ export default function SocialPage() {
         <div className="pt-1 pb-2">
           <h1 className="text-2xl font-bold text-text-primary tracking-tight">Friends</h1>
         </div>
-        <ErrorCard onRetry={() => { refetchBoard(); }} />
+        <ErrorCard
+          onRetry={() => {
+            refetchBoard();
+          }}
+        />
       </div>
     );
   }
@@ -217,7 +252,16 @@ export default function SocialPage() {
       {/* Search bar */}
       <div className="relative">
         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <circle cx="11" cy="11" r="7" />
             <path d="M21 21l-4.3-4.3" />
           </svg>
@@ -236,7 +280,15 @@ export default function SocialPage() {
             aria-label="Clear search"
             className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-oria-chip border border-oria flex items-center justify-center cursor-pointer"
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2.5" strokeLinecap="round">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#9CA0AC"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
@@ -253,12 +305,23 @@ export default function SocialPage() {
               {searchResults.map((u) => {
                 const status = getStatus(u.id);
                 return (
-                  <div key={u.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-oria-chip transition-colors">
-                    <Avatar initials={getInitials(u.displayName ?? "?")} size={38} src={u.avatarUrl} />
+                  <div
+                    key={u.id}
+                    className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-oria-chip transition-colors"
+                  >
+                    <Avatar
+                      initials={getInitials(u.displayName ?? "?")}
+                      size={38}
+                      src={u.avatarUrl}
+                    />
                     <div className="flex-1 min-w-0">
-                      <p className="text-[14px] font-semibold text-text-primary truncate">{u.displayName ?? "User"}</p>
+                      <p className="text-[14px] font-semibold text-text-primary truncate">
+                        {u.displayName ?? "User"}
+                      </p>
                       <p className="text-[11px] text-text-muted tabular-nums">
-                        {u.streak ? `${u.streak.currentCount}w streak · ${u.streak.currentApy.toFixed(1)}% APY` : "New user"}
+                        {u.streak
+                          ? `${u.streak.currentCount}w streak · ${u.streak.currentApy.toFixed(1)}% APY`
+                          : "New user"}
                       </p>
                     </div>
                     <UserActionButton
@@ -285,7 +348,9 @@ export default function SocialPage() {
             <p className="text-base font-bold text-text-primary mb-3 tracking-tight">
               Friend requests
               {pendingCount > 0 && (
-                <span className="ml-2 text-[12px] font-semibold text-accent-purple-bright bg-accent-purple/15 px-2 py-0.5 rounded-full">{pendingCount}</span>
+                <span className="ml-2 text-[12px] font-semibold text-accent-purple-bright bg-accent-purple/15 px-2 py-0.5 rounded-full">
+                  {pendingCount}
+                </span>
               )}
             </p>
 
@@ -293,10 +358,19 @@ export default function SocialPage() {
             {pendingCount > 0 ? (
               <div className="flex flex-col gap-1">
                 {pendingRequests!.map((r) => (
-                  <div key={r.friendshipId} className="flex items-center gap-3 p-2.5 rounded-xl bg-accent-purple/5 border border-accent-purple/10">
-                    <Avatar initials={getInitials(r.user.displayName ?? "?")} size={36} src={r.user.avatarUrl} />
+                  <div
+                    key={r.friendshipId}
+                    className="flex items-center gap-3 p-2.5 rounded-xl bg-accent-purple/5 border border-accent-purple/10"
+                  >
+                    <Avatar
+                      initials={getInitials(r.user.displayName ?? "?")}
+                      size={36}
+                      src={r.user.avatarUrl}
+                    />
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold text-text-primary truncate">{r.user.displayName ?? "User"}</p>
+                      <p className="text-[13px] font-semibold text-text-primary truncate">
+                        {r.user.displayName ?? "User"}
+                      </p>
                       <p className="text-[11px] text-text-muted tabular-nums">
                         {r.user.streak ? `${r.user.streak.currentCount}w streak` : "New user"}
                       </p>
@@ -333,7 +407,16 @@ export default function SocialPage() {
             ) : (
               <div className="text-center py-4">
                 <div className="w-10 h-10 rounded-xl bg-accent-purple/10 border border-accent-purple/15 flex items-center justify-center mx-auto mb-2">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#A78BFA"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
                     <circle cx="9" cy="7" r="4" />
                     <path d="M19 8v6M22 11h-6" />
@@ -353,9 +436,15 @@ export default function SocialPage() {
                 <div className="flex flex-col gap-1">
                   {sentRequests!.map((r) => (
                     <div key={r.friendshipId} className="flex items-center gap-3 p-2 rounded-xl">
-                      <Avatar initials={getInitials(r.user.displayName ?? "?")} size={32} src={r.user.avatarUrl} />
+                      <Avatar
+                        initials={getInitials(r.user.displayName ?? "?")}
+                        size={32}
+                        src={r.user.avatarUrl}
+                      />
                       <div className="flex-1 min-w-0">
-                        <p className="text-[12px] font-semibold text-text-primary truncate">{r.user.displayName ?? "User"}</p>
+                        <p className="text-[12px] font-semibold text-text-primary truncate">
+                          {r.user.displayName ?? "User"}
+                        </p>
                         <p className="text-[10px] text-text-muted">Pending</p>
                       </div>
                       <button
@@ -381,7 +470,9 @@ export default function SocialPage() {
           {friendsWeekly && friendsWeekly.length > 0 && (
             <Card className="!p-5">
               <div className="flex items-center justify-between mb-4">
-                <p className="text-base font-bold text-text-primary tracking-tight">Weekly consistency</p>
+                <p className="text-base font-bold text-text-primary tracking-tight">
+                  Weekly consistency
+                </p>
                 <p className="text-[11px] text-text-muted">This week&apos;s km vs goal</p>
               </div>
               <div className="flex flex-col gap-3">
@@ -394,24 +485,47 @@ export default function SocialPage() {
                     >
                       <div className="flex items-center gap-2.5">
                         {f.isMe ? (
-                          <Avatar initials={getInitials(f.displayName)} size={28} highlight src={f.avatarUrl} />
+                          <Avatar
+                            initials={getInitials(f.displayName)}
+                            size={28}
+                            highlight
+                            src={f.avatarUrl}
+                          />
                         ) : (
-                          <Link href={`/friend/${f.id}`} className="flex items-center gap-2.5 flex-1 min-w-0 group">
-                            <Avatar initials={getInitials(f.displayName)} size={28} src={f.avatarUrl} />
+                          <Link
+                            href={`/friend/${f.id}`}
+                            className="flex items-center gap-2.5 flex-1 min-w-0 group"
+                          >
+                            <Avatar
+                              initials={getInitials(f.displayName)}
+                              size={28}
+                              src={f.avatarUrl}
+                            />
                             <span className="text-[13px] font-semibold text-text-primary truncate group-hover:text-accent-purple-bright transition-colors">
                               {f.displayName ?? "User"}
                             </span>
                           </Link>
                         )}
                         {f.isMe && (
-                          <span className="text-[13px] font-semibold text-text-primary flex-1 truncate">You</span>
+                          <span className="text-[13px] font-semibold text-text-primary flex-1 truncate">
+                            You
+                          </span>
                         )}
                         <span className="text-[12px] font-bold tabular-nums text-text-primary">
                           {f.distanceKm.toFixed(1)}
                           <span className="text-text-muted font-medium">/{f.targetKm}</span>
                         </span>
                         {f.goalMet ? (
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#22C55E"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
                             <path d="M20 6L9 17l-5-5" />
                           </svg>
                         ) : (
@@ -455,13 +569,24 @@ export default function SocialPage() {
             ) : (
               <div className="text-center py-8">
                 <div className="w-12 h-12 rounded-2xl bg-accent-purple/15 border border-accent-purple/25 flex items-center justify-center mx-auto mb-3">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#A78BFA"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
                     <circle cx="9" cy="7" r="4" />
                   </svg>
                 </div>
                 <p className="text-[14px] font-semibold text-text-primary mb-1">No friends yet</p>
-                <p className="text-[12px] text-text-muted">Use the search bar above to find and add friends.</p>
+                <p className="text-[12px] text-text-muted">
+                  Use the search bar above to find and add friends.
+                </p>
               </div>
             )}
           </Card>
@@ -471,20 +596,43 @@ export default function SocialPage() {
             <Card>
               <p className="text-base font-bold text-text-primary mb-3 tracking-tight">
                 My friends
-                <span className="ml-2 text-[12px] font-semibold text-text-muted">{friendCount}</span>
+                <span className="ml-2 text-[12px] font-semibold text-text-muted">
+                  {friendCount}
+                </span>
               </p>
               <div className="flex flex-col gap-1">
                 {friends!.map((f) => (
                   <div key={f.friendshipId} className="flex items-center gap-3 p-2.5 rounded-xl">
-                    <Link href={`/friend/${f.user.id}`} className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer active:opacity-70 transition-opacity">
-                      <Avatar initials={getInitials(f.user.displayName ?? "?")} size={36} src={f.user.avatarUrl} />
+                    <Link
+                      href={`/friend/${f.user.id}`}
+                      className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer active:opacity-70 transition-opacity"
+                    >
+                      <Avatar
+                        initials={getInitials(f.user.displayName ?? "?")}
+                        size={36}
+                        src={f.user.avatarUrl}
+                      />
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold text-text-primary truncate">{f.user.displayName ?? "User"}</p>
+                        <p className="text-[13px] font-semibold text-text-primary truncate">
+                          {f.user.displayName ?? "User"}
+                        </p>
                         <p className="text-[11px] text-text-muted tabular-nums">
-                          {f.user.streak ? `${f.user.streak.currentCount}w streak · ${f.user.streak.currentApy.toFixed(1)}% APY` : "New user"}
+                          {f.user.streak
+                            ? `${f.user.streak.currentCount}w streak · ${f.user.streak.currentApy.toFixed(1)}% APY`
+                            : "New user"}
                         </p>
                       </div>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64697A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#64697A"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="flex-shrink-0"
+                      >
                         <polyline points="9 18 15 12 9 6" />
                       </svg>
                     </Link>
@@ -493,14 +641,27 @@ export default function SocialPage() {
                         onClick={() =>
                           pokeFriend.mutate(f.user.id, {
                             onSuccess: (data) => toast(data.message),
-                            onError: (e) => toast(e instanceof Error ? e.message : "Can't poke right now", "error"),
+                            onError: (e) =>
+                              toast(
+                                e instanceof Error ? e.message : "Can't poke right now",
+                                "error",
+                              ),
                           })
                         }
                         disabled={pokeFriend.isPending}
                         aria-label={`Poke ${f.user.displayName}`}
                         className="w-[32px] h-[32px] rounded-full bg-accent-sport/15 border border-accent-sport/25 flex items-center justify-center cursor-pointer disabled:opacity-50 hover:bg-accent-sport/25 transition-colors"
                       >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FC4C02" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#FC4C02"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
                           <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
                           <path d="M13.73 21a2 2 0 01-3.46 0" />
                         </svg>
@@ -532,12 +693,23 @@ export default function SocialPage() {
                 {discoverUsers.slice(0, 5).map((u) => {
                   const status = getStatus(u.id);
                   return (
-                    <div key={u.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-oria-chip transition-colors">
-                      <Avatar initials={getInitials(u.displayName ?? "?")} size={36} src={u.avatarUrl} />
+                    <div
+                      key={u.id}
+                      className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-oria-chip transition-colors"
+                    >
+                      <Avatar
+                        initials={getInitials(u.displayName ?? "?")}
+                        size={36}
+                        src={u.avatarUrl}
+                      />
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold text-text-primary truncate">{u.displayName ?? "User"}</p>
+                        <p className="text-[13px] font-semibold text-text-primary truncate">
+                          {u.displayName ?? "User"}
+                        </p>
                         <p className="text-[11px] text-text-muted tabular-nums">
-                          {u.streak ? `${u.streak.currentCount}w streak · ${u.streak.currentApy.toFixed(1)}% APY` : "New user"}
+                          {u.streak
+                            ? `${u.streak.currentCount}w streak · ${u.streak.currentApy.toFixed(1)}% APY`
+                            : "New user"}
                         </p>
                       </div>
                       <UserActionButton

@@ -51,7 +51,15 @@ export function MiniJar({ fill = 65, size = 100 }: MiniJarProps) {
         />
       </g>
       <rect x="70" y="30" width="60" height="10" rx="3" fill="rgba(124,58,237,0.2)" />
-      <line x1="60" y1="80" x2="60" y2="170" stroke="rgba(255,255,255,0.45)" strokeWidth="5" strokeLinecap="round" />
+      <line
+        x1="60"
+        y1="80"
+        x2="60"
+        y2="170"
+        stroke="rgba(255,255,255,0.45)"
+        strokeWidth="5"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }

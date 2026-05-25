@@ -60,7 +60,8 @@ const en: Dict = {
 
   // invest modal
   "invest.title": "Invest in Morpho",
-  "invest.intro": "Choose a Morpho vault. You can switch between them — each has its own yield and chain.",
+  "invest.intro":
+    "Choose a Morpho vault. You can switch between them — each has its own yield and chain.",
   "invest.tapMax": "Tap balance to use max",
   "invest.cta": "Invest",
   "invest.processing": "Processing…",
@@ -86,14 +87,16 @@ const en: Dict = {
   "settings.language": "Language",
   "settings.languageDesc": "Choose the language for the whole app.",
   "settings.vacationMode": "Vacation mode",
-  "settings.vacationDesc": "Freeze your streak and APY progression for 2 weeks — in case of vacation or injury. The weekly evaluation won't reset your streak while active.",
+  "settings.vacationDesc":
+    "Freeze your streak and APY progression for 2 weeks — in case of vacation or injury. The weekly evaluation won't reset your streak while active.",
   "settings.vacationActive": "Vacation active — {days} left",
   "settings.vacationEnds": "Ends {date}",
   "settings.endVacation": "End vacation early",
   "settings.ending": "Ending…",
   "settings.startVacation": "Start 2-week vacation",
   "settings.starting": "Starting…",
-  "settings.vacationConfirm": "Freeze your streak for 2 weeks? Your current streak count and APY will be preserved.",
+  "settings.vacationConfirm":
+    "Freeze your streak for 2 weeks? Your current streak count and APY will be preserved.",
   "settings.vacationStarted": "Vacation mode started — your streak is frozen",
   "settings.vacationEnded": "Vacation mode ended",
   "settings.vacationStartFailed": "Failed to start vacation",
@@ -102,7 +105,8 @@ const en: Dict = {
   "settings.pushUpdating": "Updating…",
   "settings.pushEnabled": "Enabled",
   "settings.pushEnable": "Enable push notifications",
-  "settings.pushDesc": "Get notified about friend pokes, goal completions, and more — even when the app is closed",
+  "settings.pushDesc":
+    "Get notified about friend pokes, goal completions, and more — even when the app is closed",
   "settings.pushOn": "Push notifications enabled!",
   "settings.pushOff": "Push notifications disabled",
   "settings.pushDenied": "Permission denied — check your browser settings",
@@ -127,10 +131,12 @@ const en: Dict = {
   "settings.unitsToMi": "Switch to miles",
   "settings.unitsToKm": "Switch to kilometers",
   "settings.monthlyProgression": "Monthly progression",
-  "settings.monthlyProgressionDesc": "How much your weekly target should grow each month. Pick Maintenance to keep the same target, or a higher rate to gradually push yourself.",
+  "settings.monthlyProgressionDesc":
+    "How much your weekly target should grow each month. Pick Maintenance to keep the same target, or a higher rate to gradually push yourself.",
   "settings.maintain": "Maintain",
   "settings.currency": "Currency",
-  "settings.currencyDesc": "Display balances and earnings in your preferred currency. EUR is converted at a fixed rate of 0.92 (rate refresh coming soon).",
+  "settings.currencyDesc":
+    "Display balances and earnings in your preferred currency. EUR is converted at a fixed rate of 0.92 (rate refresh coming soon).",
   "settings.saved": "Settings saved!",
   "settings.saveFailed": "Failed to save settings",
   "settings.day": "day",
@@ -178,7 +184,8 @@ const fr: Dict = {
   "wallet.noPositions": "Aucune position pour l'instant. Touche Investir pour commencer à gagner.",
   "wallet.idleUsdc": "USDC inactif",
   "wallet.usdcOn": "USDC sur {chain}",
-  "wallet.idleHint": "Pas encore de rendement — touche Investir pour déployer dans un vault Morpho.",
+  "wallet.idleHint":
+    "Pas encore de rendement — touche Investir pour déployer dans un vault Morpho.",
   "wallet.recentTx": "Transactions récentes",
   "wallet.earning": "En rendement",
   "wallet.confirmed": "Confirmé",
@@ -191,7 +198,8 @@ const fr: Dict = {
 
   // invest modal
   "invest.title": "Investir dans Morpho",
-  "invest.intro": "Choisis un vault Morpho. Tu peux passer de l'un à l'autre — chacun a son propre rendement et sa chaîne.",
+  "invest.intro":
+    "Choisis un vault Morpho. Tu peux passer de l'un à l'autre — chacun a son propre rendement et sa chaîne.",
   "invest.tapMax": "Touche le solde pour utiliser le max",
   "invest.cta": "Investir",
   "invest.processing": "En cours…",
@@ -217,14 +225,16 @@ const fr: Dict = {
   "settings.language": "Langue",
   "settings.languageDesc": "Choisis la langue de toute l'application.",
   "settings.vacationMode": "Mode vacances",
-  "settings.vacationDesc": "Gèle ta série et ta progression d'APY pendant 2 semaines — en cas de vacances ou de blessure. L'évaluation hebdomadaire ne réinitialisera pas ta série tant qu'il est actif.",
+  "settings.vacationDesc":
+    "Gèle ta série et ta progression d'APY pendant 2 semaines — en cas de vacances ou de blessure. L'évaluation hebdomadaire ne réinitialisera pas ta série tant qu'il est actif.",
   "settings.vacationActive": "Vacances actives — encore {days}",
   "settings.vacationEnds": "Fin le {date}",
   "settings.endVacation": "Terminer les vacances",
   "settings.ending": "Fin en cours…",
   "settings.startVacation": "Démarrer 2 semaines de vacances",
   "settings.starting": "Démarrage…",
-  "settings.vacationConfirm": "Geler ta série pendant 2 semaines ? Ton décompte de série et ton APY seront préservés.",
+  "settings.vacationConfirm":
+    "Geler ta série pendant 2 semaines ? Ton décompte de série et ton APY seront préservés.",
   "settings.vacationStarted": "Mode vacances activé — ta série est gelée",
   "settings.vacationEnded": "Mode vacances terminé",
   "settings.vacationStartFailed": "Échec du démarrage des vacances",
@@ -233,7 +243,8 @@ const fr: Dict = {
   "settings.pushUpdating": "Mise à jour…",
   "settings.pushEnabled": "Activées",
   "settings.pushEnable": "Activer les notifications push",
-  "settings.pushDesc": "Reçois une notification pour les pokes d'amis, les objectifs atteints, et plus — même quand l'app est fermée",
+  "settings.pushDesc":
+    "Reçois une notification pour les pokes d'amis, les objectifs atteints, et plus — même quand l'app est fermée",
   "settings.pushOn": "Notifications push activées !",
   "settings.pushOff": "Notifications push désactivées",
   "settings.pushDenied": "Permission refusée — vérifie les réglages de ton navigateur",
@@ -258,10 +269,12 @@ const fr: Dict = {
   "settings.unitsToMi": "Passer aux miles",
   "settings.unitsToKm": "Passer aux kilomètres",
   "settings.monthlyProgression": "Progression mensuelle",
-  "settings.monthlyProgressionDesc": "De combien ton objectif hebdo doit augmenter chaque mois. Choisis Maintien pour garder le même objectif, ou un taux plus élevé pour te pousser progressivement.",
+  "settings.monthlyProgressionDesc":
+    "De combien ton objectif hebdo doit augmenter chaque mois. Choisis Maintien pour garder le même objectif, ou un taux plus élevé pour te pousser progressivement.",
   "settings.maintain": "Maintien",
   "settings.currency": "Devise",
-  "settings.currencyDesc": "Affiche les soldes et les gains dans la devise de ton choix. L'EUR est converti à un taux fixe de 0,92 (rafraîchissement du taux bientôt).",
+  "settings.currencyDesc":
+    "Affiche les soldes et les gains dans la devise de ton choix. L'EUR est converti à un taux fixe de 0,92 (rafraîchissement du taux bientôt).",
   "settings.saved": "Réglages enregistrés !",
   "settings.saveFailed": "Échec de l'enregistrement des réglages",
   "settings.day": "jour",
@@ -289,7 +302,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
-    try { localStorage.setItem("oria_lang", l); } catch {}
+    try {
+      localStorage.setItem("oria_lang", l);
+    } catch {}
     if (typeof document !== "undefined") document.documentElement.lang = l;
   }, []);
 

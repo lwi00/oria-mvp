@@ -27,14 +27,8 @@ function getWeekStart(date: Date = new Date()): Date {
   return d;
 }
 
-export async function logActivity(
-  prisma: PrismaClient,
-  userId: string,
-  body: LogActivityBody,
-) {
-  const weekStart = body.weekStart
-    ? getWeekStart(new Date(body.weekStart))
-    : getWeekStart();
+export async function logActivity(prisma: PrismaClient, userId: string, body: LogActivityBody) {
+  const weekStart = body.weekStart ? getWeekStart(new Date(body.weekStart)) : getWeekStart();
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -129,11 +123,7 @@ export async function logActivity(
   return activity;
 }
 
-export async function getActivities(
-  prisma: PrismaClient,
-  userId: string,
-  weeks: number,
-) {
+export async function getActivities(prisma: PrismaClient, userId: string, weeks: number) {
   const since = new Date();
   since.setDate(since.getDate() - weeks * 7);
 
@@ -149,7 +139,10 @@ export async function getActivities(
 export async function getMyStreak(prisma: PrismaClient, userId: string) {
   const streak = await prisma.streak.findUnique({ where: { userId } });
   if (!streak) throw new NotFoundError("Streak");
-  const user = await prisma.user.findUnique({ where: { id: userId }, select: { targetKm: true, settings: true } });
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { targetKm: true, settings: true },
+  });
 
   const weekStart = getWeekStart();
   const activity = await prisma.activity.findUnique({
@@ -234,7 +227,8 @@ export async function recoverStreak(prisma: PrismaClient, userId: string) {
     _sum: { amount: true },
   });
   const balance = deposits._sum.amount ?? 0;
-  if (balance < RECOVERY_COST) throw new BadRequestError(`Need at least $${RECOVERY_COST} deposited to recover streak`);
+  if (balance < RECOVERY_COST)
+    throw new BadRequestError(`Need at least $${RECOVERY_COST} deposited to recover streak`);
 
   // Restore the streak
   await prisma.streak.update({
@@ -264,7 +258,14 @@ export async function evaluateStreaks(prisma: PrismaClient) {
 
   // Phase 1 — first pass: update counts/streaks, compute each user's new score
   const vaultRate = await getMorphoApy(prisma);
-  const passOne: Array<{ userId: string; score: number; newCount: number; newLongest: number; goalMet: boolean; longRunThreshold: number }> = [];
+  const passOne: Array<{
+    userId: string;
+    score: number;
+    newCount: number;
+    newLongest: number;
+    goalMet: boolean;
+    longRunThreshold: number;
+  }> = [];
 
   for (const user of users) {
     if (!user.streak) continue;
@@ -280,7 +281,11 @@ export async function evaluateStreaks(prisma: PrismaClient) {
 
     const goalMet = activity?.goalMet ?? false;
     const alreadyIncremented = user.streak.lastWeekMet && goalMet;
-    const newCount = goalMet ? (alreadyIncremented ? user.streak.currentCount : user.streak.currentCount + 1) : 0;
+    const newCount = goalMet
+      ? alreadyIncremented
+        ? user.streak.currentCount
+        : user.streak.currentCount + 1
+      : 0;
     const newLongest = Math.max(user.streak.longestCount, newCount);
     const longRunThreshold = getLongRunThreshold(user);
 
@@ -297,13 +302,17 @@ export async function evaluateStreaks(prisma: PrismaClient) {
   }
 
   // Phase 2 — compute global mean score
-  const meanScore = passOne.length > 0
-    ? passOne.reduce((s, p) => s + p.score, 0) / passOne.length
-    : 0;
+  const meanScore =
+    passOne.length > 0 ? passOne.reduce((s, p) => s + p.score, 0) / passOne.length : 0;
   await prisma.systemConfig.upsert({
     where: { key: MEAN_SCORE_KEY },
-    create: { key: MEAN_SCORE_KEY, value: { value: meanScore, computedAt: new Date().toISOString(), n: passOne.length } },
-    update: { value: { value: meanScore, computedAt: new Date().toISOString(), n: passOne.length } },
+    create: {
+      key: MEAN_SCORE_KEY,
+      value: { value: meanScore, computedAt: new Date().toISOString(), n: passOne.length },
+    },
+    update: {
+      value: { value: meanScore, computedAt: new Date().toISOString(), n: passOne.length },
+    },
   });
 
   // Phase 3 — apply pool distribution to each user
@@ -314,8 +323,12 @@ export async function evaluateStreaks(prisma: PrismaClient) {
 
     // Keep legacy bonus fields populated (for older UIs)
     const m = computeMultipliers(
-      apy.baseline, u.streak.weekSessions, u.streak.weekLongestRun,
-      p.longRunThreshold, u.streak.monthAvgPace, u.streak.prevMonthAvgPace,
+      apy.baseline,
+      u.streak.weekSessions,
+      u.streak.weekLongestRun,
+      p.longRunThreshold,
+      u.streak.monthAvgPace,
+      u.streak.prevMonthAvgPace,
     );
 
     await prisma.streak.update({
@@ -338,7 +351,9 @@ export async function evaluateStreaks(prisma: PrismaClient) {
 
     // Emit feed events for milestones
     if (p.goalMet) {
-      const activity = await prisma.activity.findUnique({ where: { userId_weekStart: { userId: p.userId, weekStart } } });
+      const activity = await prisma.activity.findUnique({
+        where: { userId_weekStart: { userId: p.userId, weekStart } },
+      });
       await prisma.feedEvent.create({
         data: {
           userId: p.userId,

@@ -20,7 +20,7 @@ function getColor(km: number): string {
 export function ActivityHeatmap({ data }: Props) {
   // Build 12 weeks of data, Mon=0 to Sun=6
   const today = new Date();
-  const dataMap = new Map(data.map(d => [d.date.slice(0, 10), d.distanceKm]));
+  const dataMap = new Map(data.map((d) => [d.date.slice(0, 10), d.distanceKm]));
 
   // Go back 12 weeks from current week's Monday
   const dayOfWeek = today.getUTCDay();

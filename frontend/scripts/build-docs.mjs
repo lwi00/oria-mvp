@@ -41,4 +41,6 @@ lines.push("};");
 lines.push("");
 
 fs.writeFileSync(OUT, lines.join("\n"), "utf8");
-console.log(`Wrote ${Object.keys(files).length} markdown files → ${path.relative(process.cwd(), OUT)}`);
+console.log(
+  `Wrote ${Object.keys(files).length} markdown files → ${path.relative(process.cwd(), OUT)}`,
+);

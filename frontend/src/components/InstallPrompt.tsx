@@ -11,8 +11,7 @@ const DISMISS_KEY = "oria_install_dismissed";
 const DISMISS_DAYS = 7;
 
 export function InstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -70,9 +69,7 @@ export function InstallPrompt() {
           <p className="text-[13px] font-semibold text-text-primary leading-tight">
             Add Oria to Home Screen
           </p>
-          <p className="text-[11px] text-text-muted mt-0.5">
-            Quick access, offline-ready
-          </p>
+          <p className="text-[11px] text-text-muted mt-0.5">Quick access, offline-ready</p>
         </div>
         <button
           onClick={install}

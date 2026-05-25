@@ -19,7 +19,9 @@ export function EditChallengeModal({ open, onClose, challenge }: Props) {
   const [description, setDescription] = useState(challenge.description ?? "");
   const [bannerUrl, setBannerUrl] = useState<string | null>(challenge.bannerUrl);
   const [goalKmWeek, setGoalKmWeek] = useState(String(challenge.goalKmWeek));
-  const [maxMembers, setMaxMembers] = useState(challenge.maxMembers ? String(challenge.maxMembers) : "");
+  const [maxMembers, setMaxMembers] = useState(
+    challenge.maxMembers ? String(challenge.maxMembers) : "",
+  );
 
   const fileRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -50,8 +52,14 @@ export function EditChallengeModal({ open, onClose, challenge }: Props) {
 
   const save = () => {
     const km = parseFloat(goalKmWeek);
-    if (!title.trim()) { toast("Title is required", "error"); return; }
-    if (Number.isNaN(km) || km <= 0) { toast("Weekly goal must be > 0", "error"); return; }
+    if (!title.trim()) {
+      toast("Title is required", "error");
+      return;
+    }
+    if (Number.isNaN(km) || km <= 0) {
+      toast("Weekly goal must be > 0", "error");
+      return;
+    }
     update.mutate(
       {
         id: challenge.id,
@@ -62,7 +70,10 @@ export function EditChallengeModal({ open, onClose, challenge }: Props) {
         maxMembers: maxMembers ? parseInt(maxMembers) : null,
       },
       {
-        onSuccess: () => { toast("Challenge updated"); onClose(); },
+        onSuccess: () => {
+          toast("Challenge updated");
+          onClose();
+        },
         onError: () => toast("Failed to update", "error"),
       },
     );
@@ -87,7 +98,15 @@ export function EditChallengeModal({ open, onClose, challenge }: Props) {
             aria-label="Close"
             className="w-9 h-9 rounded-full bg-oria-chip border border-oria flex items-center justify-center cursor-pointer"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2.5" strokeLinecap="round">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#9CA0AC"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
@@ -103,14 +122,27 @@ export function EditChallengeModal({ open, onClose, challenge }: Props) {
           {bannerUrl ? (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={bannerUrl} alt="Banner" className="absolute inset-0 w-full h-full object-cover" />
+              <img
+                src={bannerUrl}
+                alt="Banner"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <span className="text-[12px] font-semibold text-white">Replace image</span>
               </div>
             </>
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-text-muted">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                 <circle cx="8.5" cy="8.5" r="1.5" />
                 <polyline points="21 15 16 10 5 21" />
@@ -145,7 +177,9 @@ export function EditChallengeModal({ open, onClose, challenge }: Props) {
           className="w-full px-4 py-3.5 rounded-2xl border border-oria bg-oria-section text-[15px] text-text-primary placeholder:text-text-muted focus:border-accent-purple outline-none mb-4"
         />
 
-        <label className="text-[12px] font-medium text-text-secondary mb-1.5 block">Description</label>
+        <label className="text-[12px] font-medium text-text-secondary mb-1.5 block">
+          Description
+        </label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -156,7 +190,9 @@ export function EditChallengeModal({ open, onClose, challenge }: Props) {
 
         <div className="grid grid-cols-2 gap-3 mb-5">
           <div>
-            <label className="text-[12px] font-medium text-text-secondary mb-1.5 block">Goal (km/week)</label>
+            <label className="text-[12px] font-medium text-text-secondary mb-1.5 block">
+              Goal (km/week)
+            </label>
             <input
               type="number"
               inputMode="numeric"
@@ -168,7 +204,9 @@ export function EditChallengeModal({ open, onClose, challenge }: Props) {
             />
           </div>
           <div>
-            <label className="text-[12px] font-medium text-text-secondary mb-1.5 block">Max members</label>
+            <label className="text-[12px] font-medium text-text-secondary mb-1.5 block">
+              Max members
+            </label>
             <input
               type="number"
               inputMode="numeric"

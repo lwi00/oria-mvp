@@ -7,7 +7,12 @@ import { useUser, useStreak, useStartVacation, useEndVacation } from "@/lib/hook
 import { useToast } from "@/components/Toast";
 import { useI18n } from "@/lib/i18n";
 import { apiFetch } from "@/lib/api";
-import { isPushSupported, isPushSubscribed, subscribeToPush, unsubscribeFromPush } from "@/lib/push";
+import {
+  isPushSupported,
+  isPushSubscribed,
+  subscribeToPush,
+  unsubscribeFromPush,
+} from "@/lib/push";
 import Link from "next/link";
 
 interface Settings {
@@ -156,7 +161,9 @@ export default function SettingsPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="pt-1 pb-2"><div className="h-7 w-24 skeleton-shimmer rounded" /></div>
+        <div className="pt-1 pb-2">
+          <div className="h-7 w-24 skeleton-shimmer rounded" />
+        </div>
         <CardSkeleton />
         <CardSkeleton />
       </div>
@@ -171,35 +178,66 @@ export default function SettingsPage() {
           className="w-9 h-9 rounded-full bg-oria-chip border border-oria flex items-center justify-center cursor-pointer hover:bg-oria-elevated transition-colors"
           aria-label={t("settings.backToProfile")}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#9CA0AC"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M19 12H5" />
             <polyline points="12 19 5 12 12 5" />
           </svg>
         </Link>
-        <h1 className="text-2xl font-bold text-text-primary tracking-tight">{t("settings.title")}</h1>
+        <h1 className="text-2xl font-bold text-text-primary tracking-tight">
+          {t("settings.title")}
+        </h1>
       </div>
 
       {/* Language */}
       <Card>
         <div className="flex items-center gap-2.5 mb-1">
           <div className="w-8 h-8 rounded-lg bg-accent-purple/15 border border-accent-purple/25 flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#A78BFA"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <circle cx="12" cy="12" r="10" />
               <path d="M2 12h20" />
               <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
             </svg>
           </div>
-          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">{t("settings.language")}</p>
+          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">
+            {t("settings.language")}
+          </p>
         </div>
         <div className="py-3">
-          <p className="text-[12px] text-text-muted mb-3 leading-relaxed">{t("settings.languageDesc")}</p>
+          <p className="text-[12px] text-text-muted mb-3 leading-relaxed">
+            {t("settings.languageDesc")}
+          </p>
           <div className="flex gap-1.5 p-1 rounded-2xl bg-oria-chip border border-oria">
-            {([["en", "English"], ["fr", "Français"]] as const).map(([code, label]) => (
+            {(
+              [
+                ["en", "English"],
+                ["fr", "Français"],
+              ] as const
+            ).map(([code, label]) => (
               <button
                 key={code}
                 onClick={() => setLang(code)}
                 className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold transition-colors cursor-pointer ${
-                  lang === code ? "gradient-brand text-white shadow-button" : "text-text-secondary hover:text-text-primary"
+                  lang === code
+                    ? "gradient-brand text-white shadow-button"
+                    : "text-text-secondary hover:text-text-primary"
                 }`}
               >
                 {label}
@@ -213,12 +251,23 @@ export default function SettingsPage() {
       <Card>
         <div className="flex items-center gap-2.5 mb-1">
           <div className="w-8 h-8 rounded-lg bg-accent-sport/15 border border-accent-sport/25 flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FC4C02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#FC4C02"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" />
               <circle cx="12" cy="12" r="3" />
             </svg>
           </div>
-          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">{t("settings.vacationMode")}</p>
+          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">
+            {t("settings.vacationMode")}
+          </p>
         </div>
         <div className="py-3">
           <p className="text-[13px] text-text-secondary leading-relaxed">
@@ -230,10 +279,18 @@ export default function SettingsPage() {
             <div className="flex items-center gap-2.5 p-3 rounded-xl bg-accent-sport/10 border border-accent-sport/25">
               <div className="w-2 h-2 rounded-full bg-accent-sport animate-pulse" />
               <p className="text-[12px] text-accent-sport font-semibold flex-1">
-                {t("settings.vacationActive", { days: `${vacationDaysLeft} ${vacationDaysLeft === 1 ? t("settings.day") : t("settings.days")}` })}
+                {t("settings.vacationActive", {
+                  days: `${vacationDaysLeft} ${vacationDaysLeft === 1 ? t("settings.day") : t("settings.days")}`,
+                })}
               </p>
               <span className="text-[11px] text-text-muted tabular-nums">
-                {t("settings.vacationEnds", { date: vacationEndsAt?.toLocaleDateString(lang === "fr" ? "fr-FR" : undefined, { day: "numeric", month: "short" }) ?? "" })}
+                {t("settings.vacationEnds", {
+                  date:
+                    vacationEndsAt?.toLocaleDateString(lang === "fr" ? "fr-FR" : undefined, {
+                      day: "numeric",
+                      month: "short",
+                    }) ?? "",
+                })}
               </span>
             </div>
             <button
@@ -274,17 +331,32 @@ export default function SettingsPage() {
         <Card>
           <div className="flex items-center gap-2.5 mb-1">
             <div className="w-8 h-8 rounded-lg bg-green-500/15 border border-green-500/25 flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#22C55E"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M22 17H2a3 3 0 003-3V9a7 7 0 0114 0v5a3 3 0 003 3zm-8.27 4a2 2 0 01-3.46 0" />
               </svg>
             </div>
-            <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">{t("settings.push")}</p>
+            <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">
+              {t("settings.push")}
+            </p>
           </div>
           <div className="flex flex-col">
             <div className="flex items-center justify-between w-full py-3">
               <div className="text-left pr-4">
                 <p className="text-[14px] font-semibold text-text-primary">
-                  {pushLoading ? t("settings.pushUpdating") : pushEnabled ? t("settings.pushEnabled") : t("settings.pushEnable")}
+                  {pushLoading
+                    ? t("settings.pushUpdating")
+                    : pushEnabled
+                      ? t("settings.pushEnabled")
+                      : t("settings.pushEnable")}
                 </p>
                 <p className="text-[12px] text-text-muted mt-0.5 leading-relaxed">
                   {t("settings.pushDesc")}
@@ -317,12 +389,23 @@ export default function SettingsPage() {
       <Card>
         <div className="flex items-center gap-2.5 mb-1">
           <div className="w-8 h-8 rounded-lg bg-accent-purple/15 border border-accent-purple/25 flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#A78BFA"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
               <path d="M13.73 21a2 2 0 01-3.46 0" />
             </svg>
           </div>
-          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">{t("settings.notifications")}</p>
+          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">
+            {t("settings.notifications")}
+          </p>
         </div>
         <div className="flex flex-col divide-y divide-oria">
           <Toggle
@@ -356,12 +439,23 @@ export default function SettingsPage() {
       <Card>
         <div className="flex items-center gap-2.5 mb-1">
           <div className="w-8 h-8 rounded-lg bg-accent-gold/15 border border-accent-gold/25 flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#F59E0B"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <rect x="3" y="11" width="18" height="11" rx="2" />
               <path d="M7 11V7a5 5 0 0110 0v4" />
             </svg>
           </div>
-          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">{t("settings.privacy")}</p>
+          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">
+            {t("settings.privacy")}
+          </p>
         </div>
         <div className="flex flex-col divide-y divide-oria">
           <Toggle
@@ -383,12 +477,23 @@ export default function SettingsPage() {
       <Card>
         <div className="flex items-center gap-2.5 mb-1">
           <div className="w-8 h-8 rounded-lg bg-accent-sport/15 border border-accent-sport/25 flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FC4C02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#FC4C02"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M2 20h20" />
               <path d="M2 20V4l4 4 4-6 4 6 4-4 4 4v12" />
             </svg>
           </div>
-          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">{t("settings.units")}</p>
+          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">
+            {t("settings.units")}
+          </p>
         </div>
         <div className="flex flex-col divide-y divide-oria">
           <Toggle
@@ -404,12 +509,23 @@ export default function SettingsPage() {
       <Card>
         <div className="flex items-center gap-2.5 mb-1">
           <div className="w-8 h-8 rounded-lg bg-accent-gold/15 border border-accent-gold/25 flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#F59E0B"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
               <polyline points="16 7 22 7 22 13" />
             </svg>
           </div>
-          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">{t("settings.monthlyProgression")}</p>
+          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">
+            {t("settings.monthlyProgression")}
+          </p>
         </div>
         <div className="py-3">
           <p className="text-[12px] text-text-muted mb-3 leading-relaxed">
@@ -442,12 +558,23 @@ export default function SettingsPage() {
       <Card>
         <div className="flex items-center gap-2.5 mb-1">
           <div className="w-8 h-8 rounded-lg bg-success-500/15 border border-success-500/25 flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#10B981"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <line x1="12" y1="1" x2="12" y2="23" />
               <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
             </svg>
           </div>
-          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">{t("settings.currency")}</p>
+          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">
+            {t("settings.currency")}
+          </p>
         </div>
         <div className="py-3">
           <p className="text-[12px] text-text-muted mb-3 leading-relaxed">
@@ -483,7 +610,11 @@ export default function SettingsPage() {
               <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               {t("common.saving")}
             </span>
-          ) : dirty ? t("common.save") : t("common.allSaved")}
+          ) : dirty ? (
+            t("common.save")
+          ) : (
+            t("common.allSaved")
+          )}
         </button>
       </div>
     </div>

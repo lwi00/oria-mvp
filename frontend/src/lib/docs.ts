@@ -52,11 +52,12 @@ export function readPage(slug: string): { title: string; html: string } | null {
 
   // Pull the first h1 as the page title so the layout can show it without
   // duplicating it inside the rendered HTML.
-  let title = slug
-    .split("/")
-    .pop()!
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase()) || "Welcome";
+  let title =
+    slug
+      .split("/")
+      .pop()!
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase()) || "Welcome";
   const h1Match = /^#\s+(.+)$/m.exec(body);
   if (h1Match) title = h1Match[1].trim();
   const withoutH1 = body.replace(/^#\s+.+\n+/m, "");

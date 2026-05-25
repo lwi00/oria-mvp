@@ -22,12 +22,20 @@ export function ProgressRing({ percent, size = 64, stroke = 5 }: ProgressRingPro
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
         <circle
-          cx={size / 2} cy={size / 2} r={r}
-          fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke}
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke="rgba(255,255,255,0.08)"
+          strokeWidth={stroke}
         />
         <circle
-          cx={size / 2} cy={size / 2} r={r}
-          fill="none" stroke="url(#ringGrad)" strokeWidth={stroke}
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke="url(#ringGrad)"
+          strokeWidth={stroke}
           strokeDasharray={circ}
           strokeDashoffset={circ - (animated / 100) * circ}
           strokeLinecap="round"

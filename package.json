@@ -3,15 +3,40 @@
   "private": true,
   "scripts": {
     "dev": "pnpm --parallel -r run dev",
-    "dev:backend": "pnpm --filter backend run dev",
+    "dev:backend": "pnpm --filter oria-backend run dev",
     "dev:frontend": "pnpm --filter frontend run dev",
     "build": "pnpm -r run build",
-    "lint": "pnpm -r run lint"
+    "lint": "pnpm -r run lint",
+    "test": "pnpm --filter oria-backend run test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "frontend/**/*.{ts,tsx,js,jsx}": [
+      "prettier --write"
+    ],
+    "backend/**/*.{ts,js}": [
+      "prettier --write"
+    ],
+    "*.{json,yml,yaml,css}": [
+      "prettier --write"
+    ]
   },
   "engines": {
     "node": ">=20"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["prisma", "@prisma/client", "@prisma/engines", "esbuild"]
+    "onlyBuiltDependencies": [
+      "prisma",
+      "@prisma/client",
+      "@prisma/engines",
+      "esbuild"
+    ]
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.5",
+    "prettier": "^3.8.3"
   }
 }

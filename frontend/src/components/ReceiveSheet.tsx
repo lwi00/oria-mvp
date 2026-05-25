@@ -60,7 +60,15 @@ export function ReceiveSheet({ open, onClose, walletAddr }: ReceiveSheetProps) {
             aria-label="Close"
             className="w-9 h-9 rounded-full bg-white/[0.06] border border-white/[0.08] flex items-center justify-center cursor-pointer hover:bg-white/[0.1] transition-colors"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2.5" strokeLinecap="round">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#9CA0AC"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
@@ -73,7 +81,13 @@ export function ReceiveSheet({ open, onClose, walletAddr }: ReceiveSheetProps) {
         <div className="flex justify-center mb-5">
           <div className="p-4 bg-white rounded-2xl shadow-card">
             {walletAddr ? (
-              <QRCodeSVG value={walletAddr} size={184} level="M" bgColor="#FFFFFF" fgColor="#0B0B11" />
+              <QRCodeSVG
+                value={walletAddr}
+                size={184}
+                level="M"
+                bgColor="#FFFFFF"
+                fgColor="#0B0B11"
+              />
             ) : (
               <div className="w-[184px] h-[184px] flex items-center justify-center text-text-muted text-sm">
                 No wallet yet
@@ -90,23 +104,52 @@ export function ReceiveSheet({ open, onClose, walletAddr }: ReceiveSheetProps) {
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-9 h-9 rounded-full bg-accent-purple/15 border border-accent-purple/25 flex items-center justify-center flex-shrink-0">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#A78BFA"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <rect x="2" y="7" width="20" height="14" rx="2" />
                   <path d="M16 3H8a2 2 0 00-2 2v2h12V5a2 2 0 00-2-2z" />
                 </svg>
               </div>
               <div className="min-w-0 text-left">
-                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Your Oria wallet</p>
+                <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+                  Your Oria wallet
+                </p>
                 <p className="text-[13px] font-mono text-text-primary truncate">{short}</p>
               </div>
             </div>
             <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center group-hover:bg-accent-purple/15 transition-colors">
               {copied ? (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#10B981"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               ) : (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#9CA0AC"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <rect x="9" y="9" width="13" height="13" rx="2" />
                   <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
                 </svg>
@@ -116,14 +159,24 @@ export function ReceiveSheet({ open, onClose, walletAddr }: ReceiveSheetProps) {
         )}
 
         <div className="flex items-start gap-2.5 p-3 rounded-xl bg-warning-100 border border-warning-500/25 mb-5">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 mt-0.5">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#F59E0B"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="flex-shrink-0 mt-0.5"
+          >
             <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
             <line x1="12" y1="9" x2="12" y2="13" />
             <line x1="12" y1="17" x2="12.01" y2="17" />
           </svg>
           <p className="text-[12px] text-warning-500 leading-relaxed">
-            Make sure you&apos;re sending on a supported network. Transfers on unsupported chains may
-            result in loss of funds.
+            Make sure you&apos;re sending on a supported network. Transfers on unsupported chains
+            may result in loss of funds.
           </p>
         </div>
 

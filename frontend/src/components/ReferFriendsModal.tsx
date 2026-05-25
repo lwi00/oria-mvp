@@ -75,7 +75,15 @@ export function ReferFriendsModal({ open, onClose, userId, displayName }: Props)
             aria-label="Close"
             className="w-9 h-9 rounded-full bg-oria-chip border border-oria flex items-center justify-center cursor-pointer"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2.5" strokeLinecap="round">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#9CA0AC"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
@@ -85,7 +93,16 @@ export function ReferFriendsModal({ open, onClose, userId, displayName }: Props)
         <div className="mt-3 mb-5 p-4 rounded-2xl bg-accent-purple/10 border border-accent-purple/25">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full gradient-brand flex items-center justify-center flex-shrink-0">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
                 <path d="M22 11l-3 3-3-3M19 14V4" />
@@ -113,11 +130,29 @@ export function ReferFriendsModal({ open, onClose, userId, displayName }: Props)
           </span>
           <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-oria-chip border border-oria flex items-center justify-center">
             {copied ? (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#10B981"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             ) : (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#9CA0AC"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <rect x="9" y="9" width="13" height="13" rx="2" />
                 <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
               </svg>
@@ -131,7 +166,16 @@ export function ReferFriendsModal({ open, onClose, userId, displayName }: Props)
             onClick={nativeShare}
             className="w-full py-3.5 rounded-xl gradient-brand text-white font-semibold text-sm shadow-button cursor-pointer flex items-center justify-center gap-2 mb-3"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <circle cx="18" cy="5" r="3" />
               <circle cx="6" cy="12" r="3" />
               <circle cx="18" cy="19" r="3" />
@@ -176,7 +220,8 @@ export function ReferFriendsModal({ open, onClose, userId, displayName }: Props)
         </div>
 
         <p className="text-[11px] text-text-muted text-center leading-relaxed">
-          Chaque ami que tu fais rejoindre devient un partenaire de consistance — vous vous tirez vers le haut, votre cercle alimente votre régularité.
+          Chaque ami que tu fais rejoindre devient un partenaire de consistance — vous vous tirez
+          vers le haut, votre cercle alimente votre régularité.
         </p>
       </div>
     </div>,

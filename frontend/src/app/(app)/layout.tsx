@@ -10,11 +10,7 @@ import SplashLoading from "@/app/loading";
 
 const MIN_SPLASH_MS = 1800;
 
-export default function AppLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { ready, authenticated, authVerified } = useAppAuth();
   const router = useRouter();
   const wasAuthenticated = useRef(false);
@@ -33,7 +29,8 @@ export default function AppLayout({
     }
   }, [ready, authenticated, router]);
 
-  if (!minTimeElapsed || !ready || (!authVerified && !wasAuthenticated.current)) return <SplashLoading />;
+  if (!minTimeElapsed || !ready || (!authVerified && !wasAuthenticated.current))
+    return <SplashLoading />;
   if (ready && !authenticated && !wasAuthenticated.current) return null;
 
   return (
@@ -46,9 +43,7 @@ export default function AppLayout({
 
       <Header />
 
-      <main className="flex-1 px-4 py-3 pb-6 relative z-[1]">
-        {children}
-      </main>
+      <main className="flex-1 px-4 py-3 pb-6 relative z-[1]">{children}</main>
 
       <InstallPrompt />
       <TabBar />

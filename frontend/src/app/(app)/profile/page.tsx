@@ -3,7 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/Card";
 import { CardSkeleton } from "@/components/Skeleton";
-import { useUser, useAppleHealthStatus, useConnectAppleHealth, useStravaStatus, useStravaSync } from "@/lib/hooks";
+import {
+  useUser,
+  useAppleHealthStatus,
+  useConnectAppleHealth,
+  useStravaStatus,
+  useStravaSync,
+} from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
 import { apiFetch } from "@/lib/api";
 import { usePrivy } from "@privy-io/react-auth";
@@ -84,9 +90,10 @@ export default function ProfilePage() {
       await refetch();
       toast("Profile updated!");
     } catch (e) {
-      const msg = e instanceof Error && e.message && !e.message.startsWith("API error")
-        ? e.message
-        : "Failed to save changes";
+      const msg =
+        e instanceof Error && e.message && !e.message.startsWith("API error")
+          ? e.message
+          : "Failed to save changes";
       toast(msg, "error");
     } finally {
       setSaving(false);
@@ -129,7 +136,8 @@ export default function ProfilePage() {
               style={{
                 width: 84,
                 height: 84,
-                background: "linear-gradient(160deg, rgba(167,139,250,0.18), rgba(124,58,237,0.10))",
+                background:
+                  "linear-gradient(160deg, rgba(167,139,250,0.18), rgba(124,58,237,0.10))",
                 border: "2px solid #A78BFA",
                 boxShadow: "0 4px 16px rgba(139,92,246,0.4)",
               }}
@@ -156,7 +164,16 @@ export default function ProfilePage() {
             className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full gradient-brand flex items-center justify-center shadow-button border-2 border-[#07070B] cursor-pointer active:scale-90 transition-transform"
             aria-label="Upload profile photo"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
               <circle cx="12" cy="13" r="4" />
             </svg>
@@ -263,7 +280,9 @@ export default function ProfilePage() {
             −
           </button>
           <div className="flex-1 px-4 py-3 rounded-xl border border-oria bg-oria-section text-center">
-            <span className="text-xl font-extrabold text-text-primary tabular-nums">{targetKm}</span>
+            <span className="text-xl font-extrabold text-text-primary tabular-nums">
+              {targetKm}
+            </span>
             <span className="text-sm text-text-muted font-medium ml-1">
               {goalType === "steps" ? "k steps" : "km"}
             </span>
@@ -334,27 +353,42 @@ export default function ProfilePage() {
             </div>
             {stravaStatus?.connected ? (
               <button
-                onClick={() => stravaSync.mutate(undefined, {
-                  onSuccess: (data) => toast(`Synced ${data.synced} weeks from Strava`),
-                  onError: () => toast("Sync failed", "error"),
-                })}
+                onClick={() =>
+                  stravaSync.mutate(undefined, {
+                    onSuccess: (data) => toast(`Synced ${data.synced} weeks from Strava`),
+                    onError: () => toast("Sync failed", "error"),
+                  })
+                }
                 disabled={stravaSync.isPending}
                 className="text-[11px] font-semibold px-3.5 py-1.5 rounded-full bg-accent-purple/15 border border-accent-purple/25 text-accent-purple-bright cursor-pointer min-h-[32px] disabled:opacity-50 flex items-center gap-1.5"
               >
                 {stravaSync.isPending ? (
                   <span className="inline-block w-3 h-3 border-2 border-accent-purple-bright/30 border-t-accent-purple-bright rounded-full animate-spin" />
                 ) : (
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M1 4v6h6"/><path d="M23 20v-6h-6"/>
-                    <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/>
+                  <svg
+                    width="11"
+                    height="11"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M1 4v6h6" />
+                    <path d="M23 20v-6h-6" />
+                    <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" />
                   </svg>
-                )} {stravaSync.isPending ? "Syncing…" : "Sync"}
+                )}{" "}
+                {stravaSync.isPending ? "Syncing…" : "Sync"}
               </button>
             ) : (
               <button
                 onClick={() => {
                   const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID ?? "209985";
-                  const redirectUri = process.env.NEXT_PUBLIC_STRAVA_REDIRECT_URI ?? `${window.location.origin}/strava/callback`;
+                  const redirectUri =
+                    process.env.NEXT_PUBLIC_STRAVA_REDIRECT_URI ??
+                    `${window.location.origin}/strava/callback`;
                   const url = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=activity:read_all`;
                   window.location.href = url;
                 }}
@@ -379,7 +413,16 @@ export default function ProfilePage() {
             </div>
             {healthStatus?.connected ? (
               <span className="text-[11px] font-semibold text-success-500 bg-success-100 border border-success-500/25 px-2.5 py-1 rounded-full inline-flex items-center gap-1">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
                 Connected
@@ -406,12 +449,18 @@ export default function ProfilePage() {
           and Settings. Sized as a single card with 5 child rows. */}
       <Card className="!p-3">
         <div className="px-2 pt-1 pb-2">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-purple-bright">Understand Oria</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-purple-bright">
+            Understand Oria
+          </p>
           <p className="text-[11px] text-text-muted mt-0.5">Short, plain English.</p>
         </div>
         {[
           { slug: "how-it-works", title: "How it works", sub: "Four stages, three minutes" },
-          { slug: "yield", title: "Where the yield comes from", sub: "Pool, baseline, Morpho vault" },
+          {
+            slug: "yield",
+            title: "Where the yield comes from",
+            sub: "Pool, baseline, Morpho vault",
+          },
           { slug: "crypto", title: "Is this crypto?", sub: "Yes, and why that's fine" },
           { slug: "security", title: "Security FAQ", sub: "The hard questions, answered" },
           { slug: "glossary", title: "Glossary", sub: "Every word, defined" },
@@ -423,9 +472,21 @@ export default function ProfilePage() {
           >
             <div className="min-w-0 flex-1">
               <p className="text-[13.5px] font-semibold text-text-primary">{entry.title}</p>
-              <p className="text-[11px] text-text-muted mt-0.5 leading-snug truncate">{entry.sub}</p>
+              <p className="text-[11px] text-text-muted mt-0.5 leading-snug truncate">
+                {entry.sub}
+              </p>
             </div>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64697A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#64697A"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="shrink-0"
+            >
               <path d="M9 18l6-6-6-6" />
             </svg>
           </Link>
@@ -439,7 +500,16 @@ export default function ProfilePage() {
       >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-accent-purple/15 border border-accent-purple/25 flex items-center justify-center">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#A78BFA"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <circle cx="12" cy="12" r="3" />
               <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
             </svg>
@@ -449,7 +519,16 @@ export default function ProfilePage() {
             <p className="text-[11px] text-text-muted">Notifications, privacy, units</p>
           </div>
         </div>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64697A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#64697A"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <polyline points="9 18 15 12 9 6" />
         </svg>
       </Link>
@@ -466,7 +545,9 @@ export default function ProfilePage() {
               <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               Saving…
             </span>
-          ) : "Save changes"}
+          ) : (
+            "Save changes"
+          )}
         </button>
         <button
           onClick={async () => {

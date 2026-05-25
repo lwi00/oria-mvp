@@ -12,13 +12,24 @@ interface QuickActionProps {
 }
 
 const tintMap = {
-  purple:  { bg: "bg-accent-purple/15",  ring: "border-accent-purple/25",  text: "text-accent-purple-bright" },
-  gold:    { bg: "bg-accent-gold/15",    ring: "border-accent-gold/25",    text: "text-accent-gold" },
-  sport:   { bg: "bg-accent-sport/15",   ring: "border-accent-sport/25",   text: "text-accent-sport" },
-  neutral: { bg: "bg-oria-chip",         ring: "border-oria",              text: "text-text-primary" },
+  purple: {
+    bg: "bg-accent-purple/15",
+    ring: "border-accent-purple/25",
+    text: "text-accent-purple-bright",
+  },
+  gold: { bg: "bg-accent-gold/15", ring: "border-accent-gold/25", text: "text-accent-gold" },
+  sport: { bg: "bg-accent-sport/15", ring: "border-accent-sport/25", text: "text-accent-sport" },
+  neutral: { bg: "bg-oria-chip", ring: "border-oria", text: "text-text-primary" },
 };
 
-export function QuickAction({ label, icon, onClick, href, tint = "purple", disabled }: QuickActionProps) {
+export function QuickAction({
+  label,
+  icon,
+  onClick,
+  href,
+  tint = "purple",
+  disabled,
+}: QuickActionProps) {
   const t = tintMap[tint];
 
   const content = (

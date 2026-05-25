@@ -1,10 +1,6 @@
 "use client";
 
-export default function OnboardingLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function OnboardingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="max-w-[420px] mx-auto min-h-screen bg-oria-bg flex flex-col relative shadow-[0_0_60px_rgba(124,58,237,0.06)] border-x border-oria">
       {/* Background blobs */}

@@ -64,10 +64,7 @@ async function getFriendIds(prisma: PrismaClient, userId: string): Promise<Set<s
   return set;
 }
 
-export async function listChallenges(
-  prisma: PrismaClient,
-  userId: string,
-) {
+export async function listChallenges(prisma: PrismaClient, userId: string) {
   // Friends-only challenges are visible to: the creator, accepted friends of
   // the creator, and anyone who's already a member (in case a friendship
   // gets removed after joining).
@@ -97,11 +94,7 @@ export async function listChallenges(
   });
 }
 
-export async function joinChallenge(
-  prisma: PrismaClient,
-  userId: string,
-  challengeId: string,
-) {
+export async function joinChallenge(prisma: PrismaClient, userId: string, challengeId: string) {
   const challenge = await prisma.challenge.findUnique({
     where: { id: challengeId },
     include: { _count: { select: { members: true } } },
@@ -150,11 +143,7 @@ export async function updateChallenge(
   });
 }
 
-export async function deleteChallenge(
-  prisma: PrismaClient,
-  userId: string,
-  challengeId: string,
-) {
+export async function deleteChallenge(prisma: PrismaClient, userId: string, challengeId: string) {
   const challenge = await prisma.challenge.findUnique({
     where: { id: challengeId },
     select: { id: true, creatorId: true },
@@ -167,10 +156,7 @@ export async function deleteChallenge(
   return { ok: true };
 }
 
-export async function getChallengeDetails(
-  prisma: PrismaClient,
-  challengeId: string,
-) {
+export async function getChallengeDetails(prisma: PrismaClient, challengeId: string) {
   const challenge = await prisma.challenge.findUnique({
     where: { id: challengeId },
     include: {
@@ -197,15 +183,16 @@ export async function getChallengeDetails(
   const weeks = weeksBetween(challenge.startDate, challenge.endDate);
   const memberIds = challenge.members.map((m) => m.userId);
 
-  const activities = memberIds.length > 0 && weeks.length > 0
-    ? await prisma.activity.findMany({
-        where: {
-          userId: { in: memberIds },
-          weekStart: { gte: weeks[0], lte: weeks[weeks.length - 1] },
-        },
-        select: { userId: true, weekStart: true, distanceKm: true },
-      })
-    : [];
+  const activities =
+    memberIds.length > 0 && weeks.length > 0
+      ? await prisma.activity.findMany({
+          where: {
+            userId: { in: memberIds },
+            weekStart: { gte: weeks[0], lte: weeks[weeks.length - 1] },
+          },
+          select: { userId: true, weekStart: true, distanceKm: true },
+        })
+      : [];
 
   const byUserWeek = new Map<string, number>();
   for (const a of activities) {
@@ -258,8 +245,12 @@ export async function getChallengeDetails(
 
   // Milestones (collective)
   const halfwayTarget = Math.floor(totalWeeksPossible / 2);
-  const firstAllInIdx = weeklyParticipation.findIndex((w) => w.isPast && w.ratio >= 1 && w.total > 0);
-  const firstHalfWaveIdx = weeklyParticipation.findIndex((w) => w.isPast && w.ratio >= 0.5 && w.total > 0);
+  const firstAllInIdx = weeklyParticipation.findIndex(
+    (w) => w.isPast && w.ratio >= 1 && w.total > 0,
+  );
+  const firstHalfWaveIdx = weeklyParticipation.findIndex(
+    (w) => w.isPast && w.ratio >= 0.5 && w.total > 0,
+  );
 
   const milestones = [
     {

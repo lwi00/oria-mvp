@@ -39,7 +39,16 @@ export default function FriendProfilePage() {
             href="/social"
             className="w-11 h-11 rounded-xl bg-oria-chip border border-oria flex items-center justify-center flex-shrink-0"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#9CA0AC"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </Link>
@@ -60,7 +69,16 @@ export default function FriendProfilePage() {
             href="/social"
             className="w-11 h-11 rounded-xl bg-oria-chip border border-oria flex items-center justify-center flex-shrink-0"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#9CA0AC"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </Link>
@@ -68,8 +86,13 @@ export default function FriendProfilePage() {
         </div>
         <Card>
           <div className="text-center py-8">
-            <p className="text-text-secondary text-[15px] font-medium">Could not load this profile.</p>
-            <Link href="/social" className="text-accent-purple-bright text-[13px] font-semibold mt-2 inline-block">
+            <p className="text-text-secondary text-[15px] font-medium">
+              Could not load this profile.
+            </p>
+            <Link
+              href="/social"
+              className="text-accent-purple-bright text-[13px] font-semibold mt-2 inline-block"
+            >
               Back to Social
             </Link>
           </div>
@@ -94,7 +117,16 @@ export default function FriendProfilePage() {
           href="/social"
           className="w-11 h-11 rounded-xl bg-oria-chip border border-oria flex items-center justify-center flex-shrink-0"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#9CA0AC"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </Link>
@@ -104,11 +136,14 @@ export default function FriendProfilePage() {
       {/* Avatar + Name + Goal */}
       <div className="flex flex-col items-center py-4">
         <div className="mb-3">
-          <Avatar initials={getInitials(profile.displayName)} size={84} highlight src={profile.avatarUrl ?? null} />
+          <Avatar
+            initials={getInitials(profile.displayName)}
+            size={84}
+            highlight
+            src={profile.avatarUrl ?? null}
+          />
         </div>
-        <p className="text-lg font-bold text-text-primary">
-          {profile.displayName || "Anonymous"}
-        </p>
+        <p className="text-lg font-bold text-text-primary">{profile.displayName || "Anonymous"}</p>
         <p className="text-[13px] text-text-secondary mt-0.5">
           {goalTypeLabel(profile.goalType)} &middot; {profile.targetKm} {unit}/week
         </p>
@@ -121,10 +156,20 @@ export default function FriendProfilePage() {
         href={`/challenges?propose=${profile.id}&name=${encodeURIComponent(profile.displayName ?? "")}`}
         className="w-full py-3.5 rounded-2xl gradient-brand text-white font-semibold text-[15px] shadow-button text-center flex items-center justify-center gap-2 min-h-[48px] active:scale-[0.98] transition-transform"
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="M6 9H4a2 2 0 000 4c0 2.21 1.79 4 4 4h8c2.21 0 4-1.79 4-4a2 2 0 000-4h-2" />
           <path d="M6 3h12v6a6 6 0 01-12 0V3z" />
-          <line x1="12" y1="17" x2="12" y2="21" /><line x1="9" y1="21" x2="15" y2="21" />
+          <line x1="12" y1="17" x2="12" y2="21" />
+          <line x1="9" y1="21" x2="15" y2="21" />
         </svg>
         Propose a challenge
       </Link>
@@ -144,9 +189,7 @@ export default function FriendProfilePage() {
           <p className="text-[11px] text-text-muted font-medium mt-0.5">Weeks active</p>
         </Card>
         <Card className="!p-3.5 text-center">
-          <p className="text-xl font-extrabold text-text-primary tabular-nums">
-            {consistency}%
-          </p>
+          <p className="text-xl font-extrabold text-text-primary tabular-nums">{consistency}%</p>
           <p className="text-[11px] text-text-muted font-medium mt-0.5">Consistency</p>
         </Card>
       </div>
@@ -190,7 +233,8 @@ export default function FriendProfilePage() {
         ) : (
           <div className="flex flex-col gap-2">
             {profile.activities.map((week) => {
-              const pct = maxDistance > 0 ? Math.min(100, (week.distanceKm / maxDistance) * 100) : 0;
+              const pct =
+                maxDistance > 0 ? Math.min(100, (week.distanceKm / maxDistance) * 100) : 0;
               return (
                 <div key={week.weekStart} className="flex items-center gap-3">
                   <p className="text-[11px] text-text-muted font-medium w-14 flex-shrink-0 tabular-nums">
@@ -199,9 +243,7 @@ export default function FriendProfilePage() {
                   <div className="flex-1 h-6 rounded-lg bg-[rgba(255,255,255,0.04)] overflow-hidden relative">
                     <div
                       className={`h-full rounded-lg transition-all ${
-                        week.goalMet
-                          ? "bg-success-500/70"
-                          : "bg-accent-sport/60"
+                        week.goalMet ? "bg-success-500/70" : "bg-accent-sport/60"
                       }`}
                       style={{ width: `${Math.max(pct, 3)}%` }}
                     />

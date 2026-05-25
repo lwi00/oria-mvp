@@ -7,15 +7,10 @@ const exchangeBodySchema = z.object({ code: z.string() });
 export default async function stravaRoutes(app: FastifyInstance) {
   // POST /api/strava/exchange — exchange OAuth code for tokens
   app.post("/exchange", async (request, reply) => {
-      const { code } = exchangeBodySchema.parse(request.body);
-      const result = await exchangeStravaCode(
-        app.prisma,
-        request.userId,
-        code,
-      );
-      return reply.send(result);
-    },
-  );
+    const { code } = exchangeBodySchema.parse(request.body);
+    const result = await exchangeStravaCode(app.prisma, request.userId, code);
+    return reply.send(result);
+  });
 
   // POST /api/strava/sync — manually re-sync activities
   app.post("/sync", async (request, reply) => {

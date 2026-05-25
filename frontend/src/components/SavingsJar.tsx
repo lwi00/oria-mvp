@@ -56,11 +56,22 @@ export function SavingsJar({ fillPercent = 65, streak = 6 }: SavingsJarProps) {
           />
         </g>
         <rect x="70" y="30" width="60" height="10" rx="3" fill="rgba(124,58,237,0.2)" />
-        <line x1="60" y1="80" x2="60" y2="170" stroke="rgba(255,255,255,0.45)" strokeWidth="5" strokeLinecap="round" />
+        <line
+          x1="60"
+          y1="80"
+          x2="60"
+          y2="170"
+          stroke="rgba(255,255,255,0.45)"
+          strokeWidth="5"
+          strokeLinecap="round"
+        />
       </svg>
       {/* Streak badge */}
       <div className="absolute bottom-4 -right-2 w-[52px] h-[52px] rounded-full gradient-brand flex items-center justify-center shadow-button ring-4 ring-white/90">
-        <span className="text-xl font-bold text-white">{streak}<span className="text-base">🔥</span></span>
+        <span className="text-xl font-bold text-white">
+          {streak}
+          <span className="text-base">🔥</span>
+        </span>
       </div>
     </div>
   );

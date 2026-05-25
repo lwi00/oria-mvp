@@ -20,7 +20,11 @@ interface AppAuthState {
   authenticated: boolean;
   authVerified: boolean;
 }
-const AuthContext = createContext<AppAuthState>({ ready: true, authenticated: true, authVerified: true });
+const AuthContext = createContext<AppAuthState>({
+  ready: true,
+  authenticated: true,
+  authVerified: true,
+});
 export const useAppAuth = () => useContext(AuthContext);
 
 // Merged bridge: reads Privy state, registers the token getter, exposes authVerified,
@@ -43,8 +47,12 @@ function PrivyAuthContextBridge({ children }: { children: React.ReactNode }) {
     // Proceed regardless of the result — apiFetch will handle a null token gracefully.
     getAccessToken()
       .catch(() => null)
-      .then(() => { if (!cancelled) setAuthVerified(true); });
-    return () => { cancelled = true; };
+      .then(() => {
+        if (!cancelled) setAuthVerified(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [authenticated, getAccessToken]);
 
   // Handle unauthorized API responses → logout
@@ -141,9 +149,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         },
       }}
     >
-      <PrivyAuthContextBridge>
-        {inner}
-      </PrivyAuthContextBridge>
+      <PrivyAuthContextBridge>{inner}</PrivyAuthContextBridge>
     </PrivyProvider>
   );
 }

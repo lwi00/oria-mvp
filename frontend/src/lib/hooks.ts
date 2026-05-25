@@ -152,7 +152,15 @@ interface Deposit {
 
 // Hooks
 export function useLastRun() {
-  return useQuery<{ lastRun: { name: string; distanceKm: number; date: string; movingTimeSec: number; type: string } | null }>({
+  return useQuery<{
+    lastRun: {
+      name: string;
+      distanceKm: number;
+      date: string;
+      movingTimeSec: number;
+      type: string;
+    } | null;
+  }>({
     queryKey: ["strava", "last-run"],
     queryFn: () => apiFetch("/api/strava/last-run"),
   });
@@ -301,9 +309,21 @@ export interface ChallengeDetail {
     weeksElapsed: number;
     weekly: Array<{ weekStart: string; distanceKm: number; goalMet: boolean; isPast: boolean }>;
   }>;
-  weeklyParticipation: Array<{ weekStart: string; isPast: boolean; metCount: number; total: number; ratio: number }>;
+  weeklyParticipation: Array<{
+    weekStart: string;
+    isPast: boolean;
+    metCount: number;
+    total: number;
+    ratio: number;
+  }>;
   aggregate: { totalWeeksMet: number; totalWeeksPossible: number; ratio: number };
-  milestones: Array<{ key: string; label: string; sub: string | null; achieved: boolean; at?: string | null }>;
+  milestones: Array<{
+    key: string;
+    label: string;
+    sub: string | null;
+    achieved: boolean;
+    at?: string | null;
+  }>;
 }
 
 export function useChallenge(id: string | undefined) {
@@ -377,9 +397,7 @@ export function useCreateChallenge() {
       visibility?: "public" | "friends";
     }) => {
       const startDate = new Date().toISOString();
-      const endDate = new Date(
-        Date.now() + data.durationWeeks * 7 * 86400_000,
-      ).toISOString();
+      const endDate = new Date(Date.now() + data.durationWeeks * 7 * 86400_000).toISOString();
       return apiFetch("/api/challenges", {
         method: "POST",
         body: JSON.stringify({
@@ -659,7 +677,10 @@ export function useJoinChallenge() {
 export function useUpdateChallenge() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...body }: {
+    mutationFn: ({
+      id,
+      ...body
+    }: {
       id: string;
       title?: string;
       description?: string | null;
@@ -712,8 +733,7 @@ export function useWeeklyLeaderboard() {
 export function useLikeFeedEvent() {
   const queryClient = useQueryClient();
   return useMutation<{ likes: number; liked: boolean }, Error, string>({
-    mutationFn: (eventId: string) =>
-      apiFetch(`/api/feed/${eventId}/like`, { method: "POST" }),
+    mutationFn: (eventId: string) => apiFetch(`/api/feed/${eventId}/like`, { method: "POST" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["feed"] });
     },
@@ -725,8 +745,7 @@ export function useLikeFeedEvent() {
 export function useRecoverStreak() {
   const queryClient = useQueryClient();
   return useMutation<{ recovered: boolean; newCount: number }>({
-    mutationFn: () =>
-      apiFetch("/api/streaks/recover", { method: "POST" }),
+    mutationFn: () => apiFetch("/api/streaks/recover", { method: "POST" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["streak"] });
       queryClient.invalidateQueries({ queryKey: ["wallet"] });

@@ -17,7 +17,11 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div
           className="absolute -top-[15%] -right-[5%] w-[700px] h-[700px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(124,58,237,0.18) 0%, rgba(124,58,237,0.04) 40%, transparent 70%)", filter: "blur(60px)" }}
+          style={{
+            background:
+              "radial-gradient(circle, rgba(124,58,237,0.18) 0%, rgba(124,58,237,0.04) 40%, transparent 70%)",
+            filter: "blur(60px)",
+          }}
         />
       </div>
 
@@ -29,7 +33,16 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
               className="w-7 h-7 rounded-lg flex items-center justify-center"
               style={{ background: "linear-gradient(135deg, #7c3aed, #a78bfa)" }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M12 2L2 7l10 5 10-5-10-5z" />
                 <path d="M2 17l10 5 10-5" />
                 <path d="M2 12l10 5 10-5" />
@@ -43,7 +56,10 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
           <Link
             href="/onboarding"
             className="text-[13px] font-semibold px-4 py-2 rounded-xl text-white"
-            style={{ background: "linear-gradient(135deg, #7c3aed, #9333ea)", boxShadow: "0 2px 16px rgba(124,58,237,0.35)" }}
+            style={{
+              background: "linear-gradient(135deg, #7c3aed, #9333ea)",
+              boxShadow: "0 2px 16px rgba(124,58,237,0.35)",
+            }}
           >
             Launch App
           </Link>
@@ -100,7 +116,10 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
                     const href = l.slug === "" ? "/docs" : `/docs/${l.slug}`;
                     return (
                       <li key={l.slug}>
-                        <Link href={href} className="block px-3 py-1.5 rounded-lg text-[13px] text-white/70 hover:bg-white/5">
+                        <Link
+                          href={href}
+                          className="block px-3 py-1.5 rounded-lg text-[13px] text-white/70 hover:bg-white/5"
+                        >
                           {l.title}
                         </Link>
                       </li>

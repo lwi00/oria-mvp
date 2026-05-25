@@ -29,7 +29,9 @@ export function LearnBottomSheet({ open, onClose, streakCount }: Props) {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     setPage(0);
-    const onEsc = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
     document.addEventListener("keydown", onEsc);
     return () => {
       document.body.style.overflow = prev;
@@ -68,7 +70,15 @@ export function LearnBottomSheet({ open, onClose, streakCount }: Props) {
               aria-label="Close"
               className="w-8 h-8 rounded-full bg-oria-chip border border-oria flex items-center justify-center"
             >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2.5" strokeLinecap="round">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#9CA0AC"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              >
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
             </button>
@@ -92,10 +102,14 @@ export function LearnBottomSheet({ open, onClose, streakCount }: Props) {
                 Lending, in plain terms
               </h2>
               <p className="text-[14px] text-text-secondary leading-relaxed">
-                A bank takes your deposit, lends it out, and keeps most of the interest. <span className="text-text-primary font-semibold">DeFi</span> — finance that runs on open software instead of a bank — lets you lend directly.
+                A bank takes your deposit, lends it out, and keeps most of the interest.{" "}
+                <span className="text-text-primary font-semibold">DeFi</span> — finance that runs on
+                open software instead of a bank — lets you lend directly.
               </p>
               <p className="text-[14px] text-text-secondary leading-relaxed">
-                When someone borrows what you&apos;ve put in, they pay interest. That interest is your yield — no branch, no middleman, just public code matching lenders and borrowers.
+                When someone borrows what you&apos;ve put in, they pay interest. That interest is
+                your yield — no branch, no middleman, just public code matching lenders and
+                borrowers.
               </p>
             </div>
 
@@ -105,16 +119,24 @@ export function LearnBottomSheet({ open, onClose, streakCount }: Props) {
                 Why a borrower can&apos;t run off with it
               </h2>
               <p className="text-[14px] text-text-secondary leading-relaxed">
-                To borrow anything, they first lock up <span className="text-text-primary font-semibold">more value than they take out</span> — borrow $100 and you might post $150 of collateral.
+                To borrow anything, they first lock up{" "}
+                <span className="text-text-primary font-semibold">
+                  more value than they take out
+                </span>{" "}
+                — borrow $100 and you might post $150 of collateral.
               </p>
               <div className="rounded-2xl border border-accent-purple/25 bg-accent-purple/8 p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-purple-bright">Over-collateralised</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-purple-bright">
+                  Over-collateralised
+                </p>
                 <p className="text-[12px] text-text-muted mt-1.5 leading-snug">
-                  If a borrower stops repaying, the system automatically sells their collateral to pay lenders back — before the loan can ever go underwater.
+                  If a borrower stops repaying, the system automatically sells their collateral to
+                  pay lenders back — before the loan can ever go underwater.
                 </p>
               </div>
               <p className="text-[13px] text-text-secondary leading-relaxed">
-                Your loan is always backed by collateral worth more than the loan itself. That&apos;s the core protection, and it runs on its own.
+                Your loan is always backed by collateral worth more than the loan itself.
+                That&apos;s the core protection, and it runs on its own.
               </p>
             </div>
 
@@ -124,17 +146,25 @@ export function LearnBottomSheet({ open, onClose, streakCount }: Props) {
                 What you actually hold
               </h2>
               <p className="text-[14px] text-text-secondary leading-relaxed">
-                You don&apos;t lend regular dollars — you lend <span className="text-text-primary font-semibold">USDC</span>: a digital token worth $1, issued by Circle and backed by real dollars and US Treasury bills. The dollar, in a form a blockchain can move.
+                You don&apos;t lend regular dollars — you lend{" "}
+                <span className="text-text-primary font-semibold">USDC</span>: a digital token worth
+                $1, issued by Circle and backed by real dollars and US Treasury bills. The dollar,
+                in a form a blockchain can move.
               </p>
               <div className="rounded-2xl border border-oria bg-oria-section p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">Morpho</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+                  Morpho
+                </p>
                 <p className="text-[16px] font-bold text-text-primary mt-1">~$7.4B deposited</p>
                 <p className="text-[12px] text-text-muted mt-1.5 leading-snug">
-                  Your USDC sits in a Morpho vault — the lending protocol matching it with those collateralised borrowers.
+                  Your USDC sits in a Morpho vault — the lending protocol matching it with those
+                  collateralised borrowers.
                 </p>
               </div>
               <p className="text-[13px] text-text-secondary leading-relaxed">
-                The wallet holding your position is <span className="text-text-primary font-semibold">yours</span> — Privy-issued, no seed phrase — and you can withdraw any time. Oria never signs on your behalf.
+                The wallet holding your position is{" "}
+                <span className="text-text-primary font-semibold">yours</span> — Privy-issued, no
+                seed phrase — and you can withdraw any time. Oria never signs on your behalf.
               </p>
             </div>
 
@@ -144,19 +174,39 @@ export function LearnBottomSheet({ open, onClose, streakCount }: Props) {
                 How your rate is set each week
               </h2>
               <p className="text-[14px] text-text-secondary leading-relaxed">
-                The vault pays a yield. <span className="text-text-primary font-semibold">Everyone earns a baseline share</span> of it, whatever they do. The rest goes into a bonus pool that&apos;s split by how consistent you&apos;ve been.
+                The vault pays a yield.{" "}
+                <span className="text-text-primary font-semibold">
+                  Everyone earns a baseline share
+                </span>{" "}
+                of it, whatever they do. The rest goes into a bonus pool that&apos;s split by how
+                consistent you&apos;ve been.
               </p>
               <div className="rounded-2xl border border-accent-sport/25 bg-accent-sport/8 p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-sport">Your activity score</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-sport">
+                  Your activity score
+                </p>
                 <ul className="text-[12px] text-text-muted mt-2 leading-relaxed flex flex-col gap-1">
-                  <li><span className="text-text-secondary font-semibold">Consistency</span> — your weekly streak (the biggest factor)</li>
-                  <li><span className="text-text-secondary font-semibold">Regularity</span> — three or more sessions a week</li>
-                  <li><span className="text-text-secondary font-semibold">Long run</span> — hitting your long-session target</li>
-                  <li><span className="text-text-secondary font-semibold">Progression</span> — beating your recent average pace</li>
+                  <li>
+                    <span className="text-text-secondary font-semibold">Consistency</span> — your
+                    weekly streak (the biggest factor)
+                  </li>
+                  <li>
+                    <span className="text-text-secondary font-semibold">Regularity</span> — three or
+                    more sessions a week
+                  </li>
+                  <li>
+                    <span className="text-text-secondary font-semibold">Long run</span> — hitting
+                    your long-session target
+                  </li>
+                  <li>
+                    <span className="text-text-secondary font-semibold">Progression</span> — beating
+                    your recent average pace
+                  </li>
                 </ul>
               </div>
               <p className="text-[13px] text-text-secondary leading-relaxed">
-                Every <span className="text-text-primary font-semibold">Sunday at 12:00</span>, your score is recalculated and your rate is locked in for the week ahead.{" "}
+                Every <span className="text-text-primary font-semibold">Sunday at 12:00</span>, your
+                score is recalculated and your rate is locked in for the week ahead.{" "}
                 {streakCount > 0
                   ? `You're on a ${streakCount}-week streak — keep the weeks coming and your slice of the pool grows.`
                   : "Hit your first weekly goal and your slice of the pool starts to grow."}
@@ -186,7 +236,9 @@ export function LearnBottomSheet({ open, onClose, streakCount }: Props) {
                 />
               </div>
               <p className="text-[13px] text-text-secondary leading-relaxed pt-1 border-t border-oria">
-                Oria doesn&apos;t touch your funds, doesn&apos;t take leverage, doesn&apos;t promise a fixed return. You hold the keys, you withdraw whenever, and you can track your position on Morpho directly.
+                Oria doesn&apos;t touch your funds, doesn&apos;t take leverage, doesn&apos;t promise
+                a fixed return. You hold the keys, you withdraw whenever, and you can track your
+                position on Morpho directly.
               </p>
               <div className="mt-auto pt-2 flex flex-col gap-2">
                 <Link
@@ -208,7 +260,18 @@ export function LearnBottomSheet({ open, onClose, streakCount }: Props) {
             aria-label="Previous"
             className="w-9 h-9 rounded-full bg-oria-chip border border-oria flex items-center justify-center disabled:opacity-30"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4b5fd" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#c4b5fd"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
           </button>
           <div className="flex gap-1.5">
             {Array.from({ length: SCREENS }).map((_, i) => (
@@ -228,7 +291,18 @@ export function LearnBottomSheet({ open, onClose, streakCount }: Props) {
               aria-label="Next"
               className="w-9 h-9 rounded-full bg-accent-purple/20 border border-accent-purple/30 flex items-center justify-center"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4b5fd" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6 6-6" /></svg>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#c4b5fd"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9 18l6-6 6-6" />
+              </svg>
             </button>
           ) : (
             <button
@@ -250,7 +324,16 @@ function RiskRow({ label, body }: { label: string; body: string }) {
     <div className="rounded-2xl bg-oria-section border border-oria p-3.5">
       <div className="flex items-start gap-2.5">
         <div className="w-7 h-7 rounded-lg bg-accent-purple/15 border border-accent-purple/25 flex items-center justify-center shrink-0 mt-0.5">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4b5fd" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#c4b5fd"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
             <line x1="12" y1="9" x2="12" y2="13" />
             <line x1="12" y1="17" x2="12.01" y2="17" />

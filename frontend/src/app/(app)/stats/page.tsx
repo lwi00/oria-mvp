@@ -30,7 +30,10 @@ function isoWeek(date: Date): { year: number; week: number } {
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-function bucketize(activities: { weekStart: string; distanceKm: number }[], period: Period): Bucket[] {
+function bucketize(
+  activities: { weekStart: string; distanceKm: number }[],
+  period: Period,
+): Bucket[] {
   if (period === "weekly") {
     // Always show the last N consecutive ISO weeks — including weeks the user
     // didn't log anything (distanceKm = 0). Oldest first to match bar order.
@@ -73,7 +76,15 @@ function bucketize(activities: { weekStart: string; distanceKm: number }[], peri
     }));
 }
 
-function Bars({ buckets, color, activeOnly }: { buckets: Bucket[]; color: string; activeOnly?: boolean }) {
+function Bars({
+  buckets,
+  color,
+  activeOnly,
+}: {
+  buckets: Bucket[];
+  color: string;
+  activeOnly?: boolean;
+}) {
   const max = Math.max(1, ...buckets.map((b) => b.distanceKm));
   if (buckets.length === 0) {
     return (
@@ -86,9 +97,7 @@ function Bars({ buckets, color, activeOnly }: { buckets: Bucket[]; color: string
     <div className="mt-3">
       <div className="flex items-end gap-1.5 h-[110px]">
         {buckets.map((b, i) => {
-          const h = activeOnly
-            ? (b.active ? 100 : 8)
-            : Math.max(2, (b.distanceKm / max) * 100);
+          const h = activeOnly ? (b.active ? 100 : 8) : Math.max(2, (b.distanceKm / max) * 100);
           return (
             <div
               key={i}
@@ -179,7 +188,16 @@ export default function StatsPage() {
           aria-label="Back"
           className="w-9 h-9 rounded-full bg-oria-chip border border-oria flex items-center justify-center cursor-pointer hover:bg-oria-card-hover transition-colors"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#9CA0AC"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </Link>
@@ -191,11 +209,16 @@ export default function StatsPage() {
       {/* Distance */}
       <Card>
         <div className="flex items-baseline justify-between mb-1">
-          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">Distance</p>
-          <p className="text-[11px] text-text-muted">{period === "all" ? "by year" : `last ${buckets.length} ${periodLabel}`}</p>
+          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">
+            Distance
+          </p>
+          <p className="text-[11px] text-text-muted">
+            {period === "all" ? "by year" : `last ${buckets.length} ${periodLabel}`}
+          </p>
         </div>
         <p className="text-[26px] font-extrabold text-text-primary tabular-nums tracking-tight">
-          {totalDistance.toFixed(1)} <span className="text-[14px] font-bold text-text-muted">km</span>
+          {totalDistance.toFixed(1)}{" "}
+          <span className="text-[14px] font-bold text-text-muted">km</span>
         </p>
         <Bars buckets={buckets} color="#A78BFA" />
       </Card>
@@ -230,7 +253,9 @@ export default function StatsPage() {
         return (
           <Card>
             <div className="flex items-baseline justify-between mb-1">
-              <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">Avg pace</p>
+              <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider">
+                Avg pace
+              </p>
               <p className="text-[11px] text-text-muted">
                 min / km{catLabel ? ` · ${catLabel} this month` : " · this month"}
               </p>
@@ -238,11 +263,15 @@ export default function StatsPage() {
             {hasPace ? (
               <>
                 <p className="text-[26px] font-extrabold text-text-primary tabular-nums tracking-tight">
-                  {m}<span className="text-text-muted">:</span>{String(s).padStart(2, "0")}
+                  {m}
+                  <span className="text-text-muted">:</span>
+                  {String(s).padStart(2, "0")}
                 </p>
                 <div className="mt-0.5 flex items-baseline gap-2 flex-wrap">
                   {delta !== null && (
-                    <span className={`text-[11px] font-semibold tabular-nums ${improving ? "text-success-500" : "text-warning-500"}`}>
+                    <span
+                      className={`text-[11px] font-semibold tabular-nums ${improving ? "text-success-500" : "text-warning-500"}`}
+                    >
                       {improving ? "▼" : "▲"} {Math.abs(delta).toFixed(2)} min/km vs last month
                     </span>
                   )}
@@ -255,15 +284,29 @@ export default function StatsPage() {
               </>
             ) : (
               <>
-                <p className="text-[26px] font-extrabold text-text-muted tabular-nums tracking-tight">— : —</p>
+                <p className="text-[26px] font-extrabold text-text-muted tabular-nums tracking-tight">
+                  — : —
+                </p>
                 <div className="mt-3 p-3 rounded-xl bg-accent-purple/8 border border-accent-purple/20 flex items-start gap-2.5">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 mt-0.5">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#A78BFA"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="flex-shrink-0 mt-0.5"
+                  >
                     <circle cx="12" cy="12" r="10" />
                     <path d="M12 8v4l3 2" />
                   </svg>
                   <div className="min-w-0">
                     <p className="text-[12px] text-text-primary font-semibold leading-snug">
-                      {stravaStatus?.connected ? "No runs this month yet" : "Connect Strava for pace data"}
+                      {stravaStatus?.connected
+                        ? "No runs this month yet"
+                        : "Connect Strava for pace data"}
                     </p>
                     <p className="text-[11px] text-text-muted mt-0.5 leading-relaxed">
                       {stravaStatus?.connected

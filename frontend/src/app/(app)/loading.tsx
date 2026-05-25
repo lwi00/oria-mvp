@@ -39,7 +39,10 @@ export default function AppLoading() {
       {/* Two stat cards */}
       <div className="grid grid-cols-2 gap-3">
         {[0, 1].map((i) => (
-          <div key={i} className="bg-white/85 rounded-xl p-4 border border-purple-100/50 shadow-card space-y-1.5">
+          <div
+            key={i}
+            className="bg-white/85 rounded-xl p-4 border border-purple-100/50 shadow-card space-y-1.5"
+          >
             <div className="h-3 w-14 skeleton-shimmer rounded-full" />
             <div className="h-8 w-20 skeleton-shimmer rounded-lg" />
             <div className="h-2.5 w-16 skeleton-shimmer rounded-full" />

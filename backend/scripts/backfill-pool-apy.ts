@@ -9,7 +9,11 @@
  * poolBonus + the three legacy multiplier bonuses.
  */
 import { PrismaClient } from "@prisma/client";
-import { activityScore, computePoolApy, computeMultipliers } from "../src/modules/streaks/apy.utils.js";
+import {
+  activityScore,
+  computePoolApy,
+  computeMultipliers,
+} from "../src/modules/streaks/apy.utils.js";
 import { getMorphoApy } from "../src/modules/streaks/morpho.service.js";
 import { APY } from "../src/config/constants.js";
 
@@ -41,28 +45,46 @@ async function main() {
       monthAvgPace: user.streak.monthAvgPace,
       prevMonthAvgPace: user.streak.prevMonthAvgPace,
     });
-    return [{ userId: user.id, displayName: user.displayName, streak: user.streak, score, longRunThreshold }];
+    return [
+      {
+        userId: user.id,
+        displayName: user.displayName,
+        streak: user.streak,
+        score,
+        longRunThreshold,
+      },
+    ];
   });
 
   // Phase 2 — global mean
-  const meanScore = passOne.length > 0
-    ? passOne.reduce((s, p) => s + p.score, 0) / passOne.length
-    : 0;
+  const meanScore =
+    passOne.length > 0 ? passOne.reduce((s, p) => s + p.score, 0) / passOne.length : 0;
 
   await prisma.systemConfig.upsert({
     where: { key: MEAN_SCORE_KEY },
-    create: { key: MEAN_SCORE_KEY, value: { value: meanScore, computedAt: new Date().toISOString(), n: passOne.length } },
-    update: { value: { value: meanScore, computedAt: new Date().toISOString(), n: passOne.length } },
+    create: {
+      key: MEAN_SCORE_KEY,
+      value: { value: meanScore, computedAt: new Date().toISOString(), n: passOne.length },
+    },
+    update: {
+      value: { value: meanScore, computedAt: new Date().toISOString(), n: passOne.length },
+    },
   });
 
   // Phase 3 — apply pool distribution + write
-  console.log(`Vault rate: ${vaultRate.toFixed(2)}% | Mean score: ${meanScore.toFixed(3)} | Users: ${passOne.length}`);
+  console.log(
+    `Vault rate: ${vaultRate.toFixed(2)}% | Mean score: ${meanScore.toFixed(3)} | Users: ${passOne.length}`,
+  );
   console.log("---");
   for (const p of passOne) {
     const apy = computePoolApy(p.score, meanScore, vaultRate);
     const m = computeMultipliers(
-      apy.baseline, p.streak.weekSessions, p.streak.weekLongestRun,
-      p.longRunThreshold, p.streak.monthAvgPace, p.streak.prevMonthAvgPace,
+      apy.baseline,
+      p.streak.weekSessions,
+      p.streak.weekLongestRun,
+      p.longRunThreshold,
+      p.streak.monthAvgPace,
+      p.streak.prevMonthAvgPace,
     );
     await prisma.streak.update({
       where: { userId: p.userId },
@@ -78,10 +100,13 @@ async function main() {
     });
     console.log(
       `${(p.displayName ?? "(no name)").padEnd(18)} streak=${String(p.streak.currentCount).padStart(2)} score=${p.score.toFixed(2)} ` +
-      `=> ${p.streak.effectiveApy.toFixed(2)}% → ${apy.effective.toFixed(2)}% (base ${apy.baseline.toFixed(2)} + bonus ${apy.bonus.toFixed(2)})`,
+        `=> ${p.streak.effectiveApy.toFixed(2)}% → ${apy.effective.toFixed(2)}% (base ${apy.baseline.toFixed(2)} + bonus ${apy.bonus.toFixed(2)})`,
     );
   }
   await prisma.$disconnect();
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

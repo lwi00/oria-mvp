@@ -65,18 +65,21 @@ export default async function cronRoutes(app: FastifyInstance) {
 
     const users = await app.prisma.user.findMany({
       select: {
-        id: true, displayName: true, targetKm: true, settings: true,
+        id: true,
+        displayName: true,
+        targetKm: true,
+        settings: true,
         streak: { select: { currentCount: true, currentApy: true } },
         activities: { where: { weekStart }, select: { distanceKm: true, goalMet: true } },
       },
     });
 
-    const targeted = users.filter((u: typeof users[0]) => {
+    const targeted = users.filter((u: (typeof users)[0]) => {
       const s = u.settings as Record<string, unknown> | null;
       return !s || s.notifWeeklySummary !== false;
     });
 
-    const notifications = targeted.map((u: typeof targeted[0]) => {
+    const notifications = targeted.map((u: (typeof targeted)[0]) => {
       const km = u.activities[0]?.distanceKm ?? 0;
       const goalMet = u.activities[0]?.goalMet ?? false;
       const streak = u.streak?.currentCount ?? 0;

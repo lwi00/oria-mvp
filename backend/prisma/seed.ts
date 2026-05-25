@@ -42,7 +42,12 @@ async function main() {
         goalType: "running",
         targetKm: 15,
         streak: {
-          create: { currentCount: 6, longestCount: 6, lastWeekMet: true, currentApy: computeApy(6) },
+          create: {
+            currentCount: 6,
+            longestCount: 6,
+            lastWeekMet: true,
+            currentApy: computeApy(6),
+          },
         },
       },
     }),
@@ -54,7 +59,12 @@ async function main() {
         goalType: "running",
         targetKm: 12,
         streak: {
-          create: { currentCount: 10, longestCount: 10, lastWeekMet: true, currentApy: computeApy(10) },
+          create: {
+            currentCount: 10,
+            longestCount: 10,
+            lastWeekMet: true,
+            currentApy: computeApy(10),
+          },
         },
       },
     }),
@@ -66,7 +76,12 @@ async function main() {
         goalType: "running",
         targetKm: 10,
         streak: {
-          create: { currentCount: 4, longestCount: 5, lastWeekMet: true, currentApy: computeApy(4) },
+          create: {
+            currentCount: 4,
+            longestCount: 5,
+            lastWeekMet: true,
+            currentApy: computeApy(4),
+          },
         },
       },
     }),
@@ -78,7 +93,12 @@ async function main() {
         goalType: "cycling",
         targetKm: 20,
         streak: {
-          create: { currentCount: 3, longestCount: 3, lastWeekMet: true, currentApy: computeApy(3) },
+          create: {
+            currentCount: 3,
+            longestCount: 3,
+            lastWeekMet: true,
+            currentApy: computeApy(3),
+          },
         },
       },
     }),
@@ -90,7 +110,12 @@ async function main() {
         goalType: "running",
         targetKm: 8,
         streak: {
-          create: { currentCount: 2, longestCount: 4, lastWeekMet: true, currentApy: computeApy(2) },
+          create: {
+            currentCount: 2,
+            longestCount: 4,
+            lastWeekMet: true,
+            currentApy: computeApy(2),
+          },
         },
       },
     }),
@@ -106,7 +131,12 @@ async function main() {
         goalType: "running",
         targetKm: 12,
         streak: {
-          create: { currentCount: 5, longestCount: 7, lastWeekMet: true, currentApy: computeApy(5) },
+          create: {
+            currentCount: 5,
+            longestCount: 7,
+            lastWeekMet: true,
+            currentApy: computeApy(5),
+          },
         },
       },
     }),
@@ -118,7 +148,12 @@ async function main() {
         goalType: "cycling",
         targetKm: 25,
         streak: {
-          create: { currentCount: 8, longestCount: 8, lastWeekMet: true, currentApy: computeApy(8) },
+          create: {
+            currentCount: 8,
+            longestCount: 8,
+            lastWeekMet: true,
+            currentApy: computeApy(8),
+          },
         },
       },
     }),
@@ -130,7 +165,12 @@ async function main() {
         goalType: "steps",
         targetKm: 10,
         streak: {
-          create: { currentCount: 1, longestCount: 3, lastWeekMet: true, currentApy: computeApy(1) },
+          create: {
+            currentCount: 1,
+            longestCount: 3,
+            lastWeekMet: true,
+            currentApy: computeApy(1),
+          },
         },
       },
     }),
@@ -192,9 +232,15 @@ async function main() {
 
   // Create friendships (all users are friends)
   const friendshipPairs = [
-    [0, 1], [0, 2], [0, 3], [0, 4],
-    [1, 2], [1, 3], [1, 4],
-    [2, 3], [2, 4],
+    [0, 1],
+    [0, 2],
+    [0, 3],
+    [0, 4],
+    [1, 2],
+    [1, 3],
+    [1, 4],
+    [2, 3],
+    [2, 4],
     [3, 4],
   ];
 
@@ -287,11 +333,36 @@ async function main() {
 
   // Create feed events
   const feedEvents = [
-    { userId: users[1].id, eventType: "streak_milestone", payload: { streakCount: 10 }, hoursAgo: 2 },
-    { userId: users[2].id, eventType: "goal_met", payload: { weekStart: getMonday(0).toISOString(), distanceKm: 18.2 }, hoursAgo: 5 },
-    { userId: users[3].id, eventType: "challenge_joined", payload: { challengeId: challenge1.id, title: "Summer 10K Challenge" }, hoursAgo: 24 },
-    { userId: users[4].id, eventType: "deposit", payload: { amount: 500, token: "USDC" }, hoursAgo: 28 },
-    { userId: users[2].id, eventType: "streak_milestone", payload: { streakCount: 4 }, hoursAgo: 48 },
+    {
+      userId: users[1].id,
+      eventType: "streak_milestone",
+      payload: { streakCount: 10 },
+      hoursAgo: 2,
+    },
+    {
+      userId: users[2].id,
+      eventType: "goal_met",
+      payload: { weekStart: getMonday(0).toISOString(), distanceKm: 18.2 },
+      hoursAgo: 5,
+    },
+    {
+      userId: users[3].id,
+      eventType: "challenge_joined",
+      payload: { challengeId: challenge1.id, title: "Summer 10K Challenge" },
+      hoursAgo: 24,
+    },
+    {
+      userId: users[4].id,
+      eventType: "deposit",
+      payload: { amount: 500, token: "USDC" },
+      hoursAgo: 28,
+    },
+    {
+      userId: users[2].id,
+      eventType: "streak_milestone",
+      payload: { streakCount: 4 },
+      hoursAgo: 48,
+    },
   ];
 
   for (const e of feedEvents) {

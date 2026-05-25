@@ -10,10 +10,7 @@ const MOCK_BALANCES = {
   AVAX: 1.25,
 };
 
-export async function getBalance(
-  prisma: PrismaClient,
-  userId: string,
-) {
+export async function getBalance(prisma: PrismaClient, userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { walletAddr: true },
@@ -57,10 +54,7 @@ export async function recordDeposit(
   return deposit;
 }
 
-export async function startEarning(
-  prisma: PrismaClient,
-  userId: string,
-) {
+export async function startEarning(prisma: PrismaClient, userId: string) {
   // Update all confirmed deposits to earning status
   const updated = await prisma.deposit.updateMany({
     where: { userId, status: "confirmed" },
@@ -70,10 +64,7 @@ export async function startEarning(
   return { updated: updated.count };
 }
 
-export async function getDeposits(
-  prisma: PrismaClient,
-  userId: string,
-) {
+export async function getDeposits(prisma: PrismaClient, userId: string) {
   return prisma.deposit.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
@@ -88,10 +79,7 @@ export async function getDeposits(
   });
 }
 
-export async function getEarnings(
-  prisma: PrismaClient,
-  userId: string,
-) {
+export async function getEarnings(prisma: PrismaClient, userId: string) {
   // Live-recomputed streak (same source as Home + APY details) so APY doesn't drift
   // between weekly cron evaluations.
   const [deposits, streakLive] = await Promise.all([
@@ -101,15 +89,17 @@ export async function getEarnings(
     getMyStreak(prisma, userId).catch(() => null),
   ]);
 
-  const totalDeposited = deposits.reduce((sum: number, d: typeof deposits[0]) => sum + d.amount, 0);
+  const totalDeposited = deposits.reduce(
+    (sum: number, d: (typeof deposits)[0]) => sum + d.amount,
+    0,
+  );
   const apy = streakLive?.effectiveApy ?? streakLive?.currentApy ?? APY.BASELINE;
 
   // Simple projected yield calculation
   const annualYield = totalDeposited * (apy / 100);
   const weeklyYield = annualYield / 52;
   const earningSince = deposits[0]?.earningAt ?? new Date();
-  const weeksEarning =
-    (Date.now() - earningSince.getTime()) / (7 * 24 * 60 * 60 * 1000);
+  const weeksEarning = (Date.now() - earningSince.getTime()) / (7 * 24 * 60 * 60 * 1000);
   const totalEarned = weeklyYield * Math.max(0, weeksEarning);
 
   return {

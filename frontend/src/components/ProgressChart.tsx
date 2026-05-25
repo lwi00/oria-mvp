@@ -1,6 +1,15 @@
 "use client";
 
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+} from "recharts";
 
 interface WeekData {
   weekStart: string;
@@ -14,11 +23,13 @@ interface Props {
 }
 
 export function ProgressChart({ data, targetKm }: Props) {
-  const chartData = data.map((d) => ({
-    week: new Date(d.weekStart).toLocaleDateString("en", { month: "short", day: "numeric" }),
-    km: Math.round(d.distanceKm * 10) / 10,
-    goalMet: d.goalMet,
-  })).reverse(); // oldest first
+  const chartData = data
+    .map((d) => ({
+      week: new Date(d.weekStart).toLocaleDateString("en", { month: "short", day: "numeric" }),
+      km: Math.round(d.distanceKm * 10) / 10,
+      goalMet: d.goalMet,
+    }))
+    .reverse(); // oldest first
 
   return (
     <div className="w-full h-[180px]">

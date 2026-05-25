@@ -19,7 +19,9 @@ export function DisciplinePicker() {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const onEsc = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
     document.addEventListener("keydown", onEsc);
     return () => {
       document.body.style.overflow = previousOverflow;
@@ -50,7 +52,9 @@ export function DisciplinePicker() {
         </svg>
       </button>
 
-      {mounted && open && createPortal(<DisciplineOverlay onClose={() => setOpen(false)} />, document.body)}
+      {mounted &&
+        open &&
+        createPortal(<DisciplineOverlay onClose={() => setOpen(false)} />, document.body)}
     </>
   );
 }
@@ -67,7 +71,9 @@ function DisciplineOverlay({ onClose }: { onClose: () => void }) {
     <div
       onClick={onClose}
       className={`fixed inset-0 z-[200] flex items-center justify-center px-6 transition-all duration-300 ease-out ${
-        visible ? "bg-black/55 backdrop-blur-xl opacity-100" : "bg-black/0 backdrop-blur-none opacity-0"
+        visible
+          ? "bg-black/55 backdrop-blur-xl opacity-100"
+          : "bg-black/0 backdrop-blur-none opacity-0"
       }`}
       style={{ WebkitBackdropFilter: visible ? "blur(20px)" : "none" }}
       role="dialog"
@@ -147,19 +153,26 @@ function DisciplineTile({
       {active && (
         <div
           className="absolute -top-12 -right-12 w-[180px] h-[180px] rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle, rgba(167,139,250,0.35) 0%, transparent 60%)", filter: "blur(20px)" }}
+          style={{
+            background: "radial-gradient(circle, rgba(167,139,250,0.35) 0%, transparent 60%)",
+            filter: "blur(20px)",
+          }}
         />
       )}
 
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4">
         <div
           className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-            active ? "bg-accent-purple/25 text-accent-purple-bright shadow-button" : "bg-oria-chip text-text-secondary"
+            active
+              ? "bg-accent-purple/25 text-accent-purple-bright shadow-button"
+              : "bg-oria-chip text-text-secondary"
           }`}
         >
           {icon}
         </div>
-        <p className={`text-[15px] font-bold ${active ? "text-white" : "text-text-secondary"}`}>{label}</p>
+        <p className={`text-[15px] font-bold ${active ? "text-white" : "text-text-secondary"}`}>
+          {label}
+        </p>
       </div>
 
       {/* Badge */}
@@ -189,7 +202,16 @@ export function RunningIcon({ size = 14 }: { size?: number }) {
 }
 export function BikeIcon({ size = 16 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="18.5" cy="17.5" r="3.5" />
       <circle cx="5.5" cy="17.5" r="3.5" />
       <circle cx="15" cy="5" r="1" />
@@ -199,14 +221,32 @@ export function BikeIcon({ size = 16 }: { size?: number }) {
 }
 export function SleepIcon({ size = 16 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
     </svg>
   );
 }
 export function WalkIcon({ size = 16 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="13" cy="4" r="2" />
       <path d="M9 20l3-6 2 2 4-1" />
       <path d="M6 8l3-1 3 5-3 3" />

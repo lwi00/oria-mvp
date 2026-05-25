@@ -13,19 +13,28 @@ const QUOTES = [
   "You're building something real.",
 ];
 
-const COLORS = ["#8B5CF6", "#A78BFA", "#FC4C02", "#F59E0B", "#10B981", "#FCD34D", "#F5F5F7", "#E9D5FF"];
+const COLORS = [
+  "#8B5CF6",
+  "#A78BFA",
+  "#FC4C02",
+  "#F59E0B",
+  "#10B981",
+  "#FCD34D",
+  "#F5F5F7",
+  "#E9D5FF",
+];
 
 // Pre-compute confetti so it's stable across renders
 const CONFETTI = Array.from({ length: 30 }, (_, i) => {
   const angle = (i / 30) * Math.PI * 2;
-  const dist = 150 + (i * 7) % 200;
+  const dist = 150 + ((i * 7) % 200);
   return {
     tx: Math.round(Math.cos(angle) * dist),
     ty: Math.round(Math.sin(angle) * dist - 80),
-    rot: (i * 47) % 360 + 360,
+    rot: ((i * 47) % 360) + 360,
     size: 4 + (i % 5),
     color: COLORS[i % COLORS.length],
-    delay: (i * 0.015),
+    delay: i * 0.015,
   };
 });
 
@@ -37,7 +46,13 @@ interface RunWelcomeProps {
   onDone: () => void;
 }
 
-export function RunWelcome({ distanceKm, targetKm, streakCount, goalMet, onDone }: RunWelcomeProps) {
+export function RunWelcome({
+  distanceKm,
+  targetKm,
+  streakCount,
+  goalMet,
+  onDone,
+}: RunWelcomeProps) {
   const [visible, setVisible] = useState(true);
   const [showContent, setShowContent] = useState(false);
   const [showBar, setShowBar] = useState(false);
@@ -60,7 +75,11 @@ export function RunWelcome({ distanceKm, targetKm, streakCount, goalMet, onDone 
         setTimeout(onDone, 400);
       }
     }, 4500);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Count-up — runs once
@@ -112,16 +131,18 @@ export function RunWelcome({ distanceKm, targetKm, streakCount, goalMet, onDone 
           <div
             key={i}
             className="absolute left-1/2 top-[35%] rounded-sm"
-            style={{
-              width: c.size,
-              height: c.size * 0.6,
-              backgroundColor: c.color,
-              opacity: 0,
-              animation: `confetti-fall 1.6s ease-out ${c.delay}s forwards`,
-              "--tx": `${c.tx}px`,
-              "--ty": `${c.ty}px`,
-              "--rot": `${c.rot}deg`,
-            } as React.CSSProperties}
+            style={
+              {
+                width: c.size,
+                height: c.size * 0.6,
+                backgroundColor: c.color,
+                opacity: 0,
+                animation: `confetti-fall 1.6s ease-out ${c.delay}s forwards`,
+                "--tx": `${c.tx}px`,
+                "--ty": `${c.ty}px`,
+                "--rot": `${c.rot}deg`,
+              } as React.CSSProperties
+            }
           />
         ))}
       </div>
@@ -208,9 +229,7 @@ export function RunWelcome({ distanceKm, targetKm, streakCount, goalMet, onDone 
         </p>
 
         {/* Dismiss hint */}
-        <p className="text-[11px] text-white/20 mt-1">
-          Tap to continue
-        </p>
+        <p className="text-[11px] text-white/20 mt-1">Tap to continue</p>
       </div>
     </div>
   );

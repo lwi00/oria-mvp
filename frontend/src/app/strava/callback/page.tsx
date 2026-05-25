@@ -69,12 +69,14 @@ function StravaCallbackContent() {
 
 export default function StravaCallbackPage() {
   return (
-    <Suspense fallback={
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
-        <p className="text-sm text-text-secondary font-medium">Loading…</p>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+          <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
+          <p className="text-sm text-text-secondary font-medium">Loading…</p>
+        </div>
+      }
+    >
       <StravaCallbackContent />
     </Suspense>
   );
