@@ -2,13 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/Card";
-import { Avatar } from "@/components/Avatar";
 import { CardSkeleton } from "@/components/Skeleton";
 import { useUser, useAppleHealthStatus, useConnectAppleHealth, useStravaStatus, useStravaSync } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
-import { getInitials } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
 import { usePrivy } from "@privy-io/react-auth";
+import { RunningIcon, BikeIcon, SleepIcon, WalkIcon } from "@/components/DisciplinePicker";
 import Link from "next/link";
 
 export default function ProfilePage() {
@@ -52,8 +51,10 @@ export default function ProfilePage() {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 400_000) {
-      toast("Image too large (max 400 KB)", "error");
+    // Raw bytes; base64 string is ~33% larger and must stay under the 700K
+    // char backend cap, so 500 KB raw is the safe headroom.
+    if (file.size > 500_000) {
+      toast("Image too large (max 500 KB)", "error");
       return;
     }
     const reader = new FileReader();
@@ -82,17 +83,22 @@ export default function ProfilePage() {
       });
       await refetch();
       toast("Profile updated!");
-    } catch {
-      toast("Failed to save changes", "error");
+    } catch (e) {
+      const msg = e instanceof Error && e.message && !e.message.startsWith("API error")
+        ? e.message
+        : "Failed to save changes";
+      toast(msg, "error");
     } finally {
       setSaving(false);
     }
   };
 
-  const activities = [
-    { id: "running", label: "Running" },
-    { id: "cycling", label: "Cycling" },
-    { id: "steps", label: "Steps" },
+  // Mirror the Home discipline picker: Running is live, the rest ship "Soon".
+  const disciplines = [
+    { id: "running", label: "Running", icon: <RunningIcon size={20} />, live: true },
+    { id: "cycling", label: "Cycling", icon: <BikeIcon size={20} />, live: false },
+    { id: "sleep", label: "Sleep", icon: <SleepIcon size={20} />, live: false },
+    { id: "walking", label: "Walking", icon: <WalkIcon size={20} />, live: false },
   ];
 
   return (
@@ -104,10 +110,51 @@ export default function ProfilePage() {
       {/* Avatar & Name */}
       <div className="flex flex-col items-center py-4">
         <div className="relative mb-4">
-          <Avatar initials={getInitials(displayName || "User")} size={84} highlight src={avatarUrl} />
+          {avatarUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={avatarUrl}
+              alt="Profile"
+              className="rounded-full object-cover"
+              style={{
+                width: 84,
+                height: 84,
+                border: "2px solid #A78BFA",
+                boxShadow: "0 4px 16px rgba(139,92,246,0.4)",
+              }}
+            />
+          ) : (
+            <div
+              className="rounded-full flex items-end justify-center overflow-hidden"
+              style={{
+                width: 84,
+                height: 84,
+                background: "linear-gradient(160deg, rgba(167,139,250,0.18), rgba(124,58,237,0.10))",
+                border: "2px solid #A78BFA",
+                boxShadow: "0 4px 16px rgba(139,92,246,0.4)",
+              }}
+              aria-label="No profile photo set"
+            >
+              <svg
+                width={84}
+                height={84}
+                viewBox="0 0 64 64"
+                fill="none"
+                stroke="#E9D5FF"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="32" cy="24" r="11" />
+                <path d="M11 60c0-11.6 9.4-21 21-21s21 9.4 21 21" />
+              </svg>
+            </div>
+          )}
           <button
             onClick={handleAvatarPick}
             className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full gradient-brand flex items-center justify-center shadow-button border-2 border-[#07070B] cursor-pointer active:scale-90 transition-transform"
+            aria-label="Upload profile photo"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
@@ -123,12 +170,19 @@ export default function ProfilePage() {
           />
         </div>
         <p className="text-lg font-bold text-text-primary">{displayName || "Set your name"}</p>
-        {avatarUrl && (
+        {avatarUrl ? (
           <button
             onClick={() => setAvatarUrl(null)}
             className="text-[11px] text-text-muted mt-1 cursor-pointer bg-transparent"
           >
             Remove photo
+          </button>
+        ) : (
+          <button
+            onClick={handleAvatarPick}
+            className="text-[11px] text-accent-purple-bright mt-1 cursor-pointer bg-transparent font-semibold"
+          >
+            Upload a photo
           </button>
         )}
       </div>
@@ -152,20 +206,50 @@ export default function ProfilePage() {
         <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-3 block">
           Activity type
         </label>
-        <div className="flex gap-2 mb-5">
-          {activities.map((a) => (
-            <button
-              key={a.id}
-              onClick={() => setGoalType(a.id)}
-              className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold cursor-pointer transition-colors border ${
-                goalType === a.id
-                  ? "gradient-brand text-white border-transparent shadow-button"
-                  : "bg-oria-chip text-text-secondary border-oria"
-              }`}
-            >
-              {a.label}
-            </button>
-          ))}
+        <div className="grid grid-cols-2 gap-2.5 mb-5">
+          {disciplines.map((d) => {
+            const isActive = goalType === d.id;
+            const content = (
+              <>
+                <span className={isActive ? "text-white" : "text-text-secondary"}>{d.icon}</span>
+                <span className="text-[13px] font-semibold">{d.label}</span>
+                <span
+                  className={`absolute top-2 right-2 text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${
+                    d.live
+                      ? "bg-success-500/15 border-success-500/30 text-success-500"
+                      : "bg-accent-purple/20 border-accent-purple/30 text-accent-purple-bright"
+                  }`}
+                >
+                  {d.live ? "Live" : "Soon"}
+                </span>
+              </>
+            );
+            if (!d.live) {
+              return (
+                <button
+                  key={d.id}
+                  onClick={() => toast(`${d.label} — Coming soon`)}
+                  aria-disabled
+                  className="relative flex items-center gap-2.5 py-3 px-3 rounded-xl border border-oria bg-oria-chip text-text-secondary opacity-60 cursor-pointer"
+                >
+                  {content}
+                </button>
+              );
+            }
+            return (
+              <button
+                key={d.id}
+                onClick={() => setGoalType(d.id)}
+                className={`relative flex items-center gap-2.5 py-3 px-3 rounded-xl border cursor-pointer transition-colors ${
+                  isActive
+                    ? "gradient-brand text-white border-transparent shadow-button"
+                    : "bg-oria-chip text-text-secondary border-oria"
+                }`}
+              >
+                {content}
+              </button>
+            );
+          })}
         </div>
 
         <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-2 block">
@@ -316,6 +400,36 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
+      </Card>
+
+      {/* Understand Oria — educational entry points, between Connected Apps
+          and Settings. Sized as a single card with 5 child rows. */}
+      <Card className="!p-3">
+        <div className="px-2 pt-1 pb-2">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-purple-bright">Understand Oria</p>
+          <p className="text-[11px] text-text-muted mt-0.5">Short, plain English.</p>
+        </div>
+        {[
+          { slug: "how-it-works", title: "How it works", sub: "Four stages, three minutes" },
+          { slug: "yield", title: "Where the yield comes from", sub: "Pool, baseline, Morpho vault" },
+          { slug: "crypto", title: "Is this crypto?", sub: "Yes, and why that's fine" },
+          { slug: "security", title: "Security FAQ", sub: "The hard questions, answered" },
+          { slug: "glossary", title: "Glossary", sub: "Every word, defined" },
+        ].map((entry) => (
+          <Link
+            key={entry.slug}
+            href={`/profile/learn/${entry.slug}`}
+            className="flex items-center justify-between gap-3 px-3 py-3 rounded-xl hover:bg-oria-card-hover transition-colors cursor-pointer"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="text-[13.5px] font-semibold text-text-primary">{entry.title}</p>
+              <p className="text-[11px] text-text-muted mt-0.5 leading-snug truncate">{entry.sub}</p>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64697A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </Link>
+        ))}
       </Card>
 
       {/* Settings link */}

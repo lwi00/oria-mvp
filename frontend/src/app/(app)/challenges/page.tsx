@@ -1,26 +1,71 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Card } from "@/components/Card";
 import { Avatar } from "@/components/Avatar";
 import { CardSkeleton, ErrorCard } from "@/components/Skeleton";
-import { useChallenges, useCreateChallenge, useJoinChallenge, useUser } from "@/lib/hooks";
+import { useChallenges, useCreateChallenge, useJoinChallenge, useDeleteChallenge, useUser } from "@/lib/hooks";
 import { getInitials, daysUntil } from "@/lib/utils";
 import { useToast } from "@/components/Toast";
+
+function VisibilityPill({ kind }: { kind: "public" | "friends" }) {
+  if (kind === "public") return null; // implicit, no badge needed
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent-purple/15 border border-accent-purple/30 text-accent-purple-bright text-[10px] font-bold uppercase tracking-wider shrink-0">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 00-3-3.87" />
+        <path d="M16 3.13a4 4 0 010 7.75" />
+      </svg>
+      Friends
+    </span>
+  );
+}
 
 export default function ChallengesPage() {
   const { data: challenges, isLoading, isError, refetch } = useChallenges();
   const { data: user } = useUser();
   const createChallenge = useCreateChallenge();
   const joinChallenge = useJoinChallenge();
+  const deleteChallenge = useDeleteChallenge();
   const { toast } = useToast();
 
   const [showCreate, setShowCreate] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  useEffect(() => setMounted(true), []);
   const [title, setTitle] = useState("");
   const [goalKm, setGoalKm] = useState("");
   const [duration, setDuration] = useState("4");
   const [maxMembers, setMaxMembers] = useState("");
   const [description, setDescription] = useState("");
+  const [visibility, setVisibility] = useState<"public" | "friends">("public");
+
+  // ?propose=<friendId>&name=<friendName> — coming from a friend profile.
+  // Auto-opens the create modal and pre-fills the title with the friend's
+  // name so the user only has to set the goal + duration.
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  useEffect(() => {
+    const proposeId = searchParams.get("propose");
+    const proposeName = searchParams.get("name");
+    if (!proposeId) return;
+    const friendly = (proposeName ?? "").trim();
+    if (friendly) {
+      setTitle(`Run with ${friendly}`);
+      setDescription(`A friendly challenge with ${friendly} — set the weekly goal and let's go.`);
+      // When the user comes from a friend profile, default the visibility to
+      // friends-only — they're proposing to a friend, not opening to all.
+      setVisibility("friends");
+    }
+    setShowCreate(true);
+    // Strip the query so a reload doesn't keep re-opening the modal.
+    router.replace("/challenges", { scroll: false });
+  }, [searchParams, router]);
 
   const resetForm = () => {
     setTitle("");
@@ -28,6 +73,7 @@ export default function ChallengesPage() {
     setDuration("4");
     setMaxMembers("");
     setDescription("");
+    setVisibility("public");
   };
 
   const myChallenges = challenges?.filter(
@@ -36,6 +82,14 @@ export default function ChallengesPage() {
   const otherChallenges = challenges?.filter(
     (c) => !user || !c.members.some((m) => m.userId === user.id),
   ) ?? [];
+
+  const q = searchQuery.trim().toLowerCase();
+  const filteredOtherChallenges = q
+    ? otherChallenges.filter((c) =>
+        c.title.toLowerCase().includes(q) ||
+        (c.description?.toLowerCase().includes(q) ?? false),
+      )
+    : otherChallenges;
 
   if (isLoading) {
     return (
@@ -77,7 +131,7 @@ export default function ChallengesPage() {
       </button>
 
       {/* Create Challenge bottom-sheet */}
-      {showCreate && (
+      {showCreate && mounted && createPortal(
         <div
           className="fixed inset-0 z-[100] flex items-end justify-center bg-black/55 backdrop-blur-sm"
           onClick={() => { setShowCreate(false); resetForm(); }}
@@ -156,8 +210,51 @@ export default function ChallengesPage() {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What's this challenge about?"
               rows={2}
-              className="w-full px-4 py-3 rounded-2xl border border-oria bg-oria-section text-[15px] text-text-primary placeholder:text-text-muted focus:border-accent-purple outline-none mb-5 resize-none"
+              className="w-full px-4 py-3 rounded-2xl border border-oria bg-oria-section text-[15px] text-text-primary placeholder:text-text-muted focus:border-accent-purple outline-none mb-4 resize-none"
             />
+
+            <label className="text-[12px] font-medium text-text-secondary mb-1.5 block">Who can join</label>
+            <div className="grid grid-cols-2 gap-2 mb-5">
+              {(["public", "friends"] as const).map((opt) => {
+                const active = visibility === opt;
+                const label = opt === "public" ? "Everyone" : "Friends only";
+                const sub = opt === "public" ? "Open to all Oria users" : "Visible to your friends only";
+                const Icon = opt === "public"
+                  ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="2" y1="12" x2="22" y2="12" />
+                      <path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
+                    </svg>
+                  )
+                  : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M23 21v-2a4 4 0 00-3-3.87" />
+                      <path d="M16 3.13a4 4 0 010 7.75" />
+                    </svg>
+                  );
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => setVisibility(opt)}
+                    className={`text-left p-3 rounded-2xl border transition-colors cursor-pointer ${
+                      active
+                        ? "bg-accent-purple/15 border-accent-purple/40 text-accent-purple-bright"
+                        : "bg-oria-section border-oria text-text-secondary hover:text-text-primary"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`w-7 h-7 rounded-lg flex items-center justify-center ${active ? "bg-accent-purple/25" : "bg-oria-chip"}`}>{Icon}</span>
+                      <span className={`text-[13px] font-bold ${active ? "text-text-primary" : ""}`}>{label}</span>
+                    </div>
+                    <p className="text-[10px] text-text-muted mt-1.5 leading-snug">{sub}</p>
+                  </button>
+                );
+              })}
+            </div>
 
             <div className="flex gap-3">
               <button
@@ -174,6 +271,7 @@ export default function ChallengesPage() {
                       title,
                       goalKmWeek: parseFloat(goalKm),
                       durationWeeks: parseInt(duration) || 4,
+                      visibility,
                       ...(maxMembers ? { maxMembers: parseInt(maxMembers) } : {}),
                       ...(description.trim() ? { description: description.trim() } : {}),
                     },
@@ -193,7 +291,8 @@ export default function ChallengesPage() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* My Challenges */}
@@ -209,20 +308,47 @@ export default function ChallengesPage() {
             const weeksLeft = Math.max(0, Math.ceil((new Date(c.endDate).getTime() - Date.now()) / (7 * 86400_000)));
 
             return (
-              <Card key={c.id} className="!p-4 !border-accent-purple/20">
+              <Link key={c.id} href={`/challenges/${c.id}`} className="block">
+                <Card className="!p-4 !border-accent-purple/20 cursor-pointer hover:bg-oria-card-hover transition-colors">
                 <div className="flex justify-between items-start mb-2 gap-3">
                   <div className="min-w-0">
-                    <p className="text-[15px] font-bold text-text-primary tracking-tight truncate">{c.title}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-[15px] font-bold text-text-primary tracking-tight truncate">{c.title}</p>
+                      {c.visibility === "friends" && <VisibilityPill kind="friends" />}
+                    </div>
                     <p className="text-[11px] text-text-muted mt-0.5 tabular-nums">
                       {c.goalKmWeek} km/week · {weeksLeft > 0 ? `${weeksLeft}w left` : "ended"}
                     </p>
                   </div>
-                  <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-success-100 border border-success-500/25 text-success-500 shrink-0 inline-flex items-center gap-1">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    Joined
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-success-100 border border-success-500/25 text-success-500 inline-flex items-center gap-1">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                      Joined
+                    </span>
+                    {user && c.creatorId === user.id && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (window.confirm(`Delete "${c.title}"? This can't be undone.`)) {
+                            deleteChallenge.mutate(c.id, {
+                              onSuccess: () => toast("Challenge deleted"),
+                              onError: () => toast("Failed to delete", "error"),
+                            });
+                          }
+                        }}
+                        aria-label="Delete challenge"
+                        className="w-7 h-7 rounded-full bg-oria-chip border border-oria flex items-center justify-center cursor-pointer hover:bg-error-100 hover:border-error-500/25 transition-colors group"
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:stroke-error-500 transition-colors">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6l-2 14a2 2 0 01-2 2H9a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {c.description && (
@@ -248,7 +374,7 @@ export default function ChallengesPage() {
                   <div className="flex">
                     {c.members.slice(0, 4).map((m, i) => (
                       <div key={m.id} style={{ marginLeft: i > 0 ? -8 : 0, zIndex: 4 - i }}>
-                        <Avatar initials={getInitials(m.user.displayName)} size={28} />
+                        <Avatar initials={getInitials(m.user.displayName)} size={28} src={m.user.avatarUrl} />
                       </div>
                     ))}
                     {memberCount > 4 && (
@@ -262,7 +388,8 @@ export default function ChallengesPage() {
                   </div>
                   <span className="text-[11px] text-text-muted tabular-nums">{memberCount} member{memberCount !== 1 ? "s" : ""}</span>
                 </div>
-              </Card>
+                </Card>
+              </Link>
             );
           })}
         </>
@@ -274,7 +401,36 @@ export default function ChallengesPage() {
           <p className="text-[13px] font-semibold text-text-secondary mt-2">
             {myChallenges.length > 0 ? "Discover" : "Active Challenges"}
           </p>
-          {otherChallenges.map((c) => {
+          <div className="relative">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64697A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
+            </svg>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search challenges…"
+              className="w-full pl-10 pr-10 py-3 rounded-2xl border border-oria bg-oria-section text-[14px] text-text-primary placeholder:text-text-muted focus:border-accent-purple outline-none"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                aria-label="Clear search"
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-oria-chip border border-oria flex items-center justify-center cursor-pointer"
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+          {filteredOtherChallenges.length === 0 && (
+            <p className="text-[13px] text-text-muted text-center py-6">
+              No challenges match &ldquo;{searchQuery}&rdquo;
+            </p>
+          )}
+          {filteredOtherChallenges.map((c) => {
             const memberCount = c._count.members;
             const ends = daysUntil(c.endDate);
             const avgProgress =
@@ -283,10 +439,14 @@ export default function ChallengesPage() {
                 : 0;
 
             return (
-              <Card key={c.id} className="!p-4">
+              <Link key={c.id} href={`/challenges/${c.id}`} className="block">
+                <Card className="!p-4 cursor-pointer hover:bg-oria-card-hover transition-colors">
                 <div className="flex justify-between items-start mb-2 gap-3">
                   <div className="min-w-0">
-                    <p className="text-[15px] font-bold text-text-primary tracking-tight truncate">{c.title}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-[15px] font-bold text-text-primary tracking-tight truncate">{c.title}</p>
+                      {c.visibility === "friends" && <VisibilityPill kind="friends" />}
+                    </div>
                     <p className="text-[11px] text-text-muted mt-0.5 tabular-nums">
                       {c.goalKmWeek} km/week · ends in {ends}
                     </p>
@@ -311,7 +471,7 @@ export default function ChallengesPage() {
                   <div className="flex">
                     {c.members.slice(0, 4).map((m, i) => (
                       <div key={m.id} style={{ marginLeft: i > 0 ? -8 : 0, zIndex: 4 - i }}>
-                        <Avatar initials={getInitials(m.user.displayName)} size={28} />
+                        <Avatar initials={getInitials(m.user.displayName)} size={28} src={m.user.avatarUrl} />
                       </div>
                     ))}
                     {memberCount > 4 && (
@@ -324,19 +484,22 @@ export default function ChallengesPage() {
                     )}
                   </div>
                   <button
-                    onClick={() =>
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       joinChallenge.mutate(c.id, {
                         onSuccess: () => toast("Joined challenge!"),
                         onError: () => toast("Failed to join", "error"),
-                      })
-                    }
+                      });
+                    }}
                     disabled={joinChallenge.isPending}
                     className="text-[11px] font-semibold px-3.5 py-1.5 rounded-full gradient-brand text-white shadow-button min-h-[32px] disabled:opacity-50"
                   >
                     Join
                   </button>
                 </div>
-              </Card>
+                </Card>
+              </Link>
             );
           })}
         </>

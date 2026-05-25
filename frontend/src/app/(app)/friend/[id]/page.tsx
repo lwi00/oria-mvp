@@ -104,7 +104,7 @@ export default function FriendProfilePage() {
       {/* Avatar + Name + Goal */}
       <div className="flex flex-col items-center py-4">
         <div className="mb-3">
-          <Avatar initials={getInitials(profile.displayName)} size={84} highlight />
+          <Avatar initials={getInitials(profile.displayName)} size={84} highlight src={profile.avatarUrl ?? null} />
         </div>
         <p className="text-lg font-bold text-text-primary">
           {profile.displayName || "Anonymous"}
@@ -113,6 +113,21 @@ export default function FriendProfilePage() {
           {goalTypeLabel(profile.goalType)} &middot; {profile.targetKm} {unit}/week
         </p>
       </div>
+
+      {/* Primary CTA — propose a challenge. Opens /challenges with the friend
+          handle pre-filled in the create modal so the user can launch one
+          tailored to this person in one tap. */}
+      <Link
+        href={`/challenges?propose=${profile.id}&name=${encodeURIComponent(profile.displayName ?? "")}`}
+        className="w-full py-3.5 rounded-2xl gradient-brand text-white font-semibold text-[15px] shadow-button text-center flex items-center justify-center gap-2 min-h-[48px] active:scale-[0.98] transition-transform"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 9H4a2 2 0 000 4c0 2.21 1.79 4 4 4h8c2.21 0 4-1.79 4-4a2 2 0 000-4h-2" />
+          <path d="M6 3h12v6a6 6 0 01-12 0V3z" />
+          <line x1="12" y1="17" x2="12" y2="21" /><line x1="9" y1="21" x2="15" y2="21" />
+        </svg>
+        Propose a challenge
+      </Link>
 
       {/* Stats Row */}
       <div className="grid grid-cols-3 gap-2">

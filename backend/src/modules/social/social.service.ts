@@ -1,6 +1,8 @@
 import type { PrismaClient } from "@prisma/client";
 import { BadRequestError, NotFoundError } from "../../lib/errors.js";
 import { sendPushToUser } from "../push/push.service.js";
+import { getMyStreak } from "../streaks/streaks.service.js";
+import { APY } from "../../config/constants.js";
 
 interface UserSettings {
   notifRunReminders?: boolean;
@@ -206,7 +208,7 @@ export async function getFeed(
   // Include own events too
   const userIds = [userId, ...friendIds];
 
-  return prisma.feedEvent.findMany({
+  const events = await prisma.feedEvent.findMany({
     where: {
       userId: { in: userIds },
       ...(cursor ? { createdAt: { lt: new Date(cursor) } } : {}),
@@ -217,12 +219,25 @@ export async function getFeed(
           id: true,
           displayName: true,
           avatarUrl: true,
+          streak: { select: { currentCount: true } },
         },
       },
     },
     orderBy: { createdAt: "desc" },
     take: limit,
   });
+
+  // Flatten the streak into the user payload so the feed UI can show a
+  // "this user is on an N-week streak" badge without a second round trip.
+  return events.map((e: typeof events[0]) => ({
+    ...e,
+    user: {
+      id: e.user.id,
+      displayName: e.user.displayName,
+      avatarUrl: e.user.avatarUrl,
+      streakCount: e.user.streak?.currentCount ?? 0,
+    },
+  }));
 }
 
 export async function getPendingRequests(prisma: PrismaClient, userId: string) {
@@ -611,16 +626,31 @@ export async function getLeaderboard(
   const users = await prisma.user.findMany({
     where: { id: { in: userIds } },
     include: { streak: true },
-    orderBy: { streak: { currentCount: "desc" } },
   });
 
-  return users.map((u: typeof users[0], i: number) => ({
-    rank: i + 1,
-    id: u.id,
-    displayName: u.displayName,
-    avatarUrl: u.avatarUrl,
-    streak: u.streak?.currentCount ?? 0,
-    apy: u.streak?.currentApy ?? 4.0,
-    isMe: u.id === userId,
-  }));
+  // Live-recompute the current user's APY so it matches Home / APY details.
+  // Friends keep the persisted value (cheaper, refreshed on the weekly cron).
+  const myLive = await getMyStreak(prisma, userId).catch(() => null);
+
+  // Build the row payload first, then sort. Primary key is streak count
+  // (matches the visible "Nw" badge), secondary key is APY so two friends
+  // tied on streak don't end up in arbitrary order — the one earning more
+  // takes the higher rank. Without this, e.g. Eva on streak 8 / 3.36 % was
+  // landing above Emma D. on streak 8 / 3.54 %.
+  const rows = users.map((u: typeof users[0]) => {
+    const isMe = u.id === userId;
+    const apy = isMe
+      ? (myLive?.effectiveApy ?? myLive?.currentApy ?? u.streak?.effectiveApy ?? APY.BASELINE)
+      : (u.streak?.effectiveApy ?? u.streak?.currentApy ?? APY.BASELINE);
+    return {
+      id: u.id,
+      displayName: u.displayName,
+      avatarUrl: u.avatarUrl,
+      streak: u.streak?.currentCount ?? 0,
+      apy,
+      isMe,
+    };
+  });
+  rows.sort((a, b) => (b.streak - a.streak) || (b.apy - a.apy));
+  return rows.map((r, i) => ({ rank: i + 1, ...r }));
 }

@@ -1,14 +1,31 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/Card";
-import { MiniJar } from "@/components/MiniJar";
 import { apiFetch, setAuthTokenGetter } from "@/lib/api";
-import { usePrivy, useLogin } from "@privy-io/react-auth";
-import { useOnChainDeposit } from "@/lib/useOnChainDeposit";
+import { usePrivy, useLogin, type User } from "@privy-io/react-auth";
+import { QRCodeSVG } from "qrcode.react";
+import { useWalletBalance } from "@/lib/hooks";
+import { useToast } from "@/components/Toast";
 
-const STEPS = 4;
+function deriveDisplayName(user: User): string {
+  const u = user as unknown as {
+    google?: { name?: string; email?: string };
+    apple?: { email?: string };
+    email?: { address?: string };
+  };
+  const candidates = [
+    u.google?.name?.trim(),
+    u.email?.address?.split("@")[0],
+    u.google?.email?.split("@")[0],
+    u.apple?.email?.split("@")[0],
+  ].filter((s): s is string => !!s && s.length > 0);
+  if (candidates.length > 0) return candidates[0].slice(0, 50);
+  return "";
+}
+
+const STEPS = 5;
 
 function ProgressDots({ current, total }: { current: number; total: number }) {
   return (
@@ -78,10 +95,12 @@ function ConnectWalletStep({
   onNext,
   onBack,
   onSignIn,
+  onPrivyName,
 }: {
   onNext: () => void;
   onBack: () => void;
   onSignIn: () => void;
+  onPrivyName: (name: string) => void;
 }) {
   const [loggingIn, setLoggingIn] = useState(false);
   const { getAccessToken } = usePrivy();
@@ -92,19 +111,22 @@ function ConnectWalletStep({
       setAuthTokenGetter(() => getAccessToken());
       const walletAddr = params.user.wallet?.address;
       let isNew = true;
+      // Create the user record with no displayName / no avatar so the next
+      // step (NameStep) is forced to collect one — otherwise we'd silently
+      // create accounts called "User" that nobody can search for.
       try {
         const data = await apiFetch("/api/auth/verify", {
           method: "POST",
-          body: JSON.stringify({
-            walletAddr,
-            displayName: params.user.email?.address?.split("@")[0],
-          }),
+          body: JSON.stringify({ walletAddr }),
         }) as { isNew?: boolean };
         if (data?.isNew === false) isNew = false;
       } catch {
         // ignore — treat as new user on error
       }
       if (isNew) {
+        // Pre-fill the name step with whatever Privy gave us, but the user
+        // still has to confirm/edit and submit before continuing.
+        onPrivyName(deriveDisplayName(params.user));
         onNext();
       } else {
         // Returning user — skip onboarding steps, go straight to dashboard
@@ -138,7 +160,7 @@ function ConnectWalletStep({
 
       <div className="mt-6 mb-2">
         <p className="text-xs font-semibold text-purple-600 tracking-widest uppercase mb-2">
-          Step 1 of 3
+          Step 1 of 4
         </p>
         <h1 className="text-2xl font-bold text-text-primary tracking-tight">
           Connect Your Wallet
@@ -170,7 +192,188 @@ function ConnectWalletStep({
   );
 }
 
-// ─── Step 3: Choose Goal ───
+// ─── Step 3: Choose Your Name (+ optional photo) ───
+function ChooseNameStep({
+  initialName,
+  onNext,
+  onBack,
+}: {
+  initialName: string;
+  onNext: () => void;
+  onBack: () => void;
+}) {
+  const [name, setName] = useState(initialName);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // If Privy filled it in after mount, pre-populate (but don't overwrite
+    // user-typed input).
+    if (initialName && !name) setName(initialName);
+  }, [initialName]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleAvatarPick = () => fileInputRef.current?.click();
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 500_000) { toast("Image too large (max 500 KB)", "error"); return; }
+    const reader = new FileReader();
+    reader.onload = () => setAvatarUrl(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const trimmed = name.trim();
+  const canContinue = trimmed.length >= 2;
+
+  const submit = async () => {
+    if (!canContinue || saving) return;
+    setSaving(true);
+    try {
+      await apiFetch("/api/users/me", {
+        method: "PATCH",
+        body: JSON.stringify({ displayName: trimmed, avatarUrl }),
+      });
+      onNext();
+    } catch (e) {
+      const msg = e instanceof Error && e.message && !e.message.startsWith("API error")
+        ? e.message
+        : "Couldn't save your name — please retry";
+      toast(msg, "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen px-6 py-10">
+      <div className="flex items-center gap-3 mb-2">
+        <button
+          onClick={onBack}
+          className="w-10 h-10 rounded-md flex items-center justify-center bg-purple-50 border-none cursor-pointer"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+        </button>
+      </div>
+
+      <div className="mt-6 mb-6">
+        <p className="text-xs font-semibold text-purple-600 tracking-widest uppercase mb-2">
+          Step 2 of 4
+        </p>
+        <h1 className="text-2xl font-bold text-text-primary tracking-tight">
+          Pick a name your friends will recognise
+        </h1>
+        <p className="text-sm text-text-secondary mt-2 leading-relaxed">
+          This is how you&apos;ll show up on leaderboards, challenges and the activity feed.
+        </p>
+      </div>
+
+      {/* Avatar — silhouette by default, optional upload */}
+      <div className="flex flex-col items-center mb-8">
+        <div className="relative">
+          {avatarUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={avatarUrl}
+              alt="Profile"
+              className="rounded-full object-cover"
+              style={{
+                width: 100,
+                height: 100,
+                border: "2px solid #A78BFA",
+                boxShadow: "0 4px 16px rgba(139,92,246,0.4)",
+              }}
+            />
+          ) : (
+            <div
+              className="rounded-full flex items-end justify-center overflow-hidden"
+              style={{
+                width: 100,
+                height: 100,
+                background: "linear-gradient(160deg, rgba(167,139,250,0.18), rgba(124,58,237,0.10))",
+                border: "2px solid #A78BFA",
+                boxShadow: "0 4px 16px rgba(139,92,246,0.4)",
+              }}
+              aria-label="No profile photo set"
+            >
+              <svg width={100} height={100} viewBox="0 0 64 64" fill="none" stroke="#E9D5FF" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="32" cy="24" r="11" />
+                <path d="M11 60c0-11.6 9.4-21 21-21s21 9.4 21 21" />
+              </svg>
+            </div>
+          )}
+          <button
+            onClick={handleAvatarPick}
+            className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full gradient-brand flex items-center justify-center shadow-button border-2 border-[#07070B] cursor-pointer active:scale-90 transition-transform"
+            aria-label="Upload profile photo"
+            type="button"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarChange}
+            className="hidden"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={avatarUrl ? () => setAvatarUrl(null) : handleAvatarPick}
+          className={`text-[12px] mt-3 cursor-pointer bg-transparent font-semibold ${avatarUrl ? "text-text-muted" : "text-accent-purple-bright"}`}
+        >
+          {avatarUrl ? "Remove photo" : "Upload a photo (optional)"}
+        </button>
+      </div>
+
+      {/* Name input */}
+      <div>
+        <label htmlFor="onb-name" className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-2 block">
+          Display name
+        </label>
+        <input
+          id="onb-name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value.slice(0, 50))}
+          placeholder="Eve, Marco, sarah_k…"
+          autoComplete="name"
+          autoFocus
+          onKeyDown={(e) => { if (e.key === "Enter" && canContinue) submit(); }}
+          className="w-full px-4 py-3.5 rounded-2xl border border-oria bg-oria-section text-[15px] text-text-primary placeholder:text-text-muted focus:border-accent-purple outline-none"
+        />
+        <p className="text-[11px] text-text-muted mt-2">
+          {trimmed.length < 2
+            ? "At least 2 characters so friends can find you."
+            : `${trimmed.length}/50`}
+        </p>
+      </div>
+
+      <div className="mt-8">
+        <button
+          onClick={submit}
+          disabled={!canContinue || saving}
+          className="w-full px-5 py-4 rounded-xl gradient-brand text-white shadow-button cursor-pointer border-none min-h-[56px] text-base font-semibold disabled:opacity-50"
+        >
+          {saving ? "Saving…" : "Continue"}
+        </button>
+      </div>
+
+      <div className="mt-auto pt-8">
+        <ProgressDots current={2} total={STEPS} />
+      </div>
+    </div>
+  );
+}
+
+// ─── Step 4: Choose Goal ───
 function ChooseGoalStep({
   onNext,
   onBack,
@@ -235,7 +438,7 @@ function ChooseGoalStep({
 
       <div className="mt-6 mb-2">
         <p className="text-xs font-semibold text-purple-600 tracking-widest uppercase mb-2">
-          Step 2 of 3
+          Step 3 of 4
         </p>
         <h1 className="text-2xl font-bold text-text-primary tracking-tight">
           Set Your Goal
@@ -336,13 +539,13 @@ function ChooseGoalStep({
         >
           Continue
         </button>
-        <ProgressDots current={2} total={STEPS} />
+        <ProgressDots current={3} total={STEPS} />
       </div>
     </div>
   );
 }
 
-// ─── Step 4: Fund Wallet ───
+// ─── Step 5: Fund Wallet — show address + QR for the user to receive crypto ───
 function FundWalletStep({
   onNext,
   onBack,
@@ -350,27 +553,21 @@ function FundWalletStep({
   onNext: () => void;
   onBack: () => void;
 }) {
-  const [token, setToken] = useState("USDC");
-  const [amount, setAmount] = useState("");
-  const onChainDeposit = useOnChainDeposit();
+  const { data: wallet } = useWalletBalance();
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+  const addr = wallet?.walletAddr ?? null;
+  const short = addr ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : "";
 
-  const quickAmounts = [50, 100, 500, 1000];
-  const fillPercent = Math.min(
-    100,
-    Math.round((parseFloat(amount || "0") / 1000) * 100),
-  );
-
-  const handleDeposit = async () => {
-    const numAmount = parseFloat(amount || "0");
-    if (numAmount <= 0) {
-      onNext();
-      return;
-    }
+  const copy = async () => {
+    if (!addr) return;
     try {
-      await onChainDeposit.deposit(numAmount, token);
-      onNext();
+      await navigator.clipboard.writeText(addr);
+      setCopied(true);
+      toast("Address copied!");
+      setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Error is captured in onChainDeposit.error — don't navigate
+      toast("Failed to copy", "error");
     }
   };
 
@@ -379,8 +576,7 @@ function FundWalletStep({
       <div className="flex items-center gap-3 mb-2">
         <button
           onClick={onBack}
-          disabled={onChainDeposit.isPending}
-          className="w-10 h-10 rounded-md flex items-center justify-center bg-purple-50 border-none cursor-pointer disabled:opacity-50"
+          className="w-10 h-10 rounded-md flex items-center justify-center bg-purple-50 border-none cursor-pointer"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -390,108 +586,81 @@ function FundWalletStep({
 
       <div className="mt-6 mb-2">
         <p className="text-xs font-semibold text-purple-600 tracking-widest uppercase mb-2">
-          Step 3 of 3
+          Step 4 of 4
         </p>
         <h1 className="text-2xl font-bold text-text-primary tracking-tight">
-          Fund Your Jar
+          Fund your Oria wallet
         </h1>
         <p className="text-sm text-text-secondary mt-2 leading-relaxed">
-          Deposit crypto to start earning yield. Your funds are non-custodial
-          and always yours.
+          Scan or copy your address to fund your wallet from any exchange or other wallet. Funds start earning yield as soon as they arrive.
         </p>
       </div>
 
-      {/* Jar illustration */}
+      {/* QR */}
       <div className="flex justify-center my-6">
-        <MiniJar fill={fillPercent} size={80} />
-      </div>
-
-      {/* Token toggle */}
-      <div className="mb-5">
-        <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3 block">
-          Token
-        </label>
-        <div className="flex gap-2">
-          {["USDC", "WAVAX"].map((t) => (
-            <button
-              key={t}
-              onClick={() => setToken(t)}
-              disabled={onChainDeposit.isPending}
-              className={`flex-1 py-3 rounded-xl text-sm font-semibold cursor-pointer transition-all disabled:opacity-50 ${
-                token === t
-                  ? "gradient-brand text-white shadow-button"
-                  : "bg-purple-50 text-purple-600 border border-oria"
-              }`}
-            >
-              {t}
-            </button>
-          ))}
+        <div className="p-4 bg-white rounded-2xl shadow-card">
+          {addr ? (
+            <QRCodeSVG value={addr} size={188} level="M" bgColor="#FFFFFF" fgColor="#0B0B11" />
+          ) : (
+            <div className="w-[188px] h-[188px] flex items-center justify-center text-text-muted text-sm">
+              Loading wallet…
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Amount input */}
-      <div className="mb-4">
-        <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3 block">
-          Amount
-        </label>
-        <div className="relative">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg text-text-muted font-medium">
-            $
-          </span>
-          <input
-            type="number"
-            step="1"
-            min="0"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            disabled={onChainDeposit.isPending}
-            placeholder="0"
-            className="w-full pl-9 pr-4 py-4 rounded-xl border border-oria bg-white/80 text-[22px] font-bold text-text-primary focus:border-purple-600 outline-none tabular-nums tracking-tight disabled:opacity-50"
-          />
-        </div>
-      </div>
-
-      {/* Quick amounts */}
-      <div className="flex gap-2 mb-6">
-        {quickAmounts.map((a) => (
-          <button
-            key={a}
-            onClick={() => setAmount(String(a))}
-            disabled={onChainDeposit.isPending}
-            className={`flex-1 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors disabled:opacity-50 ${
-              amount === String(a)
-                ? "gradient-brand text-white"
-                : "bg-purple-50 text-purple-600 border border-oria"
-            }`}
-          >
-            ${a}
-          </button>
-        ))}
-      </div>
-
-      {/* Error message */}
-      {onChainDeposit.error && (
-        <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200">
-          <p className="text-sm text-red-600">{onChainDeposit.error}</p>
-        </div>
+      {/* Address — tap to copy */}
+      {addr && (
+        <button
+          onClick={copy}
+          className="w-full mb-4 px-4 py-3 rounded-2xl bg-oria-card border border-oria flex items-center justify-between gap-3 cursor-pointer hover:bg-oria-card-hover transition-colors group"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-full bg-accent-purple/15 border border-accent-purple/25 flex items-center justify-center flex-shrink-0">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2" />
+                <path d="M16 3H8a2 2 0 00-2 2v2h12V5a2 2 0 00-2-2z" />
+              </svg>
+            </div>
+            <div className="min-w-0 text-left">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Your Oria wallet</p>
+              <p className="text-[13px] font-mono text-text-primary truncate">{short}</p>
+            </div>
+          </div>
+          <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-oria-chip border border-oria flex items-center justify-center group-hover:bg-accent-purple/15 transition-colors">
+            {copied ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" />
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+              </svg>
+            )}
+          </div>
+        </button>
       )}
 
-      <div className="mt-auto pt-4 flex flex-col gap-3">
+      <div className="flex items-start gap-2.5 p-3 rounded-xl bg-warning-100 border border-warning-500/25">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 mt-0.5">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+        <p className="text-[12px] text-warning-500 leading-relaxed">
+          Make sure you&apos;re sending on a supported network. Transfers on unsupported chains may result in loss of funds.
+        </p>
+      </div>
+
+      <div className="mt-auto pt-6 flex flex-col gap-3">
         <button
-          onClick={handleDeposit}
-          disabled={onChainDeposit.isPending}
-          className="w-full h-[52px] rounded-[14px] gradient-brand text-white font-semibold text-base shadow-button cursor-pointer border-none disabled:opacity-70"
+          onClick={onNext}
+          className="w-full h-[52px] rounded-[14px] gradient-brand text-white font-semibold text-base shadow-button cursor-pointer border-none"
         >
-          {onChainDeposit.buttonText("Deposit & Start Earning")}
+          I&apos;ve sent funds (or do it later)
         </button>
-        <button
-          onClick={() => onNext()}
-          disabled={onChainDeposit.isPending}
-          className="w-full py-3 text-sm text-purple-400 font-medium cursor-pointer bg-transparent border-none disabled:opacity-50"
-        >
-          Skip for now
-        </button>
-        <ProgressDots current={3} total={STEPS} />
+        <ProgressDots current={4} total={STEPS} />
       </div>
     </div>
   );
@@ -500,6 +669,7 @@ function FundWalletStep({
 // ─── Main Onboarding Page ───
 export default function OnboardingPage() {
   const [step, setStep] = useState(0);
+  const [privyName, setPrivyName] = useState("");
   const [goalType, setGoalType] = useState("running");
   const [targetKm, setTargetKm] = useState(10);
   const router = useRouter();
@@ -545,20 +715,32 @@ export default function OnboardingPage() {
     <>
       {step === 0 && <WelcomeStep onNext={() => setStep(1)} onSignIn={() => setStep(1)} />}
       {step === 1 && (
-        <ConnectWalletStep onNext={() => setStep(2)} onBack={() => setStep(0)} onSignIn={goToDashboard} />
+        <ConnectWalletStep
+          onNext={() => setStep(2)}
+          onBack={() => setStep(0)}
+          onSignIn={goToDashboard}
+          onPrivyName={setPrivyName}
+        />
       )}
       {step === 2 && (
-        <ChooseGoalStep
-          onNext={(gt, tk) => {
-            setGoalType(gt);
-            setTargetKm(tk);
-            setStep(3);
-          }}
+        <ChooseNameStep
+          initialName={privyName}
+          onNext={() => setStep(3)}
           onBack={() => setStep(1)}
         />
       )}
       {step === 3 && (
-        <FundWalletStep onNext={finish} onBack={() => setStep(2)} />
+        <ChooseGoalStep
+          onNext={(gt, tk) => {
+            setGoalType(gt);
+            setTargetKm(tk);
+            setStep(4);
+          }}
+          onBack={() => setStep(2)}
+        />
+      )}
+      {step === 4 && (
+        <FundWalletStep onNext={finish} onBack={() => setStep(3)} />
       )}
     </>
   );

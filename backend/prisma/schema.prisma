@@ -80,22 +80,32 @@ model Streak {
   longestCount Int      @default(0) @map("longest_count")
   /// Whether the goal was met last week (used during evaluation)
   lastWeekMet  Boolean  @default(false) @map("last_week_met")
-  /// Current APY percentage based on streak count (4.0 – 8.0)
-  currentApy   Float    @default(4.0) @map("current_apy")
+  /// Pool-model baseline APY (currently 3.0 %). Persisted by the weekly cron
+  /// but always live-recomputed by getMyStreak.
+  currentApy   Float    @default(3.0) @map("current_apy")
   /// Multi-factor APY bonuses (computed from Strava data)
   regularityBonus  Float @default(0) @map("regularity_bonus")
   longRunBonus     Float @default(0) @map("long_run_bonus")
   progressionBonus Float @default(0) @map("progression_bonus")
-  /// Effective APY = currentApy + sum(bonuses), capped at 9%
-  effectiveApy     Float @default(4.0) @map("effective_apy")
+  /// Effective APY = baseline + score-weighted pool bonus, capped at 12 %.
+  effectiveApy     Float @default(3.0) @map("effective_apy")
   /// Sessions this week (for regularity tracking)
   weekSessions     Int   @default(0) @map("week_sessions")
   /// Longest single run this week in km
   weekLongestRun   Float @default(0) @map("week_longest_run")
-  /// Average pace this month (min/km), 0 = no data
+  /// Average pace this month (min/km), 0 = no data. Limited to the user's
+  /// dominant Strava activity category so we don't average runs with rides.
   monthAvgPace     Float @default(0) @map("month_avg_pace")
   /// Average pace last month (min/km), for progression comparison
   prevMonthAvgPace Float @default(0) @map("prev_month_avg_pace")
+  /// Strava activity category that pace is computed against: "running" | "cycling" | null
+  paceCategory     String? @map("pace_category")
+  /// When set and in the future, weekly evaluation skips this user (vacation/injury freeze)
+  vacationUntil    DateTime? @map("vacation_until")
+  /// Composite activity score [0..1] for pool-based APY distribution
+  activityScore    Float    @default(0) @map("activity_score")
+  /// User's share of the redistribution pool (percentage points)
+  poolBonus        Float    @default(0) @map("pool_bonus")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -267,12 +277,14 @@ model PushSubscription {
 /// get a temporary APY boost (future feature).
 model Challenge {
   id          String   @id @default(uuid())
-  /// User who created the challenge
+  /// User who created (and owns) the challenge — can edit the page and banner
   creatorId   String   @map("creator_id")
   /// Challenge display title (e.g., "Team 10K Week")
   title       String
   /// Optional description
   description String?
+  /// Owner-uploaded banner (base64 data URL, capped at 500 KB)
+  bannerUrl   String?  @map("banner_url")
   /// Weekly km goal for all participants
   goalKmWeek  Float    @map("goal_km_week")
   /// Challenge start date (ISO Monday)
@@ -283,6 +295,9 @@ model Challenge {
   maxMembers  Int?     @map("max_members")
   /// Lifecycle: "active" | "completed" | "cancelled"
   status      String   @default("active")
+  /// Who can see and join the challenge: "public" (anyone) | "friends"
+  /// (only the creator + their accepted friends).
+  visibility  String   @default("public")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -311,4 +326,13 @@ model ChallengeMember {
   /// One membership per user per challenge
   @@unique([challengeId, userId])
   @@map("challenge_members")
+}
+
+/// Key-value system config (e.g. cached Morpho vault APY, global meanScore).
+model SystemConfig {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("system_config")
 }

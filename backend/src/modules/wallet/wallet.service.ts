@@ -1,6 +1,8 @@
 import type { PrismaClient } from "@prisma/client";
 import { env } from "../../config/env.js";
 import { NotFoundError } from "../../lib/errors.js";
+import { APY } from "../../config/constants.js";
+import { getMyStreak } from "../streaks/streaks.service.js";
 
 // Mock wallet balances for MVP
 const MOCK_BALANCES = {
@@ -90,15 +92,17 @@ export async function getEarnings(
   prisma: PrismaClient,
   userId: string,
 ) {
-  const [deposits, streak] = await Promise.all([
+  // Live-recomputed streak (same source as Home + APY details) so APY doesn't drift
+  // between weekly cron evaluations.
+  const [deposits, streakLive] = await Promise.all([
     prisma.deposit.findMany({
       where: { userId, status: "earning" },
     }),
-    prisma.streak.findUnique({ where: { userId } }),
+    getMyStreak(prisma, userId).catch(() => null),
   ]);
 
   const totalDeposited = deposits.reduce((sum: number, d: typeof deposits[0]) => sum + d.amount, 0);
-  const apy = streak?.currentApy ?? 4.0;
+  const apy = streakLive?.effectiveApy ?? streakLive?.currentApy ?? APY.BASELINE;
 
   // Simple projected yield calculation
   const annualYield = totalDeposited * (apy / 100);

@@ -3,38 +3,36 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Card } from "@/components/Card";
-import { Avatar } from "@/components/Avatar";
+import { PlanModal } from "@/components/PlanModal";
+import { ReferFriendsModal } from "@/components/ReferFriendsModal";
 import { QuickAction } from "@/components/QuickAction";
-import { ProgressRing } from "@/components/ProgressRing";
+import { DisciplinePicker } from "@/components/DisciplinePicker";
+import { ActivityFeed } from "@/components/ActivityFeed";
 import { CardSkeleton, ErrorCard } from "@/components/Skeleton";
-import { LogActivityModal } from "@/components/LogActivityModal";
 import { Celebration } from "@/components/Celebration";
 import { RunWelcome } from "@/components/RunWelcome";
 import {
-  useUser, useStreak, useFeed, useEarnings,
-  useStravaStatus, useStravaSync, useLastRun,
-  useFriendsWeekly, useActivities,
+  useUser, useStreak, useEarnings,
+  useStravaStatus, useStravaSync,
+  useActivities,
 } from "@/lib/hooks";
-import { ProgressChart } from "@/components/ProgressChart";
 import { useToast } from "@/components/Toast";
-import { timeAgo, getInitials, formatFeedEvent } from "@/lib/utils";
+import { formatMoney, lastNWeeks } from "@/lib/utils";
 
 export default function DashboardPage() {
   const { data: user, isLoading: userLoading, isError: userError, refetch: refetchUser } = useUser();
   const { data: streak, isLoading: streakLoading, isError: streakError, refetch: refetchStreak } = useStreak();
-  const { data: feed } = useFeed(3);
   const { data: earnings } = useEarnings();
-  const { data: friendsWeekly } = useFriendsWeekly();
   const { data: activities } = useActivities(8);
   const { data: stravaStatus } = useStravaStatus();
   const stravaSync = useStravaSync();
-  const { data: lastRunData } = useLastRun();
   const { toast } = useToast();
 
-  const [showLogModal, setShowLogModal] = useState(false);
   const [showSyncCelebration, setShowSyncCelebration] = useState(false);
   const [syncedKm, setSyncedKm] = useState(0);
   const [showRunWelcome, setShowRunWelcome] = useState(false);
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [showReferModal, setShowReferModal] = useState(false);
   const welcomeChecked = useRef(false);
   const autoSynced = useRef(false);
 
@@ -85,35 +83,67 @@ export default function DashboardPage() {
 
   const displayName = user?.displayName?.split(" ")[0] ?? "there";
   const streakCount = streak?.currentCount ?? 0;
-  const apy = streak?.currentApy ?? 4.0;
+  const apy = streak?.currentApy ?? 3.0;
   const effectiveApy = streak?.effectiveApy ?? apy;
   const targetKm = user?.targetKm ?? 10;
   const currentKm = streak?.currentWeek?.distanceKm ?? 0;
   const pct = Math.min(100, Math.round((currentKm / targetKm) * 100));
   const balance = (earnings?.totalDeposited ?? 0) + (earnings?.totalEarned ?? 0);
   const earned = earnings?.totalEarned ?? 0;
+  const currency = user?.settings?.currency ?? "USD";
+  const bal = formatMoney(balance, currency);
+  const earnedFmt = formatMoney(earned, currency);
+  const intWithCommas = bal.intPart;
+  const decPartRaw = bal.decPart;
 
-  const [intPart, decPartRaw] = balance.toFixed(2).split(".");
-  const intWithCommas = Number(intPart).toLocaleString();
 
+  const vacationUntil = streak?.vacationUntil ? new Date(streak.vacationUntil) : null;
+  const vacationActive = !!vacationUntil && vacationUntil > new Date();
+  const vacationDaysLeft = vacationUntil
+    ? Math.max(0, Math.ceil((vacationUntil.getTime() - Date.now()) / (24 * 60 * 60 * 1000)))
+    : 0;
 
   return (
     <div className="flex flex-col gap-4">
+      {vacationActive && (
+        <Link
+          href="/settings"
+          className="flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-accent-sport/10 border border-accent-sport/25 cursor-pointer hover:bg-accent-sport/15 transition-colors"
+        >
+          <div className="w-2 h-2 rounded-full bg-accent-sport animate-pulse flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-[12px] font-bold text-accent-sport">Vacation mode active</p>
+            <p className="text-[11px] text-text-muted">
+              Streak frozen — {vacationDaysLeft} day{vacationDaysLeft === 1 ? "" : "s"} left
+            </p>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FC4C02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </Link>
+      )}
+
       {/* Greeting + Balance Hero */}
       <section className="pt-2 pb-1">
-        <p className="text-[13px] text-text-secondary font-medium">
-          Hello, <span className="text-text-primary">{displayName}</span>
+        <p className="text-[16px] text-text-secondary font-medium">
+          Hello, <span className="text-text-primary font-semibold">{displayName}</span>
         </p>
         <div className="mt-3 flex items-baseline gap-1">
-          <span className="text-[15px] text-text-muted font-medium mr-1">$</span>
+          <span className="text-[15px] text-text-muted font-medium mr-1">{bal.symbol}</span>
           <span className="text-[48px] font-extrabold text-text-primary leading-none tracking-tight tabular-nums">
             {intWithCommas}
           </span>
           <span className="text-[22px] text-text-muted font-bold tabular-nums">.{decPartRaw}</span>
+          {/* Discipline picker — sits next to the balance so the "fitness ↔ wealth"
+              link is visible at a glance; opens a menu teasing cycling / sleep
+              / walking, which all ship "Coming soon" until we expand. */}
+          <div className="ml-auto self-center">
+            <DisciplinePicker />
+          </div>
         </div>
         <div className="mt-2 flex items-center gap-3 text-[13px]">
           <span className="text-success-500 font-semibold tabular-nums">
-            +${earned.toFixed(2)}
+            +{earnedFmt.symbol}{earnedFmt.intPart}.{earnedFmt.decPart}
           </span>
           <span className="text-text-muted">total earned</span>
           <Link href="/apy" className="ml-auto px-2.5 py-1 rounded-full bg-accent-purple/15 border border-accent-purple/25 text-accent-purple-bright text-[11px] font-semibold tabular-nums active:scale-95 transition-transform flex items-center gap-1">
@@ -126,14 +156,31 @@ export default function DashboardPage() {
       {/* Quick actions */}
       <section className="grid grid-cols-4 gap-2 py-2">
         <QuickAction
-          label="Log run"
+          label={stravaSync.isPending ? "Syncing…" : "Sync"}
           tint="sport"
-          onClick={() => setShowLogModal(true)}
+          onClick={() => {
+            if (stravaSync.isPending) return;
+            if (!stravaStatus?.connected) {
+              toast("Connect Strava from your profile first", "error");
+              return;
+            }
+            stravaSync.mutate(undefined, {
+              onSuccess: (d) => {
+                if (d.synced > 0) {
+                  setSyncedKm(d.lastRun?.distanceKm ?? 0);
+                  setShowSyncCelebration(true);
+                } else {
+                  toast("Already up to date");
+                }
+              },
+              onError: () => toast("Sync failed", "error"),
+            });
+          }}
           icon={
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="13" cy="4" r="2" />
-              <path d="M4 22l4-6 4 3 4-7 4 4" />
-              <path d="M11 14l-1-4 4-3 3 4" />
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={stravaSync.isPending ? "animate-spin" : ""}>
+              <path d="M1 4v6h6" />
+              <path d="M23 20v-6h-6" />
+              <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" />
             </svg>
           }
         />
@@ -150,7 +197,7 @@ export default function DashboardPage() {
         <QuickAction
           label="Invite"
           tint="purple"
-          href="/social"
+          onClick={() => setShowReferModal(true)}
           icon={
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
@@ -162,7 +209,7 @@ export default function DashboardPage() {
         <QuickAction
           label="Stats"
           tint="neutral"
-          href="/challenges"
+          href="/stats"
           icon={
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 3v18h18" />
@@ -172,13 +219,24 @@ export default function DashboardPage() {
         />
       </section>
 
-      {/* Streak Hero */}
-      <Link href="/streak" className="block">
-        <Card className="relative overflow-hidden !p-5 cursor-pointer active:scale-[0.98] transition-transform">
-          <div className="absolute -top-16 -right-10 w-[220px] h-[220px] rounded-full bg-[radial-gradient(circle,rgba(252,76,2,0.25)_0%,transparent_60%)] blur-[20px] pointer-events-none" />
-          <div className="flex items-center gap-4 relative">
-            <div className="w-[82px] h-[82px] rounded-full gradient-sport flex items-center justify-center shadow-sport-glow flex-shrink-0">
-              <span className="text-[42px] font-extrabold text-white leading-none tracking-tight tabular-nums">
+      {/* Streak × APY hero — the single card that makes the app's promise readable:
+          your streak (left), this week's progress (middle band), and a ramp
+          that visually links streak → effective APY (bottom band). */}
+      <Card className="relative overflow-hidden !p-5">
+        <div className="absolute -top-16 -right-10 w-[240px] h-[240px] rounded-full bg-[radial-gradient(circle,rgba(252,76,2,0.18)_0%,transparent_60%)] blur-[24px] pointer-events-none" />
+        <div className="absolute -bottom-20 -left-12 w-[200px] h-[200px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.18)_0%,transparent_60%)] blur-[24px] pointer-events-none" />
+
+        {/* Top row: streak count + APY callout */}
+        <Link href="/streak" className="block relative">
+          <div className="flex items-center gap-4">
+            <div className="flex items-baseline gap-1.5 flex-shrink-0">
+              <span
+                className="text-[44px] leading-none drop-shadow-[0_2px_12px_rgba(252,76,2,0.45)]"
+                aria-hidden
+              >
+                🔥
+              </span>
+              <span className="text-[56px] font-extrabold text-text-primary leading-none tracking-tight tabular-nums">
                 {streakCount}
               </span>
             </div>
@@ -186,245 +244,260 @@ export default function DashboardPage() {
               <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-sport">
                 Current streak
               </p>
-              <p className="text-[17px] font-bold text-text-primary mt-0.5">
+              <p className="text-[14px] font-bold text-text-primary mt-0.5">
                 {streakCount === 0
                   ? "Start your streak this week"
                   : `${streakCount} week${streakCount > 1 ? "s" : ""} strong`}
               </p>
-              <p className="text-[12px] text-text-secondary mt-0.5">
-                {streakCount >= 10
-                  ? `Max base APY — ${effectiveApy > 8 ? `${effectiveApy.toFixed(2)}% with bonuses` : "8.00%"}`
-                  : `${(8 - apy).toFixed(2)}% to unlock max base APY`}
+              <p className="text-[13px] text-accent-purple-bright font-semibold mt-1 tabular-nums">
+                Earning <span className="font-extrabold">{effectiveApy.toFixed(2)}% APY</span>
               </p>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-text-muted flex-shrink-0"><path d="M9 18l6-6-6-6" /></svg>
           </div>
-        </Card>
-      </Link>
+        </Link>
 
-      {/* This week progress */}
-      <Card className="!p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
-              This week
-            </p>
-            <p className="text-[24px] font-extrabold text-text-primary mt-1 tabular-nums leading-none">
-              {currentKm.toFixed(1)}
-              <span className="text-[14px] text-text-secondary font-medium"> / {targetKm} km</span>
+        {/* Middle row: this week's progress */}
+        <div className="mt-5 pt-4 border-t border-oria relative">
+          <div className="flex justify-between items-baseline mb-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">This week</p>
+            <p className="text-[13px] font-bold text-text-primary tabular-nums">
+              {currentKm.toFixed(1)}<span className="text-text-secondary font-medium"> / {targetKm} km</span>
             </p>
           </div>
-          <ProgressRing percent={pct} />
-        </div>
-        <div className="h-1.5 rounded-full bg-oria-chip overflow-hidden">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-accent-sport to-accent-gold animate-bar"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <div className="flex justify-between items-center mt-3">
-          <span className="text-[12px] text-text-muted">
-            {Math.max(0, targetKm - currentKm).toFixed(1)} km remaining
+          <div className="h-1.5 rounded-full bg-oria-chip overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-accent-sport to-accent-gold animate-bar"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <div className="flex justify-between items-center mt-2">
+            <span className="text-[11px] text-text-muted">
+              {currentKm >= targetKm
+                ? "Goal hit — streak +1 this week"
+                : `${Math.max(0, targetKm - currentKm).toFixed(1)} km to lock this week's streak`}
+            </span>
             {stravaStatus?.connected && (
-              <span className="text-accent-sport ml-1">· via Strava</span>
+              <button
+                onClick={() =>
+                  stravaSync.mutate(undefined, {
+                    onSuccess: (d) => {
+                      if (d.synced > 0 && d.lastRun) {
+                        setSyncedKm(d.lastRun.distanceKm);
+                        setShowSyncCelebration(true);
+                      } else {
+                        toast(`Synced ${d.synced} weeks from Strava`);
+                      }
+                    },
+                    onError: () => toast("Sync failed", "error"),
+                  })
+                }
+                disabled={stravaSync.isPending}
+                className="text-[10px] font-semibold text-accent-purple-bright cursor-pointer bg-accent-purple/15 border border-accent-purple/25 px-2.5 py-1 rounded-full flex items-center gap-1 disabled:opacity-50"
+              >
+                {stravaSync.isPending ? (
+                  <span className="inline-block w-3 h-3 border-2 border-accent-purple-bright/30 border-t-accent-purple-bright rounded-full animate-spin" />
+                ) : (
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 4v6h6" /><path d="M23 20v-6h-6" />
+                    <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" />
+                  </svg>
+                )}
+                Sync
+              </button>
             )}
-          </span>
-          {stravaStatus?.connected && (
-            <button
-              onClick={() =>
-                stravaSync.mutate(undefined, {
-                  onSuccess: (d) => {
-                    if (d.synced > 0 && d.lastRun) {
-                      setSyncedKm(d.lastRun.distanceKm);
-                      setShowSyncCelebration(true);
-                    } else {
-                      toast(`Synced ${d.synced} weeks from Strava`);
-                    }
-                  },
-                  onError: () => toast("Sync failed", "error"),
-                })
-              }
-              disabled={stravaSync.isPending}
-              className="text-[11px] font-semibold text-accent-purple-bright cursor-pointer bg-accent-purple/15 border border-accent-purple/25 px-3 py-1.5 rounded-full min-h-[32px] flex items-center gap-1.5 disabled:opacity-50"
-            >
-              {stravaSync.isPending ? (
-                <span className="inline-block w-3 h-3 border-2 border-accent-purple-bright/30 border-t-accent-purple-bright rounded-full animate-spin" />
-              ) : (
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M1 4v6h6" /><path d="M23 20v-6h-6" />
-                  <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" />
-                </svg>
-              )}
-              Sync
-            </button>
-          )}
+          </div>
         </div>
-        <Link href="/activities" className="flex items-center justify-center gap-1 mt-3 pt-2 border-t border-oria text-[12px] text-accent-purple-bright font-semibold">
-          View all activities
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-        </Link>
+
+        {/* Bottom row: APY-per-week line chart driven by the user's actual
+            goal-met history. Each week steps up the streak (and the
+            projected APY) when the goal was met, and resets to baseline
+            when it was missed — so the curve makes resilience visible. */}
+        {(() => {
+          const breakdown = streak?.apyBreakdown;
+          const baselineApy = breakdown?.baseline ?? 3;
+          const vaultMax = breakdown?.vaultRate ?? 5;
+          const range = Math.max(0.01, vaultMax - baselineApy);
+
+          // 8 most recent ISO weeks, oldest first.
+          const padded = lastNWeeks(activities ?? [], 8).slice().reverse();
+
+          // Derive the streak trajectory *backwards* from the current streak
+          // count so the rightmost point always matches what the rest of the
+          // card claims (effectiveApy). Activity history only sets dot
+          // colours; the curve itself is anchored on streakCount.
+          // For week index i (0 = oldest, n-1 = this week), weeksFromEnd
+          // = n - 1 - i. If that week is within the active streak, the
+          // streak at that moment was streakCount - weeksFromEnd.
+          //
+          // We scale the projection by streakCount (not the constant 16) so
+          // the value at the current streak lands exactly on effectiveApy,
+          // giving a continuous curve from baseline up to today instead of
+          // a visible jump on the last point.
+          const currentBonus = Math.max(0, effectiveApy - baselineApy);
+          const projectedApy = (s: number) =>
+            streakCount <= 0
+              ? baselineApy
+              : baselineApy + currentBonus * Math.min(1, s / streakCount);
+          const points = padded.map((w, i) => {
+            const weeksFromEnd = padded.length - 1 - i;
+            const inActiveStreak = weeksFromEnd < streakCount;
+            const streakAt = inActiveStreak ? streakCount - weeksFromEnd : 0;
+            return {
+              weekStart: w.weekStart,
+              goalMet: inActiveStreak || w.goalMet, // mark met if part of the live streak
+              streak: streakAt,
+              apy: projectedApy(streakAt),
+            };
+          });
+
+          // SVG geometry
+          const W = 100; // viewBox width (%) — responsive via preserveAspectRatio="none" on the line area
+          const H = 80;  // viewBox height
+          const padX = 4;
+          const padY = 6;
+          const x = (i: number) => padX + ((W - 2 * padX) * (points.length <= 1 ? 0 : i / (points.length - 1)));
+          const y = (apy: number) => {
+            const t = (apy - baselineApy) / range; // 0..1+
+            const clamped = Math.max(0, Math.min(1, t));
+            return H - padY - clamped * (H - 2 * padY);
+          };
+          // Step chart: APY holds flat across a week, then jumps at the week
+          // boundary when the next goal-met week ticks the streak up a tier.
+          // Render as a staircase (hold then riser), not a diagonal line.
+          const stair = points
+            .map((p, i) => (i === 0 ? `${x(i)} ${y(p.apy)}` : `${x(i)} ${y(points[i - 1].apy)} L ${x(i)} ${y(p.apy)}`))
+            .join(" L ");
+          const linePath = points.length > 0 ? `M ${stair}` : "";
+          const areaPath = points.length > 0
+            ? `M ${x(0)} ${H - padY} L ${stair} L ${x(points.length - 1)} ${H - padY} Z`
+            : "";
+
+          const remainingWeeks = Math.max(0, 16 - streakCount);
+          const subtitle =
+            streakCount === 0
+              ? "Stay consistent — each goal-met week boosts your share of the bonus pool."
+              : streakCount >= 16
+                ? "You've maxed the streak component — you're earning at the ceiling."
+                : `${remainingWeeks} more goal-met week${remainingWeeks > 1 ? "s" : ""} to max your share.`;
+
+          return (
+            <div className="mt-5 pt-4 border-t border-oria relative">
+              <div className="flex justify-between items-baseline mb-2">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">Streak → APY · last {points.length}w</p>
+                <Link href="/apy" className="text-[10px] font-semibold text-accent-purple-bright">
+                  Details →
+                </Link>
+              </div>
+
+              <div className="relative">
+                {/* y-axis labels */}
+                <div className="absolute -left-0.5 inset-y-0 flex flex-col justify-between text-[9px] text-text-muted tabular-nums pointer-events-none">
+                  <span>{vaultMax.toFixed(2)}%</span>
+                  <span>{baselineApy.toFixed(2)}%</span>
+                </div>
+                <svg
+                  viewBox={`0 0 ${W} ${H}`}
+                  preserveAspectRatio="none"
+                  className="w-full h-[110px] ml-9"
+                  aria-label="APY per week — last 8 weeks"
+                >
+                  <defs>
+                    <linearGradient id="apyGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#a78bfa" stopOpacity="0.35" />
+                      <stop offset="100%" stopColor="#a78bfa" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  {/* grid: baseline + ceiling */}
+                  <line x1={padX} x2={W - padX} y1={y(baselineApy)} y2={y(baselineApy)} stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" strokeDasharray="2 2" />
+                  <line x1={padX} x2={W - padX} y1={y(vaultMax)} y2={y(vaultMax)} stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" strokeDasharray="2 2" />
+                  {/* area + line */}
+                  {areaPath && <path d={areaPath} fill="url(#apyGrad)" />}
+                  {linePath && <path d={linePath} stroke="#a78bfa" strokeWidth="1.5" fill="none" vectorEffect="non-scaling-stroke" />}
+                  {/* dots */}
+                  {points.map((p, i) => (
+                    <circle
+                      key={p.weekStart}
+                      cx={x(i)}
+                      cy={y(p.apy)}
+                      r={i === points.length - 1 ? 1.6 : 1}
+                      fill={p.goalMet ? "#22c55e" : "#fc4c02"}
+                      stroke={i === points.length - 1 ? "#fff" : "none"}
+                      strokeWidth={i === points.length - 1 ? 0.6 : 0}
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  ))}
+                </svg>
+              </div>
+
+              {/* x labels (just first + last to keep it light) */}
+              {points.length > 0 && (
+                <div className="flex justify-between text-[9px] text-text-muted tabular-nums mt-1 ml-9">
+                  <span>{new Date(points[0].weekStart).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
+                  <span>This week</span>
+                </div>
+              )}
+
+              <div className="flex items-center gap-3 mt-3 text-[10px] text-text-muted">
+                <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-success-500" /> goal met</span>
+                <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-accent-sport" /> missed</span>
+              </div>
+              <p className="text-[11px] text-text-secondary mt-2 leading-relaxed">{subtitle}</p>
+            </div>
+          );
+        })()}
       </Card>
 
-      {/* Progress chart */}
-      {activities && activities.length >= 2 && (
-        <Card className="!p-5">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-3">
-            Weekly progress
-          </p>
-          <ProgressChart data={activities} targetKm={targetKm} />
-        </Card>
-      )}
+      {/* The standalone "Weekly progress" (km-by-week area chart) used to live
+          here. It was folded into the streak/this-week card above as an
+          APY-by-week line, so the same plot communicates the actual value
+          the user cares about (yield) instead of just distance. */}
 
-      {/* Last run */}
-      {lastRunData?.lastRun && (
-        <Card className="!p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-accent-sport/15 border border-accent-sport/25 flex items-center justify-center flex-shrink-0">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#FC4C02">
-                <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-.956l2.09 4.128L3 0h4.138" />
-              </svg>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
-                Last activity
-              </p>
-              <p className="text-[14px] font-semibold text-text-primary truncate">{lastRunData.lastRun.name}</p>
-              <p className="text-[11px] text-text-muted">{new Date(lastRunData.lastRun.date).toLocaleDateString()}</p>
-            </div>
-            <div className="text-right flex-shrink-0">
-              <p className="text-[20px] font-extrabold text-text-primary tabular-nums leading-none">
-                {lastRunData.lastRun.distanceKm}<span className="text-[12px] text-text-muted font-medium"> km</span>
-              </p>
-              <p className="text-[11px] text-text-muted tabular-nums mt-0.5">
-                {Math.floor(lastRunData.lastRun.movingTimeSec / 60)} min
-              </p>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {/* Weekly consistency — you + friends */}
-      {friendsWeekly && friendsWeekly.length > 0 && (
-        <Card className="!p-5">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm font-bold text-text-primary tracking-tight">Weekly consistency</p>
-            <Link href="/social" className="text-[12px] text-accent-purple-bright font-semibold hover:text-accent-purple">
-              See all →
-            </Link>
-          </div>
-          <div className="flex flex-col gap-3">
-            {friendsWeekly.slice(0, 5).map((f) => {
-              const pctF = Math.min(100, Math.round((f.distanceKm / f.targetKm) * 100));
-              return (
-                <div key={f.id} className={`rounded-xl ${f.isMe ? "bg-accent-purple/8 border border-accent-purple/15 p-2.5" : "p-0.5"}`}>
-                  <div className="flex items-center gap-2.5">
-                    <Avatar initials={getInitials(f.displayName)} size={28} highlight={f.isMe} />
-                    <span className="text-[13px] font-semibold text-text-primary flex-1 truncate">
-                      {f.isMe ? "You" : (f.displayName ?? "User")}
-                    </span>
-                    <span className="text-[12px] font-bold tabular-nums text-text-primary">
-                      {f.distanceKm.toFixed(1)}
-                      <span className="text-text-muted font-medium">/{f.targetKm}</span>
-                    </span>
-                    {f.goalMet ? (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20 6L9 17l-5-5" />
-                      </svg>
-                    ) : (
-                      <span className="text-[11px] font-semibold text-text-muted tabular-nums w-[14px] text-center">
-                        {pctF}%
-                      </span>
-                    )}
-                  </div>
-                  <div className="h-1 rounded-full bg-oria-chip overflow-hidden mt-1.5">
-                    <div
-                      className={`h-full rounded-full animate-bar ${f.goalMet ? "bg-success-500" : "bg-gradient-to-r from-accent-sport to-accent-gold"}`}
-                      style={{ width: `${pctF}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-      )}
+      {/* "Last run" and "Weekly consistency — you + friends" used to live here.
+          They moved off Home so the page stays focused on the fintech ↔ sport
+          link: last-activity details are in the activity feed below; the
+          consistency leaderboard now lives on /social. */}
 
       {/* Coaching plan */}
       {(() => {
-        const sessionsPerWeek = Math.max(3, Math.min(5, Math.ceil(targetKm / 3)));
-        const longRunTarget = Math.round(targetKm * 0.4 * 10) / 10;
-        const nextMonthTarget = Math.round(targetKm * 1.1 * 10) / 10;
+        const goalType = user?.goalType ?? "running";
+        const isSteps = goalType === "steps";
+        const isCycling = goalType === "cycling";
+        const sessionWord = isSteps ? "day" : isCycling ? "ride" : "run";
+        const unitLabel = isSteps ? "k steps" : "km";
+        // Sessions/week: prefer the user's configured plan, fallback to runSchedule, then default.
+        const plan = user?.settings?.runPlan;
+        const scheduledDays = user?.runSchedule?.length ?? 0;
+        const sessionsPerWeek = plan?.sessionsPerWeek ?? (scheduledDays > 0
+          ? scheduledDays
+          : Math.max(3, Math.min(5, Math.ceil(targetKm / 3))));
+        const longRunKm = plan?.longRunKm ?? 0;
+        const progressionPct = user?.settings?.monthlyProgressionPct ?? 10;
+        const nextMonthTarget = Math.round(targetKm * (1 + progressionPct / 100) * 10) / 10;
         const weekSessions = streak?.weekSessions ?? 0;
-        const monthPace = streak?.monthAvgPace ?? 0;
-        const remainingKm = Math.max(0, targetKm - currentKm);
-        const daysLeft = 7 - new Date().getUTCDay() + (new Date().getUTCDay() === 0 ? 0 : 1);
-        const remainingSessions = Math.max(1, sessionsPerWeek - weekSessions);
-        const goalDone = currentKm >= targetKm;
 
         return (
           <>
-            {/* Next run CTA */}
-            <Card className={`!p-0 overflow-hidden ${goalDone ? "border-success-500/30" : ""}`}>
-              <div className={`px-5 py-4 ${goalDone ? "bg-success-500/8" : "bg-gradient-to-r from-accent-sport/8 to-transparent"}`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
-                      {goalDone ? "Goal complete" : "Next run"}
-                    </p>
-                    <p className="text-[22px] font-extrabold text-text-primary mt-1 leading-none tabular-nums">
-                      {goalDone ? (
-                        <span className="text-success-500">Done</span>
-                      ) : (
-                        <>{(remainingKm / remainingSessions).toFixed(1)}<span className="text-[14px] text-text-muted font-semibold"> km</span></>
-                      )}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    {!goalDone && (
-                      <>
-                        <p className="text-[13px] font-bold text-text-primary tabular-nums">
-                          {remainingSessions} run{remainingSessions > 1 ? "s" : ""} left
-                        </p>
-                        <p className="text-[11px] text-text-muted tabular-nums">
-                          {daysLeft}d remaining
-                        </p>
-                      </>
-                    )}
-                    {goalDone && (
-                      <div className="w-10 h-10 rounded-full bg-success-500/15 flex items-center justify-center">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M20 6L9 17l-5-5" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Weekly plan + projection */}
+            {/* Weekly plan + projection — same-height grid */}
             <div className="grid grid-cols-2 gap-3">
-              {/* Optimal split */}
-              <Card className="!p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-accent-purple-bright">Plan</p>
+              {/* Plan — opens config modal */}
+              <button
+                onClick={() => setShowPlanModal(true)}
+                className="block text-left bg-oria-card rounded-xl border border-oria backdrop-blur-[18px] shadow-card hover:bg-oria-card-hover transition-colors cursor-pointer p-4 h-full flex flex-col"
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-accent-purple-bright">Plan</p>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64697A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </div>
                 <p className="text-[20px] font-extrabold text-text-primary mt-1 leading-none tabular-nums">
                   <span className="animate-count-pop inline-block">{weekSessions}</span>
                   <span className="text-[12px] text-text-muted font-semibold">/{sessionsPerWeek}</span>
                 </p>
-                <div className="mt-2 flex flex-col gap-1">
-                  <div className="flex items-center gap-1.5">
-                    <div className={`w-1.5 h-1.5 rounded-full ${(streak?.weekLongestRun ?? 0) >= longRunTarget ? "bg-success-500" : "bg-accent-sport"}`} />
-                    <span className={`text-[11px] ${(streak?.weekLongestRun ?? 0) >= longRunTarget ? "text-success-500 line-through" : "text-text-secondary"}`}>
-                      1 long: {longRunTarget} km
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className={`w-1.5 h-1.5 rounded-full ${weekSessions >= sessionsPerWeek ? "bg-success-500" : "bg-accent-purple"}`} />
-                    <span className={`text-[11px] ${weekSessions >= sessionsPerWeek - 1 ? "text-success-500" : "text-text-secondary"}`}>
-                      {Math.max(0, sessionsPerWeek - 1 - Math.max(0, weekSessions - 1))} easy left
-                    </span>
-                  </div>
-                </div>
+                <p className="text-[11px] text-text-secondary mt-1.5">
+                  {sessionWord}{sessionsPerWeek > 1 ? "s" : ""} this week
+                </p>
                 <div className="mt-2 flex gap-1">
                   {Array.from({ length: sessionsPerWeek }).map((_, i) => (
                     <div
@@ -434,40 +507,56 @@ export default function DashboardPage() {
                     />
                   ))}
                 </div>
-              </Card>
+                <p className="text-[10px] text-text-muted mt-auto pt-2">
+                  {plan
+                    ? (longRunKm > 0 ? `1 long ${sessionWord}: ${longRunKm} ${unitLabel}` : "Tap to edit")
+                    : "Tap to configure"}
+                </p>
+              </button>
 
               {/* Next month projection */}
-              <Card className="!p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-accent-gold">Next month</p>
-                <p className="text-[20px] font-extrabold text-text-primary mt-1 leading-none tabular-nums">
-                  {nextMonthTarget}<span className="text-[12px] text-text-muted font-semibold"> km/wk</span>
-                </p>
-                <p className="text-[11px] text-text-secondary mt-2">
-                  +10% progressive overload
-                </p>
-                {monthPace > 0 ? (
-                  <p className="text-[11px] text-text-muted mt-1 tabular-nums">
-                    Pace: {monthPace.toFixed(1)} min/km
+              <Link href="/settings" className="block h-full">
+                <Card className="!p-4 cursor-pointer hover:bg-oria-card-hover transition-colors h-full flex flex-col">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-accent-gold">Next month</p>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64697A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </div>
+                  <p className="text-[20px] font-extrabold text-text-primary mt-1 leading-none tabular-nums">
+                    {nextMonthTarget}<span className="text-[12px] text-text-muted font-semibold"> {unitLabel}/wk</span>
                   </p>
-                ) : (
-                  <p className="text-[11px] text-text-muted mt-1">
-                    Expect 5-8% pace gain
+                  <p className="text-[11px] text-text-secondary mt-1.5">
+                    {progressionPct === 0 ? "Maintenance" : `+${progressionPct}% overload`}
                   </p>
-                )}
-                <div className="mt-2 flex items-center gap-1">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-                  </svg>
-                  <span className="text-[10px] text-text-muted">Buist et al. 2010</span>
-                </div>
-              </Card>
+                  <p className="text-[10px] text-text-muted mt-auto pt-2">Tap to change rate</p>
+                </Card>
+              </Link>
             </div>
           </>
         );
       })()}
 
-      {/* Log Activity Modal */}
-      <LogActivityModal open={showLogModal} onClose={() => setShowLogModal(false)} />
+      {/* Plan config modal */}
+      <PlanModal
+        open={showPlanModal}
+        onClose={() => setShowPlanModal(false)}
+        targetKm={targetKm}
+        goalType={user?.goalType ?? "running"}
+        initial={{
+          sessionsPerWeek: user?.settings?.runPlan?.sessionsPerWeek ?? Math.max(3, Math.min(5, Math.ceil(targetKm / 3))),
+          longRunKm: user?.settings?.runPlan?.longRunKm ?? 0,
+        }}
+        onSaved={() => refetchUser()}
+      />
+
+      {/* Refer friends modal */}
+      <ReferFriendsModal
+        open={showReferModal}
+        onClose={() => setShowReferModal(false)}
+        userId={user?.id}
+        displayName={user?.displayName}
+      />
 
       {/* Strava sync celebration */}
       <Celebration
@@ -478,35 +567,50 @@ export default function DashboardPage() {
         goalMet={currentKm + syncedKm >= targetKm}
       />
 
-      {/* Friends activity */}
-      <Card className="!p-5">
-        <div className="flex justify-between items-center mb-3">
-          <span className="text-sm font-bold text-text-primary tracking-tight">Friends activity</span>
-          <Link href="/social" className="text-[12px] text-accent-purple-bright font-semibold hover:text-accent-purple">
-            See all →
-          </Link>
-        </div>
-        {feed && feed.length > 0 ? (
-          feed.map((f, i) => {
-            const { text, emoji } = formatFeedEvent(f.eventType, f.payload as Record<string, unknown>);
-            return (
-              <div key={f.id} className={`flex items-center gap-3 py-2.5 ${i < feed.length - 1 ? "border-b border-oria" : ""}`}>
-                <Avatar initials={getInitials(f.user.displayName)} size={32} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] text-text-primary leading-snug">
-                    <span className="font-semibold">{f.user.displayName ?? "User"}</span>{" "}
-                    <span className="text-text-secondary">{text}</span>
-                  </p>
-                  <p className="text-[11px] text-text-muted mt-0.5">{timeAgo(f.createdAt)}</p>
-                </div>
-                <span className="text-base">{emoji}</span>
-              </div>
-            );
-          })
-        ) : (
-          <p className="text-sm text-text-muted py-2">No recent activity from friends yet.</p>
-        )}
-      </Card>
+      {/* Activity feed — two-tier card system (moved from /social) */}
+      <ActivityFeed />
+
+      {/* Coming soon — explore. Sits at the bottom of Home so the focal
+          area stays on streak/yield/feed; events + map are aspirational. */}
+      <section className="grid grid-cols-2 gap-2.5 pt-2">
+        {[
+          {
+            label: "Events",
+            description: "Run together with the community",
+            icon: (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" />
+              </svg>
+            ),
+          },
+          {
+            label: "Map",
+            description: "Discover Oria runners near you",
+            icon: (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" />
+                <path d="M8 2v16M16 6v16" />
+              </svg>
+            ),
+          },
+        ].map((item) => (
+          <button
+            key={item.label}
+            onClick={() => toast(`${item.label} — Coming soon`)}
+            className="relative text-left p-4 rounded-2xl bg-oria-card border border-oria backdrop-blur-[18px] shadow-card cursor-pointer hover:bg-oria-card-hover transition-colors group min-h-[88px]"
+          >
+            <span className="absolute top-2.5 right-2.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-accent-purple/20 text-accent-purple-bright border border-accent-purple/25">
+              Soon
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-accent-purple/15 border border-accent-purple/25 flex items-center justify-center text-accent-purple-bright mb-2">
+              {item.icon}
+            </div>
+            <p className="text-[13px] font-bold text-text-primary">{item.label}</p>
+            <p className="text-[11px] text-text-muted mt-0.5 leading-snug line-clamp-2">{item.description}</p>
+          </button>
+        ))}
+      </section>
 
       {/* Run welcome celebration — shows on app open if new km */}
       {showRunWelcome && (

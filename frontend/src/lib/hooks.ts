@@ -19,6 +19,19 @@ interface Streak {
   weekLongestRun: number;
   monthAvgPace: number;
   prevMonthAvgPace: number;
+  paceCategory: "running" | "cycling" | null;
+  vacationUntil: string | null;
+  activityScore: number;
+  poolBonus: number;
+  apyBreakdown?: {
+    vaultRate: number;
+    spread: number;
+    baseline: number;
+    poolRate: number;
+    bonus: number;
+    effective: number;
+    meanScore: number;
+  };
   currentWeek: {
     weekStart: string;
     distanceKm: number;
@@ -43,6 +56,9 @@ interface User {
     privacyShowOnLeaderboard?: boolean;
     privacyShowActivityToFriends?: boolean;
     unitsKm?: boolean;
+    currency?: "USD" | "EUR";
+    monthlyProgressionPct?: number;
+    runPlan?: { sessionsPerWeek: number; longRunKm: number };
   };
   streak: {
     currentCount: number;
@@ -83,6 +99,7 @@ interface FeedEvent {
     id: string;
     displayName: string | null;
     avatarUrl: string | null;
+    streakCount: number;
   };
 }
 
@@ -96,6 +113,7 @@ interface Challenge {
   endDate: string;
   maxMembers: number | null;
   status: string;
+  visibility: "public" | "friends";
   members: Array<{
     id: string;
     userId: string;
@@ -215,6 +233,22 @@ export function useStreak() {
   });
 }
 
+export function useStartVacation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => apiFetch("/api/streaks/vacation", { method: "POST" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["streak", "me"] }),
+  });
+}
+
+export function useEndVacation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => apiFetch("/api/streaks/vacation", { method: "DELETE" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["streak", "me"] }),
+  });
+}
+
 export function useActivities(weeks = 12) {
   return useQuery<Activity[]>({
     queryKey: ["activities", weeks],
@@ -240,6 +274,43 @@ export function useChallenges() {
   return useQuery<Challenge[]>({
     queryKey: ["challenges"],
     queryFn: () => apiFetch("/api/challenges"),
+  });
+}
+
+export interface ChallengeDetail {
+  id: string;
+  creatorId: string;
+  title: string;
+  description: string | null;
+  bannerUrl: string | null;
+  goalKmWeek: number;
+  startDate: string;
+  endDate: string;
+  maxMembers: number | null;
+  status: string;
+  visibility: "public" | "friends";
+  creator: { id: string; displayName: string | null };
+  weeks: string[];
+  elapsedWeeks: number;
+  members: Array<{
+    id: string;
+    userId: string;
+    joinedAt: string;
+    user: { id: string; displayName: string | null; avatarUrl: string | null };
+    weeksMet: number;
+    weeksElapsed: number;
+    weekly: Array<{ weekStart: string; distanceKm: number; goalMet: boolean; isPast: boolean }>;
+  }>;
+  weeklyParticipation: Array<{ weekStart: string; isPast: boolean; metCount: number; total: number; ratio: number }>;
+  aggregate: { totalWeeksMet: number; totalWeeksPossible: number; ratio: number };
+  milestones: Array<{ key: string; label: string; sub: string | null; achieved: boolean; at?: string | null }>;
+}
+
+export function useChallenge(id: string | undefined) {
+  return useQuery<ChallengeDetail>({
+    queryKey: ["challenges", id],
+    queryFn: () => apiFetch(`/api/challenges/${id}`),
+    enabled: !!id,
   });
 }
 
@@ -303,6 +374,7 @@ export function useCreateChallenge() {
       durationWeeks: number;
       maxMembers?: number;
       description?: string;
+      visibility?: "public" | "friends";
     }) => {
       const startDate = new Date().toISOString();
       const endDate = new Date(
@@ -317,6 +389,7 @@ export function useCreateChallenge() {
           endDate,
           maxMembers: data.maxMembers,
           description: data.description,
+          visibility: data.visibility ?? "public",
         }),
       });
     },
@@ -577,6 +650,39 @@ export function useJoinChallenge() {
   return useMutation({
     mutationFn: (challengeId: string) =>
       apiFetch(`/api/challenges/${challengeId}/join`, { method: "POST" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["challenges"] });
+    },
+  });
+}
+
+export function useUpdateChallenge() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: {
+      id: string;
+      title?: string;
+      description?: string | null;
+      bannerUrl?: string | null;
+      goalKmWeek?: number;
+      maxMembers?: number | null;
+    }) =>
+      apiFetch(`/api/challenges/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      }),
+    onSuccess: (_data, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["challenges"] });
+      queryClient.invalidateQueries({ queryKey: ["challenges", vars.id] });
+    },
+  });
+}
+
+export function useDeleteChallenge() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (challengeId: string) =>
+      apiFetch(`/api/challenges/${challengeId}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["challenges"] });
     },

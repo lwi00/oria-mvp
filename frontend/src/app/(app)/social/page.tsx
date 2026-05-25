@@ -7,7 +7,6 @@ import { Avatar } from "@/components/Avatar";
 import { CardSkeleton, ErrorCard } from "@/components/Skeleton";
 import {
   useLeaderboard,
-  useFeed,
   useDiscoverUsers,
   useSearchUsers,
   useSendFriendRequest,
@@ -19,33 +18,41 @@ import {
   useFriends,
   useRemoveFriend,
   usePokeFriend,
-  useLikeFeedEvent,
+  useFriendsWeekly,
 } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
-import { timeAgo, getInitials, formatFeedEvent } from "@/lib/utils";
+import { getInitials } from "@/lib/utils";
 
 function PodiumRow({
+  id,
   rank,
   name,
   streak,
   apy,
   isMe,
   initials,
+  avatarUrl,
 }: {
+  id: string;
   rank: number;
   name: string;
   streak: number;
   apy: number;
   isMe: boolean;
   initials: string;
+  avatarUrl?: string | null;
 }) {
   const medalFill = rank === 1 ? "#F59E0B" : rank === 2 ? "#94A3B8" : rank === 3 ? "#CD7F32" : null;
+  // Tap a row → go to the friend's profile (unless it's the current user).
+  const Wrapper = isMe
+    ? ({ children }: { children: React.ReactNode }) => <div className="flex items-center gap-3 p-3 rounded-2xl bg-accent-purple/12 border border-accent-purple/25">{children}</div>
+    : ({ children }: { children: React.ReactNode }) => (
+        <Link href={`/friend/${id}`} className="flex items-center gap-3 p-3 rounded-2xl cursor-pointer hover:bg-oria-card-hover transition-colors group">
+          {children}
+        </Link>
+      );
   return (
-    <div
-      className={`flex items-center gap-3 p-3 rounded-2xl ${
-        isMe ? "bg-accent-purple/12 border border-accent-purple/25" : ""
-      }`}
-    >
+    <Wrapper>
       {medalFill ? (
         <span className="inline-flex items-center justify-center w-6 h-6" aria-label={`#${rank}`}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill={medalFill} stroke="rgba(0,0,0,0.3)" strokeWidth="0.8">
@@ -55,9 +62,9 @@ function PodiumRow({
       ) : (
         <span className="text-[13px] font-bold w-6 text-center tabular-nums text-text-muted">#{rank}</span>
       )}
-      <Avatar initials={initials} size={34} highlight={isMe} />
+      <Avatar initials={initials} size={34} highlight={isMe} src={avatarUrl ?? null} />
       <div className="flex-1 min-w-0">
-        <p className="text-[14px] font-semibold text-text-primary truncate">
+        <p className={`text-[14px] font-semibold text-text-primary truncate ${isMe ? "" : "group-hover:text-accent-purple-bright transition-colors"}`}>
           {name}{" "}
           {isMe && <span className="text-[11px] text-accent-purple-bright font-semibold">· you</span>}
         </p>
@@ -71,7 +78,7 @@ function PodiumRow({
           </svg>
         </span>
       </div>
-    </div>
+    </Wrapper>
   );
 }
 
@@ -136,7 +143,7 @@ function UserActionButton({
 
 export default function SocialPage() {
   const { data: board, isLoading: boardLoading, isError: boardError, refetch: refetchBoard } = useLeaderboard();
-  const { data: feed, isLoading: feedLoading, isError: feedError, refetch: refetchFeed } = useFeed();
+  const { data: friendsWeekly } = useFriendsWeekly();
   const { data: discoverUsers } = useDiscoverUsers();
   const { data: friends } = useFriends();
   const { data: sentRequests } = useSentRequests();
@@ -147,7 +154,6 @@ export default function SocialPage() {
   const rejectRequest = useRejectFriendRequest();
   const removeFriend = useRemoveFriend();
   const pokeFriend = usePokeFriend();
-  const likeFeed = useLikeFeedEvent();
   const { toast } = useToast();
 
   const [query, setQuery] = useState("");
@@ -173,7 +179,7 @@ export default function SocialPage() {
     });
   };
 
-  if (boardLoading || feedLoading) {
+  if (boardLoading) {
     return (
       <div className="flex flex-col gap-4">
         <div className="pt-1 pb-2">
@@ -185,13 +191,13 @@ export default function SocialPage() {
     );
   }
 
-  if (boardError || feedError) {
+  if (boardError) {
     return (
       <div className="flex flex-col gap-4">
         <div className="pt-1 pb-2">
           <h1 className="text-2xl font-bold text-text-primary tracking-tight">Friends</h1>
         </div>
-        <ErrorCard onRetry={() => { refetchBoard(); refetchFeed(); }} />
+        <ErrorCard onRetry={() => { refetchBoard(); }} />
       </div>
     );
   }
@@ -248,7 +254,7 @@ export default function SocialPage() {
                 const status = getStatus(u.id);
                 return (
                   <div key={u.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-oria-chip transition-colors">
-                    <Avatar initials={getInitials(u.displayName ?? "?")} size={38} />
+                    <Avatar initials={getInitials(u.displayName ?? "?")} size={38} src={u.avatarUrl} />
                     <div className="flex-1 min-w-0">
                       <p className="text-[14px] font-semibold text-text-primary truncate">{u.displayName ?? "User"}</p>
                       <p className="text-[11px] text-text-muted tabular-nums">
@@ -288,7 +294,7 @@ export default function SocialPage() {
               <div className="flex flex-col gap-1">
                 {pendingRequests!.map((r) => (
                   <div key={r.friendshipId} className="flex items-center gap-3 p-2.5 rounded-xl bg-accent-purple/5 border border-accent-purple/10">
-                    <Avatar initials={getInitials(r.user.displayName ?? "?")} size={36} />
+                    <Avatar initials={getInitials(r.user.displayName ?? "?")} size={36} src={r.user.avatarUrl} />
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-semibold text-text-primary truncate">{r.user.displayName ?? "User"}</p>
                       <p className="text-[11px] text-text-muted tabular-nums">
@@ -347,7 +353,7 @@ export default function SocialPage() {
                 <div className="flex flex-col gap-1">
                   {sentRequests!.map((r) => (
                     <div key={r.friendshipId} className="flex items-center gap-3 p-2 rounded-xl">
-                      <Avatar initials={getInitials(r.user.displayName ?? "?")} size={32} />
+                      <Avatar initials={getInitials(r.user.displayName ?? "?")} size={32} src={r.user.avatarUrl} />
                       <div className="flex-1 min-w-0">
                         <p className="text-[12px] font-semibold text-text-primary truncate">{r.user.displayName ?? "User"}</p>
                         <p className="text-[10px] text-text-muted">Pending</p>
@@ -371,6 +377,62 @@ export default function SocialPage() {
             )}
           </Card>
 
+          {/* Weekly consistency — you + friends (moved from Home) */}
+          {friendsWeekly && friendsWeekly.length > 0 && (
+            <Card className="!p-5">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-base font-bold text-text-primary tracking-tight">Weekly consistency</p>
+                <p className="text-[11px] text-text-muted">This week&apos;s km vs goal</p>
+              </div>
+              <div className="flex flex-col gap-3">
+                {friendsWeekly.slice(0, 8).map((f) => {
+                  const pctF = Math.min(100, Math.round((f.distanceKm / f.targetKm) * 100));
+                  return (
+                    <div
+                      key={f.id}
+                      className={`rounded-xl ${f.isMe ? "bg-accent-purple/8 border border-accent-purple/15 p-2.5" : "p-0.5"}`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        {f.isMe ? (
+                          <Avatar initials={getInitials(f.displayName)} size={28} highlight src={f.avatarUrl} />
+                        ) : (
+                          <Link href={`/friend/${f.id}`} className="flex items-center gap-2.5 flex-1 min-w-0 group">
+                            <Avatar initials={getInitials(f.displayName)} size={28} src={f.avatarUrl} />
+                            <span className="text-[13px] font-semibold text-text-primary truncate group-hover:text-accent-purple-bright transition-colors">
+                              {f.displayName ?? "User"}
+                            </span>
+                          </Link>
+                        )}
+                        {f.isMe && (
+                          <span className="text-[13px] font-semibold text-text-primary flex-1 truncate">You</span>
+                        )}
+                        <span className="text-[12px] font-bold tabular-nums text-text-primary">
+                          {f.distanceKm.toFixed(1)}
+                          <span className="text-text-muted font-medium">/{f.targetKm}</span>
+                        </span>
+                        {f.goalMet ? (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 6L9 17l-5-5" />
+                          </svg>
+                        ) : (
+                          <span className="text-[11px] font-semibold text-text-muted tabular-nums w-[14px] text-center">
+                            {pctF}%
+                          </span>
+                        )}
+                      </div>
+                      <div className="h-1 rounded-full bg-oria-chip overflow-hidden mt-1.5">
+                        <div
+                          className={`h-full rounded-full animate-bar ${f.goalMet ? "bg-success-500" : "bg-gradient-to-r from-accent-sport to-accent-gold"}`}
+                          style={{ width: `${pctF}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          )}
+
           {/* Leaderboard */}
           <Card>
             <p className="text-base font-bold text-text-primary mb-3 tracking-tight">Leaderboard</p>
@@ -379,12 +441,14 @@ export default function SocialPage() {
                 {sortedBoard.map((p) => (
                   <PodiumRow
                     key={p.id}
+                    id={p.id}
                     rank={p.rank}
                     name={p.displayName ?? "User"}
                     streak={p.streak}
                     apy={p.apy}
                     isMe={p.isMe}
                     initials={getInitials(p.displayName)}
+                    avatarUrl={p.avatarUrl}
                   />
                 ))}
               </div>
@@ -413,7 +477,7 @@ export default function SocialPage() {
                 {friends!.map((f) => (
                   <div key={f.friendshipId} className="flex items-center gap-3 p-2.5 rounded-xl">
                     <Link href={`/friend/${f.user.id}`} className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer active:opacity-70 transition-opacity">
-                      <Avatar initials={getInitials(f.user.displayName ?? "?")} size={36} />
+                      <Avatar initials={getInitials(f.user.displayName ?? "?")} size={36} src={f.user.avatarUrl} />
                       <div className="flex-1 min-w-0">
                         <p className="text-[13px] font-semibold text-text-primary truncate">{f.user.displayName ?? "User"}</p>
                         <p className="text-[11px] text-text-muted tabular-nums">
@@ -469,7 +533,7 @@ export default function SocialPage() {
                   const status = getStatus(u.id);
                   return (
                     <div key={u.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-oria-chip transition-colors">
-                      <Avatar initials={getInitials(u.displayName ?? "?")} size={36} />
+                      <Avatar initials={getInitials(u.displayName ?? "?")} size={36} src={u.avatarUrl} />
                       <div className="flex-1 min-w-0">
                         <p className="text-[13px] font-semibold text-text-primary truncate">{u.displayName ?? "User"}</p>
                         <p className="text-[11px] text-text-muted tabular-nums">
@@ -490,44 +554,7 @@ export default function SocialPage() {
             </Card>
           )}
 
-          {/* Activity feed */}
-          <Card>
-            <p className="text-base font-bold text-text-primary mb-3 tracking-tight">Activity feed</p>
-            {feed && feed.length > 0 ? (
-              feed.map((f, i) => {
-                const { text, emoji } = formatFeedEvent(f.eventType, f.payload as Record<string, unknown>);
-                return (
-                  <div key={f.id} className={`flex gap-3 py-3 ${i < feed.length - 1 ? "border-b border-oria" : ""}`}>
-                    <Avatar initials={getInitials(f.user.displayName)} size={36} />
-                    <div className="flex-1">
-                      <p className="text-[13px] text-text-primary leading-snug">
-                        <span className="font-semibold">{f.user.displayName ?? "User"}</span>{" "}
-                        <span className="text-text-secondary">{text}</span>{" "}
-                        <span className="text-base">{emoji}</span>
-                      </p>
-                      <div className="flex items-center gap-3 mt-1">
-                        <p className="text-[11px] text-text-muted">{timeAgo(f.createdAt)}</p>
-                        <button
-                          onClick={() => likeFeed.mutate(f.id)}
-                          className="flex items-center gap-1 text-[11px] text-text-muted hover:text-accent-purple-bright cursor-pointer transition-colors"
-                        >
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill={f.likes > 0 ? "#A78BFA" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                          </svg>
-                          {f.likes > 0 && <span>{f.likes}</span>}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-sm font-semibold text-text-primary mb-1">No activity yet</p>
-                <p className="text-[12px] text-text-muted">Your friends&apos; activity will appear here.</p>
-              </div>
-            )}
-          </Card>
+          {/* Activity feed lives on Home — keep this page focused on people */}
         </>
       )}
     </div>

@@ -46,5 +46,11 @@ export async function apiFetch<T>(
     throw new Error(body.message || `API error: ${res.status}`);
   }
 
+  // 204 No Content (and other empty bodies) — return undefined instead of
+  // calling res.json(), which would throw on an empty payload and surface as
+  // an "onError" to callers even though the request succeeded.
+  if (res.status === 204 || res.headers.get("content-length") === "0") {
+    return undefined as T;
+  }
   return res.json();
 }
