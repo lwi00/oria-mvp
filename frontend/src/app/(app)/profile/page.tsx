@@ -369,19 +369,19 @@ export default function ProfilePage() {
         </div>
       </Card>
 
-      {/* Comprendre Oria — educational entry points, between Connected Apps
+      {/* Understand Oria — educational entry points, between Connected Apps
           and Settings. Sized as a single card with 5 child rows. */}
       <Card className="!p-3">
         <div className="px-2 pt-1 pb-2">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-purple-bright">Comprendre Oria</p>
-          <p className="text-[11px] text-text-muted mt-0.5">Honnête, court, sans jargon.</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-purple-bright">Understand Oria</p>
+          <p className="text-[11px] text-text-muted mt-0.5">Short, plain English.</p>
         </div>
         {[
-          { slug: "how-it-works", title: "Comment ça marche ?", sub: "Le tour complet en 3 minutes" },
-          { slug: "yield", title: "D'où vient le rendement ?", sub: "Pool, baseline, vault Morpho" },
-          { slug: "crypto", title: "C'est de la crypto ?", sub: "Oui — et pourquoi c'est OK" },
-          { slug: "security", title: "FAQ sécurité", sub: "Les vraies questions, dans l'ordre" },
-          { slug: "glossary", title: "Glossaire", sub: "Tous les mots qu'on utilise" },
+          { slug: "how-it-works", title: "How it works", sub: "Four stages, three minutes" },
+          { slug: "yield", title: "Where the yield comes from", sub: "Pool, baseline, Morpho vault" },
+          { slug: "crypto", title: "Is this crypto?", sub: "Yes, and why that's fine" },
+          { slug: "security", title: "Security FAQ", sub: "The hard questions, answered" },
+          { slug: "glossary", title: "Glossary", sub: "Every word, defined" },
         ].map((entry) => (
           <Link
             key={entry.slug}

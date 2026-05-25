@@ -11,57 +11,54 @@ export default function HowItWorksPage() {
   const targetKm = user?.targetKm ?? 10;
 
   return (
-    <LearnShell
-      title="Comment ça marche ?"
-      intro="Le tour complet en 3 minutes. Honnête, sans jargon."
-    >
-      <h2>1. Tu déposes des USDC</h2>
+    <LearnShell title="How it works" intro="Four stages, three minutes.">
+      <h2>1. You deposit USDC</h2>
       <p>
-        USDC, c'est un <strong>stablecoin</strong> adossé au dollar US : 1 USDC = 1 $. Émis par Circle, une boîte américaine régulée. Ce n'est pas du Bitcoin ou de l'Ether — la valeur ne bouge pas.
+        USDC is a <strong>stablecoin</strong> pegged to the US dollar: 1 USDC = $1. Issued by Circle, a regulated US company. Each USDC in circulation is backed by an actual dollar (or a US Treasury bill) held in a bank.
       </p>
       <p>
-        Tu fundes ton wallet Oria avec des USDC (depuis un exchange, depuis un autre wallet, n'importe), puis tu cliques sur Invest depuis l'onglet Wallet.
+        You fund your Oria wallet with USDC — from an exchange, from another wallet, anywhere — and tap Invest in the Wallet tab.
       </p>
 
-      <h2>2. Tes USDC partent dans un coffre Morpho</h2>
+      <h2>2. Your USDC goes into a Morpho vault</h2>
       <p>
-        On les dépose dans un coffre <strong>Morpho</strong> — un protocole de prêt décentralisé sur Ethereum. Aujourd'hui <strong>~7,4 Mds$</strong> y sont confiés. Des emprunteurs y déposent du collatéral pour emprunter, et ils paient des intérêts. Ces intérêts, c'est ton rendement.
+        We deposit it into a <strong>Morpho</strong> vault — a decentralised lending protocol on Ethereum. About <strong>$7.4B</strong> sits in Morpho today. Borrowers post collateral and pay interest to borrow USDC; that interest is your yield.
       </p>
       <p>
-        Le wallet qui détient ces dépôts, c'est <strong>le tien</strong> — créé automatiquement par Privy, sans seed phrase. Oria ne signe rien à ta place.
+        The wallet that holds the vault shares is <strong>yours</strong> — Privy-issued, no seed phrase. Oria doesn't sign on your behalf.
       </p>
 
-      <h2>3. Tu bouges chaque semaine, ton APY monte</h2>
+      <h2>3. You hit your weekly goal, your APY climbs</h2>
       <p>
-        Tu as fixé un objectif hebdomadaire ({targetKm} km/semaine). Chaque semaine où tu l'atteins, ta <strong>streak</strong> augmente d'un cran et ta part du <em>bonus pool</em> grossit.
+        You picked a weekly target ({targetKm} km/week). Every week you hit it, your <strong>streak</strong> ticks up and your share of the bonus pool grows.
       </p>
       <ul>
-        <li><strong>Baseline garantie</strong> : 3 % APY peu importe ton activité</li>
-        <li><strong>Bonus pool</strong> : le surplus de rendement que les inactifs n'utilisent pas est redistribué proportionnellement à ta consistance</li>
+        <li><strong>Guaranteed baseline</strong>: 3% APY whatever you do</li>
+        <li><strong>Bonus pool</strong>: yield the inactive users don't claim is redistributed by activity score</li>
       </ul>
       {streakCount > 0 ? (
         <p>
-          Tu es actuellement à <strong>{streakCount} semaine{streakCount > 1 ? "s" : ""} de streak</strong>, ce qui te place à <strong>{effectiveApy.toFixed(2)} %</strong>. À 16 semaines, ta part du pool est au maximum.
+          You're on <strong>{streakCount} week{streakCount > 1 ? "s" : ""} of streak</strong>, sitting at <strong>{effectiveApy.toFixed(2)}%</strong> today. At 16 weeks, your slice of the pool maxes out.
         </p>
       ) : (
         <p>
-          Si tu démarres ta première streak cette semaine, ton APY commence à monter au-delà du baseline. À 16 semaines, ta part du pool est au maximum.
+          Hit your first weekly goal and your APY starts climbing above the baseline. The streak component caps at 16 weeks.
         </p>
       )}
 
-      <h2>4. Tu retires quand tu veux</h2>
+      <h2>4. You withdraw whenever</h2>
       <p>
-        Pas de période de blocage. Tu peux retirer tout ou partie de tes USDC à tout moment — un tap depuis l'onglet Wallet, signature dans ton wallet Privy, et c'est fait. Pas d'autorisation Oria à demander, parce qu'Oria ne contrôle rien.
+        No lock-up. Tap Withdraw in the Wallet tab, sign with your Privy wallet, and your USDC is back in your wallet in seconds. Oria doesn't have a switch to flip — there's nothing to ask permission for.
       </p>
 
-      <h2>Ce qu'Oria ne fait pas</h2>
+      <h2>What Oria doesn't do</h2>
       <ul>
-        <li>On ne touche pas à ton argent (le wallet est non-custodial)</li>
-        <li>On ne prend pas de levier (ton dépôt = ton exposition, point)</li>
-        <li>On ne te promet pas un rendement fixe (le marché bouge, on le dit)</li>
+        <li>Touch your funds (the wallet is non-custodial)</li>
+        <li>Use leverage (your deposit = your exposure, full stop)</li>
+        <li>Promise a fixed return (the market moves, we say so)</li>
       </ul>
       <p>
-        Pour les questions de sécurité (que se passe-t-il si Oria ferme, etc.), va sur <strong>FAQ sécurité</strong> dans le menu Comprendre Oria.
+        For security questions (what happens if Oria shuts down, etc.), see <strong>Security FAQ</strong> in the Understand Oria menu.
       </p>
     </LearnShell>
   );

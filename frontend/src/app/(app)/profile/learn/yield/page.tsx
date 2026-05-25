@@ -13,54 +13,51 @@ export default function YieldPage() {
   const bonus = Math.max(0, effectiveApy - baseline);
 
   return (
-    <LearnShell
-      title="D'où vient le rendement ?"
-      intro="Trois étages : Morpho génère le yield, on en garantit une part à tout le monde, et le reste se redistribue selon ta consistance."
-    >
-      <h2>Étage 1 — Le rendement vient de Morpho</h2>
+    <LearnShell title="Where the yield comes from" intro="Three layers: Morpho generates the yield, we guarantee a slice to everyone, and the rest redistributes by consistency.">
+      <h2>Layer 1 — Morpho generates the yield</h2>
       <p>
-        Tes USDC sont déposés dans un <strong>coffre Morpho</strong> sur Base ou Ethereum (tu choisis dans Wallet → Invest). Ce coffre prête ces USDC à des emprunteurs qui ont déposé du collatéral. Les emprunteurs paient des intérêts ; ces intérêts remontent au coffre, et donc à toi.
+        Your USDC sits in a <strong>Morpho vault</strong> on Base or Ethereum (you pick in Wallet → Invest). The vault lends those USDC to borrowers who've posted collateral. Borrowers pay interest, the vault collects it, and it flows back to you.
       </p>
       <p>
-        Aujourd'hui le marché donne environ <strong>{vaultMax.toFixed(2)} %</strong> annualisé sur ce coffre. Ce taux bouge avec l'offre et la demande de crédit — il monte quand la demande augmente, il baisse quand elle se calme.
+        Right now the market gives about <strong>{vaultMax.toFixed(2)}%</strong> annualised on that vault. The rate moves with supply and demand for credit — up when borrowing demand rises, down when it cools.
       </p>
 
-      <h2>Étage 2 — La baseline garantie</h2>
+      <h2>Layer 2 — The guaranteed baseline</h2>
       <p>
-        Oria garantit <strong>{baseline.toFixed(2)} %</strong> de baseline à tout le monde, peu importe l'activité. Même si tu ne bouges pas, tu touches au moins ça.
+        Oria guarantees <strong>{baseline.toFixed(2)}%</strong> baseline to everyone, regardless of activity. Sit still, and you still earn that.
       </p>
       <p>
-        C'est volontaire : on veut que le produit reste rassurant pour quelqu'un qui découvre la DeFi, pas un jeu à somme nulle où il faut tout donner pour récupérer quelque chose.
+        We picked this deliberately — the product should stay reassuring for someone discovering DeFi, not a zero-sum game where you have to grind to get anything back.
       </p>
 
-      <h2>Étage 3 — Le bonus pool, redistribué selon ta consistance</h2>
+      <h2>Layer 3 — The bonus pool, redistributed by consistency</h2>
       <p>
-        Le reste du rendement (<strong>{Math.max(0, vaultMax - baseline).toFixed(2)} %</strong> environ) est mis dans un pool partagé. Ce pool est <strong>redistribué chaque semaine</strong> en fonction du score d'activité de chaque utilisateur. Plus tu es régulier, plus ta part grossit.
+        The rest of the yield (roughly <strong>{Math.max(0, vaultMax - baseline).toFixed(2)}%</strong>) sits in a shared pool. That pool is <strong>redistributed weekly</strong> based on each user's activity score. The more consistent you are, the bigger your slice.
       </p>
       <p>
-        Le score d'activité combine 4 ingrédients : ta streak (poids 60 %), ta régularité hebdo (15 %), ton long run (15 %), et la progression de ton allure (10 %).
+        The activity score is made of four ingredients: streak (60% weight), weekly regularity (15%), long run (15%), pace progression (10%).
       </p>
       {streakCount > 0 ? (
         <p>
-          Toi, avec {streakCount} semaine{streakCount > 1 ? "s" : ""} de streak, tu récupères actuellement <strong>+{bonus.toFixed(2)} %</strong> de bonus, ce qui te place à <strong>{effectiveApy.toFixed(2)} %</strong> au total.
+          With {streakCount} week{streakCount > 1 ? "s" : ""} of streak, you currently pull <strong>+{bonus.toFixed(2)}%</strong> of bonus, which puts you at <strong>{effectiveApy.toFixed(2)}%</strong>.
         </p>
       ) : (
         <p>
-          Tant que tu ne valides pas une semaine, tu restes sur la baseline. Une fois la streak lancée, ton bonus augmente à chaque semaine validée jusqu'à atteindre le plafond à 16 semaines.
+          Until you complete a week, you stay on the baseline. Once you do, your bonus grows with every validated week until the streak component caps at 16.
         </p>
       )}
 
-      <h2>Le plafond : jamais plus que ce que Morpho donne</h2>
+      <h2>The ceiling: never above what Morpho pays</h2>
       <p>
-        On a posé une limite haute : <strong>ton APY effectif ne peut jamais dépasser le rendement réel du coffre</strong>. Si Morpho donne {vaultMax.toFixed(2)} %, le maximum que tu peux toucher chez nous est {vaultMax.toFixed(2)} %. Pas plus.
+        We capped the effective APY at the vault rate itself: <strong>your APY can never exceed what Morpho generates</strong>. If Morpho pays {vaultMax.toFixed(2)}%, the most you can earn here is {vaultMax.toFixed(2)}%.
       </p>
       <p>
-        C'est un garde-fou : on ne veut surtout pas payer plus que ce que les emprunteurs paient. Le pool de bonus existe uniquement pour redistribuer l'excédent que les inactifs n'utilisent pas — il ne crée pas de rendement à partir de rien.
+        The bonus pool only redistributes what inactive users leave on the table — it doesn't create yield out of thin air.
       </p>
 
-      <h2>Ce qu'Oria prend</h2>
+      <h2>What Oria takes</h2>
       <p>
-        On prend une part fixe (le <em>spread</em>) sur le rendement Morpho pour faire tourner le produit. La part exacte n'est pas affichée volontairement dans l'app : on préfère montrer ce que tu reçois, pas ce qu'on garde. Si tu veux savoir, demande — on dira.
+        Oria takes a fixed slice (the <em>spread</em>) on the Morpho yield to run the product. We don't surface the exact figure in the app — we'd rather highlight what you receive than what we keep. Ask if you want the number.
       </p>
     </LearnShell>
   );

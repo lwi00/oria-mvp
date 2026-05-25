@@ -7,77 +7,77 @@ interface Entry { term: string; def: React.ReactNode; }
 const ENTRIES: Entry[] = [
   {
     term: "USDC",
-    def: <>Stablecoin émis par <strong>Circle</strong>, calé sur le dollar US (1 USDC = 1 $). Adossé à des dollars et bons du Trésor US en banque. C'est ce que tu déposes sur Oria.</>,
+    def: <>Stablecoin issued by <strong>Circle</strong>, pegged to the US dollar (1 USDC = $1). Backed by dollars and US Treasury bills held in a bank. This is what you deposit on Oria.</>,
   },
   {
     term: "Stablecoin",
-    def: <>Crypto dont la valeur est calée sur une monnaie classique. Utilisé pour garder du pouvoir d'achat stable dans l'écosystème crypto sans être exposé à la volatilité.</>,
+    def: <>A crypto whose value is pegged to a fiat currency. Used to keep stable purchasing power inside the crypto ecosystem without volatility exposure.</>,
   },
   {
     term: "APY",
-    def: <>Annual Percentage Yield — le rendement annualisé. Si tu touches 0,4 % sur un mois, l'APY équivalent est ~5 %. C'est le chiffre affiché à côté de ton solde.</>,
+    def: <>Annual Percentage Yield — the annualised return. If you earn 0.4% in a month, the equivalent APY is ~5%. This is the number shown next to your balance.</>,
   },
   {
     term: "Baseline",
-    def: <>Le rendement garanti à <strong>tout le monde</strong> sur Oria (3 % aujourd'hui). Tu le touches même sans activité.</>,
+    def: <>The yield guaranteed to <strong>everyone</strong> on Oria (3% today). You earn it even with no activity.</>,
   },
   {
     term: "Bonus pool",
-    def: <>L'excédent du rendement Morpho au-delà de la baseline, redistribué chaque semaine entre les utilisateurs actifs proportionnellement à leur score d'activité. Pas de magie : ce sont les inactifs qui financent les actifs.</>,
+    def: <>The Morpho yield above the baseline, redistributed weekly among active users in proportion to their activity score. No magic — inactive users are effectively funding the active ones.</>,
   },
   {
     term: "Streak",
-    def: <>Le nombre de semaines consécutives où tu as atteint ton objectif km. C'est l'ingrédient principal de ton score d'activité (60 % du poids). Une semaine ratée la remet à zéro.</>,
+    def: <>The number of consecutive weeks you've hit your km target. It's the biggest ingredient of your activity score (60% weight). A missed week resets it to zero.</>,
   },
   {
     term: "Morpho",
-    def: <>Protocole de prêt décentralisé sur Ethereum (~7,4 Mds$ confiés). Met en relation prêteurs et emprunteurs via des <em>smart contracts</em>. Tes USDC dorment dans un coffre Morpho géré par un curateur (Steakhouse, Gauntlet…).</>,
+    def: <>A decentralised lending protocol on Ethereum (~$7.4B deposited). Matches lenders and borrowers via <em>smart contracts</em>. Your USDC sits in a Morpho vault managed by a curator (Steakhouse, Gauntlet…).</>,
   },
   {
-    term: "Vault (coffre)",
-    def: <>Un compartiment Morpho géré par un curateur professionnel qui choisit où prêter pour optimiser le rendement et la sécurité. Oria utilise trois vaults USDC : Steakhouse Prime, Gauntlet Prime (sur Base) et Gauntlet Frontier (sur Ethereum mainnet).</>,
+    term: "Vault",
+    def: <>A Morpho compartment managed by a professional curator who picks where to lend for the best risk/return mix. Oria uses three USDC vaults: Steakhouse Prime, Gauntlet Prime (on Base) and Gauntlet Frontier (on Ethereum mainnet).</>,
   },
   {
     term: "Privy",
-    def: <>Le service qui crée et gère ton wallet sans seed phrase. Tu te connectes par email, Google ou Apple ; Privy garde le contrôle d'une partie de ta clé via MPC. Non-custodial : Oria n'a pas la clé.</>,
+    def: <>The service that creates and manages your wallet without a seed phrase. You sign in with email, Google or Apple; Privy holds part of your key via MPC. Non-custodial: Oria doesn't have the key.</>,
   },
   {
     term: "Wallet",
-    def: <>Ton adresse sur la blockchain. C'est elle qui détient tes USDC et tes parts de vault. Format <code>0x…</code>. Tu peux la voir dans Wallet → Receive.</>,
+    def: <>Your address on the blockchain. It holds your USDC and your vault shares. Format <code>0x…</code>. Visible in Wallet → Receive.</>,
   },
   {
     term: "Non-custodial",
-    def: <>Personne d'autre que toi ne peut bouger tes fonds. Par opposition à <em>custodial</em> où un intermédiaire (exchange, app) détient les clés et peut bloquer / refuser un retrait.</>,
+    def: <>Nobody else can move your funds. Opposite of <em>custodial</em>, where an intermediary (exchange, app) holds the keys and can block or refuse a withdrawal.</>,
   },
   {
     term: "Smart contract",
-    def: <>Un programme qui tourne sur la blockchain et exécute automatiquement les règles qu'il décrit. Morpho est un ensemble de smart contracts. Auditable publiquement, immuable une fois déployé.</>,
+    def: <>A program running on the blockchain that automatically executes the rules it encodes. Morpho is a set of smart contracts. Publicly auditable, immutable once deployed.</>,
   },
   {
     term: "Gas fees",
-    def: <>Les frais de transaction du réseau blockchain. Payés en ETH (sur Base ou Ethereum mainnet) aux validateurs qui sécurisent la chaîne. Quelques centimes sur Base, parfois plus sur Ethereum mainnet en période d'engorgement.</>,
+    def: <>Network transaction fees. Paid in ETH (on Base or Ethereum mainnet) to validators who secure the chain. A few cents on Base, sometimes more on Ethereum mainnet when busy.</>,
   },
   {
     term: "Base",
-    def: <>Une blockchain "layer 2" construite sur Ethereum par Coinbase. Beaucoup moins de gas fees qu'Ethereum mainnet, même sécurité de fond. C'est le réseau par défaut sur Oria.</>,
+    def: <>A layer-2 blockchain built on Ethereum by Coinbase. Far lower gas fees than Ethereum mainnet, same underlying security. The default network on Oria.</>,
   },
   {
     term: "Liquidation",
-    def: <>Quand un emprunteur sur Morpho n'a plus assez de collatéral pour couvrir son prêt, son collatéral est vendu automatiquement pour rembourser les prêteurs. C'est le mécanisme qui protège ton dépôt.</>,
+    def: <>When a Morpho borrower no longer has enough collateral to cover their loan, the collateral is automatically sold to repay lenders. This is the mechanism that protects your deposit.</>,
   },
   {
     term: "Peg",
-    def: <>Le mécanisme qui maintient un stablecoin à sa parité (1 USDC = 1 $). Un <em>dépeg</em> arrive quand la parité décroche temporairement, généralement à cause d'un choc de liquidité. Rare mais possible.</>,
+    def: <>The mechanism that keeps a stablecoin at parity (1 USDC = $1). A <em>depeg</em> happens when parity briefly drifts — usually due to a liquidity shock. Rare but possible.</>,
   },
   {
     term: "Spread",
-    def: <>La marge qu'Oria prend sur le rendement Morpho pour faire tourner le produit. On préfère parler de ce que tu reçois plutôt que de ce qu'on prend.</>,
+    def: <>The slice Oria takes on the Morpho yield to run the product. We'd rather talk about what you receive than what we keep.</>,
   },
 ];
 
 export default function GlossaryPage() {
   return (
-    <LearnShell title="Glossaire" intro="Tous les mots qu'on utilise dans l'app, expliqués à la suite.">
+    <LearnShell title="Glossary" intro="Every word we use, defined.">
       <div className="flex flex-col gap-3 mt-2">
         {ENTRIES.map((e) => (
           <div key={e.term} className="rounded-2xl border border-oria bg-oria-section p-4">

@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/Card";
 import { CardSkeleton } from "@/components/Skeleton";
 import { useStreak, useUser } from "@/lib/hooks";
+import { LearnBottomSheet } from "@/components/LearnBottomSheet";
 
 const SCORE_BREAKDOWN = [
   { key: "streak", label: "Streak (palier)", weight: 0.6 },
@@ -15,6 +17,7 @@ const SCORE_BREAKDOWN = [
 export default function ApyDetailPage() {
   const { data: streak, isLoading: streakLoading } = useStreak();
   const { data: user, isLoading: userLoading } = useUser();
+  const [showLearnSheet, setShowLearnSheet] = useState(false);
 
   if (streakLoading || userLoading) {
     return (
@@ -66,8 +69,22 @@ export default function ApyDetailPage() {
         <Link href="/dashboard" className="w-9 h-9 rounded-xl bg-oria-card border border-oria flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
         </Link>
-        <h1 className="text-xl font-bold text-text-primary tracking-tight">APY Details</h1>
+        <h1 className="text-xl font-bold text-text-primary tracking-tight flex-1">APY Details</h1>
+        <button
+          onClick={() => setShowLearnSheet(true)}
+          className="text-[11px] font-semibold text-accent-purple-bright px-3 py-1.5 rounded-full bg-accent-purple/15 border border-accent-purple/25 active:scale-95 transition-transform"
+        >
+          How it works
+        </button>
       </div>
+
+      <LearnBottomSheet
+        open={showLearnSheet}
+        onClose={() => setShowLearnSheet(false)}
+        streakCount={count}
+        effectiveApy={effective}
+        baselineApy={baseline}
+      />
 
       {/* Big APY display */}
       <Card className="relative overflow-hidden !p-6 text-center">

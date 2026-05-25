@@ -7,17 +7,15 @@ import Link from "next/link";
 interface Props {
   open: boolean;
   onClose: () => void;
-  /** User context for personalization */
   streakCount: number;
   effectiveApy: number;
   baselineApy: number;
-  bonusBps?: number; // optional, derived
 }
 
 /**
- * Three swipable screens explaining the yield in plain French — pulled up
- * from the APY chip on the dashboard. Step 3 deliberately closes on a calm,
- * "you stay in control" beat rather than on the risk list.
+ * Three swipable screens explaining the yield in plain English — opens from
+ * the APY chip on Home and from the APY details page. Screen 3 closes on a
+ * calm "you stay in control" beat rather than on the risk list.
  */
 export function LearnBottomSheet({ open, onClose, streakCount, effectiveApy, baselineApy }: Props) {
   const [mounted, setMounted] = useState(false);
@@ -64,16 +62,15 @@ export function LearnBottomSheet({ open, onClose, streakCount, effectiveApy, bas
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-[460px] bg-[#0F0F16] rounded-t-3xl border-t border-x border-oria sheet-in max-h-[90vh] flex flex-col"
       >
-        {/* Drag handle + header */}
         <div className="pt-3 pb-2 flex flex-col items-center shrink-0">
           <div className="w-10 h-1 rounded-full bg-oria-strong mb-3" />
           <div className="w-full px-5 flex items-center justify-between">
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent-purple-bright">
-              Comprendre Oria
+              How Oria works
             </p>
             <button
               onClick={onClose}
-              aria-label="Fermer"
+              aria-label="Close"
               className="w-8 h-8 rounded-full bg-oria-chip border border-oria flex items-center justify-center"
             >
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2.5" strokeLinecap="round">
@@ -83,7 +80,6 @@ export function LearnBottomSheet({ open, onClose, streakCount, effectiveApy, bas
           </div>
         </div>
 
-        {/* Horizontal scroll-snap carousel */}
         <div
           ref={scrollerRef}
           className="overflow-x-auto snap-x snap-mandatory flex-1 scrollbar-none"
@@ -95,84 +91,81 @@ export function LearnBottomSheet({ open, onClose, streakCount, effectiveApy, bas
           style={{ scrollbarWidth: "none" }}
         >
           <div className="flex">
-            {/* ── Screen 1 — D'où vient mon taux ? ── */}
+            {/* Screen 1 — Where your rate comes from */}
             <div className="min-w-full snap-start px-6 py-6 flex flex-col gap-4">
               <h2 className="text-[22px] font-extrabold text-white tracking-tight leading-tight">
-                D'où vient ton <span className="text-accent-purple-bright">{apyFmt}%</span> ?
+                Your <span className="text-accent-purple-bright">{apyFmt}%</span> is two things
               </h2>
-              <p className="text-[14px] text-text-secondary leading-relaxed">
-                Ton APY est composé de deux choses :
-              </p>
               <div className="flex flex-col gap-2">
                 <div className="rounded-2xl border border-accent-purple/25 bg-accent-purple/8 p-4">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-purple-bright">Baseline</p>
                   <p className="text-[20px] font-extrabold text-text-primary mt-1 tabular-nums">{baseFmt}%</p>
                   <p className="text-[12px] text-text-muted mt-1 leading-snug">
-                    Garantie pour tous, peu importe ton activité.
+                    Guaranteed to everyone, regardless of activity.
                   </p>
                 </div>
                 <div className="rounded-2xl border border-accent-sport/25 bg-accent-sport/8 p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-sport">Bonus consistance</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-sport">Consistency bonus</p>
                   <p className="text-[20px] font-extrabold text-text-primary mt-1 tabular-nums">+{bonusFmt}%</p>
                   <p className="text-[12px] text-text-muted mt-1 leading-snug">
                     {streakCount > 0
-                      ? `Tu es à ${streakCount} semaine${streakCount > 1 ? "s" : ""} de streak — chaque semaine validée augmente ta part du pool partagé.`
-                      : `Démarre une streak cette semaine et ton bonus se met à grimper. Plus tu es régulier, plus ta part du pool grossit.`}
+                      ? `You're on a ${streakCount}-week streak — each weekly goal hit increases your share of the shared pool.`
+                      : `Start a streak this week and your bonus starts climbing. The more consistent you are, the larger your slice.`}
                   </p>
                 </div>
               </div>
               <p className="text-[12px] text-text-muted leading-relaxed">
-                Le pool n'est jamais magique : c'est juste une redistribution. Les utilisateurs inactifs touchent le baseline ; tu récupères leur surplus en restant actif.
+                The bonus pool isn't free money — it redistributes what inactive users don't claim to the active ones.
               </p>
             </div>
 
-            {/* ── Screen 2 — Et mon argent, il est où ? ── */}
+            {/* Screen 2 — Where your money sits */}
             <div className="min-w-full snap-start px-6 py-6 flex flex-col gap-4">
               <h2 className="text-[22px] font-extrabold text-white tracking-tight leading-tight">
-                Et ton argent, il est où ?
+                Where your money sits
               </h2>
               <p className="text-[14px] text-text-secondary leading-relaxed">
-                Tes USDC ne dorment pas sur nos serveurs. Quand tu déposes, on les met dans un <span className="text-text-primary font-semibold">coffre Morpho</span> — un protocole de prêt sur Ethereum.
+                Your USDC isn't held on our servers. When you deposit, it goes into a <span className="text-text-primary font-semibold">Morpho vault</span> — a lending protocol on Ethereum.
               </p>
               <div className="rounded-2xl border border-oria bg-oria-section p-4">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">Morpho</p>
-                <p className="text-[16px] font-bold text-text-primary mt-1">~7,4 Mds$ confiés</p>
+                <p className="text-[16px] font-bold text-text-primary mt-1">~$7.4 B deposited</p>
                 <p className="text-[12px] text-text-muted mt-1.5 leading-snug">
-                  Des emprunteurs déposent du collatéral pour emprunter des USDC. Ils paient des intérêts. Ces intérêts, Morpho les reverse aux prêteurs — toi, en l'occurrence.
+                  Borrowers post collateral to borrow USDC and pay interest. Morpho passes that interest to the lenders — you.
                 </p>
               </div>
               <p className="text-[13px] text-text-secondary leading-relaxed">
-                Le wallet qui détient les coffres, c'est <span className="text-text-primary font-semibold">le tien</span> — créé par Privy sans seed phrase. Oria n'a jamais la signature.
+                The wallet that holds your vault shares is <span className="text-text-primary font-semibold">yours</span> — Privy-issued, no seed phrase, and Oria never signs on your behalf.
               </p>
               <p className="text-[13px] text-text-secondary leading-relaxed">
-                Tu peux <span className="text-text-primary font-semibold">retirer quand tu veux</span>. Pas de période de blocage, pas d'autorisation à demander.
+                You can <span className="text-text-primary font-semibold">withdraw any time</span>. No lock-ups, no approvals to ask for.
               </p>
             </div>
 
-            {/* ── Screen 3 — C'est risqué ? ── */}
+            {/* Screen 3 — Is it risky? */}
             <div className="min-w-full snap-start px-6 py-6 flex flex-col gap-4">
               <h2 className="text-[22px] font-extrabold text-white tracking-tight leading-tight">
-                C'est risqué ?
+                Is it risky?
               </h2>
               <p className="text-[14px] text-text-secondary leading-relaxed">
-                Honnêtement : oui, comme tout placement. On nomme les trois risques sans les enrober :
+                Yes, like any investment. Three things to know:
               </p>
               <div className="flex flex-col gap-2">
                 <RiskRow
                   label="Smart contract"
-                  body="Morpho est un code, et un code peut avoir un bug. Les vaults sont audités par Spearbit, Trail of Bits et OpenZeppelin, mais le risque zéro n'existe pas."
+                  body="Morpho is code, and code can have bugs. The vaults are audited by Spearbit, Trail of Bits and OpenZeppelin — zero risk doesn't exist."
                 />
                 <RiskRow
                   label="USDC peg"
-                  body="USDC est adossé au dollar par Circle. En 2023 le peg a brièvement bougé. Probabilité faible, mais réelle."
+                  body="USDC is backed by Circle and pegged to the dollar. In 2023 the peg briefly drifted. Rare, but real."
                 />
                 <RiskRow
-                  label="APY variable"
-                  body="Si la demande d'emprunteurs sur Morpho baisse, ton rendement baisse aussi. C'est jamais figé."
+                  label="Variable APY"
+                  body="If borrowing demand on Morpho drops, your yield drops too. Nothing here is fixed."
                 />
               </div>
               <p className="text-[13px] text-text-secondary leading-relaxed pt-1 border-t border-oria">
-                Ce qu'Oria ne fait pas : on ne touche pas à ton argent, on ne prend pas de levier, on ne te promet pas un rendement fixe. Tu gardes les clés, tu retires quand tu veux, et tu peux suivre ta position sur Morpho en direct.
+                Oria doesn't touch your funds, doesn't take leverage, doesn't promise a fixed return. You hold the keys, you withdraw whenever, and you can track your position on Morpho directly.
               </p>
               <div className="mt-auto pt-2 flex flex-col gap-2">
                 <Link
@@ -180,19 +173,18 @@ export function LearnBottomSheet({ open, onClose, streakCount, effectiveApy, bas
                   onClick={onClose}
                   className="inline-flex items-center justify-center gap-1 text-[12px] font-semibold text-accent-purple-bright"
                 >
-                  Voir la FAQ sécurité complète →
+                  Full security FAQ →
                 </Link>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Pagination */}
         <div className="shrink-0 px-5 pt-2 pb-5 flex items-center justify-between">
           <button
             onClick={() => goTo(Math.max(0, page - 1))}
             disabled={page === 0}
-            aria-label="Précédent"
+            aria-label="Previous"
             className="w-9 h-9 rounded-full bg-oria-chip border border-oria flex items-center justify-center disabled:opacity-30"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4b5fd" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
@@ -202,7 +194,7 @@ export function LearnBottomSheet({ open, onClose, streakCount, effectiveApy, bas
               <button
                 key={i}
                 onClick={() => goTo(i)}
-                aria-label={`Aller à l'écran ${i + 1}`}
+                aria-label={`Go to screen ${i + 1}`}
                 className={`h-1.5 rounded-full transition-all duration-200 ${
                   i === page ? "w-6 bg-accent-purple-bright" : "w-1.5 bg-white/20"
                 }`}
@@ -212,7 +204,7 @@ export function LearnBottomSheet({ open, onClose, streakCount, effectiveApy, bas
           {page < 2 ? (
             <button
               onClick={() => goTo(Math.min(2, page + 1))}
-              aria-label="Suivant"
+              aria-label="Next"
               className="w-9 h-9 rounded-full bg-accent-purple/20 border border-accent-purple/30 flex items-center justify-center"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4b5fd" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
@@ -222,7 +214,7 @@ export function LearnBottomSheet({ open, onClose, streakCount, effectiveApy, bas
               onClick={onClose}
               className="text-[12px] font-bold text-white px-3.5 py-2 rounded-full gradient-brand shadow-button"
             >
-              Compris
+              Got it
             </button>
           )}
         </div>

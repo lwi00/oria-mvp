@@ -154,9 +154,9 @@ export default function DashboardPage() {
             <button
               onClick={() => setShowLearnSheet(true)}
               className="text-[11px] font-semibold text-text-muted hover:text-accent-purple-bright underline underline-offset-2 decoration-text-muted/40 hover:decoration-accent-purple-bright transition-colors"
-              aria-label="Comprendre comment l'APY fonctionne"
+              aria-label="How does APY work?"
             >
-              Comment ça marche ?
+              How it works
             </button>
             <Link href="/apy" className="px-2.5 py-1 rounded-full bg-accent-purple/15 border border-accent-purple/25 text-accent-purple-bright text-[11px] font-semibold tabular-nums active:scale-95 transition-transform flex items-center gap-1">
               {effectiveApy.toFixed(2)}% APY

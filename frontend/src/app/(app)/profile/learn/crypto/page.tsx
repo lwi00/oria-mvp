@@ -4,55 +4,52 @@ import { LearnShell } from "../LearnShell";
 
 export default function CryptoPage() {
   return (
-    <LearnShell
-      title="C'est de la crypto ?"
-      intro="Oui. Mais probablement pas la crypto à laquelle tu penses."
-    >
-      <h2>Ce que tu détiens : des USDC</h2>
+    <LearnShell title="Is this crypto?" intro="Yes — and probably not the crypto you're thinking of.">
+      <h2>What you hold: USDC</h2>
       <p>
-        USDC est un <strong>stablecoin</strong> : une crypto dont la valeur est calée sur le dollar US (1 USDC = 1 $). Émis par Circle, une boîte américaine régulée par les autorités financières US. Chaque USDC en circulation est adossé à un vrai dollar (ou un bon du Trésor US) détenu en banque.
+        USDC is a <strong>stablecoin</strong> pegged to the US dollar: 1 USDC = $1. Issued by Circle, a US company regulated by US financial authorities. Every USDC in circulation is backed by an actual dollar (or a US Treasury bill) held in a bank.
       </p>
       <p>
-        Donc non, ce n'est pas du Bitcoin qui peut faire ±15 % dans la journée. C'est un proxy numérique du dollar, qui sert à transiter dans des protocoles comme Morpho.
+        So no, it's not Bitcoin or Ether moving ±15% in a day. It's a digital proxy for the dollar, used to transit through protocols like Morpho.
       </p>
 
-      <h2>Le protocole : Morpho</h2>
+      <h2>The protocol: Morpho</h2>
       <p>
-        Morpho est un <strong>protocole de prêt décentralisé</strong> qui tourne sur Ethereum. En gros, une banque sans banquier : un code (un <em>smart contract</em>) qui met en relation des prêteurs (toi) et des emprunteurs, automatiquement.
+        Morpho is a <strong>decentralised lending protocol</strong> running on Ethereum. A bank without a banker: code (a <em>smart contract</em>) that matches lenders (you) and borrowers automatically.
       </p>
       <ul>
-        <li>Les emprunteurs déposent du collatéral (souvent surévalué : 150 € pour emprunter 100 USDC) pour garantir leur prêt.</li>
-        <li>Si le collatéral baisse trop, le protocole le liquide automatiquement pour rembourser les prêteurs.</li>
-        <li>Les emprunteurs paient des intérêts ; les prêteurs (toi) en récupèrent la majeure partie.</li>
+        <li>Borrowers post collateral (usually overcollateralised: $150 to borrow 100 USDC) to guarantee their loan.</li>
+        <li>If the collateral drops too far, the protocol liquidates it automatically to repay lenders.</li>
+        <li>Borrowers pay interest; lenders get most of it.</li>
       </ul>
       <p>
-        Aujourd'hui <strong>~7,4 Mds$</strong> sont confiés à Morpho. C'est un des plus gros protocoles du genre, audité par Spearbit, Trail of Bits et OpenZeppelin.
+        About <strong>$7.4B</strong> sits in Morpho today. One of the largest protocols of its kind, audited by Spearbit, Trail of Bits and OpenZeppelin.
       </p>
 
-      <h2>Pourquoi crypto plutôt qu'une banque traditionnelle ?</h2>
-      <p>Trois différences qui comptent :</p>
+      <h2>Why crypto rather than a traditional bank?</h2>
+      <p>Three differences that matter:</p>
       <ul>
         <li>
-          <strong>Transparence</strong>. Tu peux voir en temps réel sur la chaîne combien Morpho détient, qui emprunte combien, quel est le rendement. Aucune banque ne te montre ça.
+          <strong>Transparency</strong>. You can see on-chain in real time how much Morpho holds, who's borrowing what, and the live rate. No bank shows you that.
         </li>
         <li>
-          <strong>Non-custodial</strong>. Personne ne peut bloquer ton retrait. Tes USDC sont dans <em>ton</em> wallet, pas dans un compte d'Oria ou de Morpho.
+          <strong>Non-custodial</strong>. Nobody can block your withdrawal. Your USDC is in <em>your</em> wallet, not in an Oria or Morpho account.
         </li>
         <li>
-          <strong>Meilleur taux, généralement</strong>. Le rendement du marché DeFi sur stablecoins est aujourd'hui entre 3 % et 8 %, là où un livret bancaire en zone euro plafonne sous 3 %.
+          <strong>Better rates, usually</strong>. DeFi stablecoin yield is around 3–8% today. A Eurozone savings account caps below 3%.
         </li>
       </ul>
 
-      <h2>Ce qui change par rapport à une banque</h2>
+      <h2>What changes vs a bank</h2>
       <ul>
-        <li><strong>Pas de garantie publique</strong> type fonds de garantie des dépôts. Si Morpho se fait hacker (rare mais possible), il n'y a pas l'État derrière pour rembourser.</li>
-        <li><strong>Tu es responsable de ton wallet</strong>. Privy simplifie énormément (pas de seed phrase), mais perdre l'accès à ton compte Privy signifie perdre l'accès au wallet.</li>
-        <li><strong>Le rendement n'est pas garanti</strong>. Il bouge avec le marché.</li>
+        <li><strong>No public guarantee</strong> like deposit insurance. If Morpho gets hacked (rare but possible), there's no state-level backstop.</li>
+        <li><strong>You're responsible for your wallet</strong>. Privy makes this far easier (no seed phrase), but losing access to your Privy account means losing access to the wallet.</li>
+        <li><strong>The yield isn't fixed</strong>. It moves with the market.</li>
       </ul>
 
-      <h2>Notre position</h2>
+      <h2>Our position</h2>
       <p>
-        On pense que la DeFi est aujourd'hui assez mature pour être proposée aux gens qui ne sont pas spécialement crypto-natifs — à condition d'expliquer clairement comment ça marche et de ne pas cacher les risques. C'est tout l'objet de ces pages.
+        DeFi is mature enough today to be offered to people who aren't especially crypto-native — provided we explain clearly how it works and don't paper over the risks. That's what these pages are for.
       </p>
     </LearnShell>
   );

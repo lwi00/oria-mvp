@@ -7,86 +7,86 @@ interface QA { q: string; a: React.ReactNode; }
 
 const QUESTIONS: QA[] = [
   {
-    q: "Est-ce qu'Oria peut accéder à mon argent ?",
+    q: "Can Oria access my money?",
     a: (
       <>
-        <p>Non.</p>
+        <p>No.</p>
         <p>
-          Ton wallet est créé par <strong>Privy</strong> et il est <strong>non-custodial</strong> : seules tes propres signatures (validées depuis ton compte Privy) peuvent bouger des fonds. Oria n'a pas de clé. On ne peut pas retirer à ta place, on ne peut pas geler ton solde, on ne peut pas le transférer ailleurs.
+          Your wallet is created by <strong>Privy</strong> and is <strong>non-custodial</strong>: only your own signatures (validated from your Privy account) can move funds. Oria doesn't have a key. We can't withdraw on your behalf, can't freeze your balance, can't transfer it elsewhere.
         </p>
         <p>
-          La seule chose qu'Oria fait, c'est te montrer ton solde et te proposer les actions (déposer, retirer, investir dans tel ou tel coffre Morpho). Tu cliques, ton wallet Privy signe, la transaction part directement sur la chaîne.
+          All Oria does is show you your balance and surface the available actions (deposit, withdraw, invest into vault X). You tap, your Privy wallet signs, the transaction goes straight on-chain.
         </p>
       </>
     ),
   },
   {
-    q: "Que se passe-t-il si Oria ferme ?",
+    q: "What happens if Oria shuts down?",
     a: (
       <>
-        <p>Tes USDC restent là où ils sont — c'est-à-dire dans ton wallet et dans le coffre Morpho.</p>
+        <p>Your USDC stays exactly where it is — in your wallet and in the Morpho vault.</p>
         <p>
-          Même si l'app Oria disparaît demain, ton wallet Privy continue d'exister. Tu peux te connecter à <strong>app.morpho.org</strong> avec la même adresse et retirer tes positions directement depuis l'interface de Morpho. Pas d'intermédiaire à demander la permission.
+          Even if Oria disappears tomorrow, your Privy wallet still exists. You can log in at <strong>app.morpho.org</strong> with the same address and withdraw your positions directly from Morpho's UI. No middleman to ask.
         </p>
         <p>
-          On a documenté la procédure de retrait "sans Oria" dans la FAQ technique du repo public. C'est volontaire : si on disparaît, on ne veut pas que tes fonds disparaissent avec.
+          The "withdraw without Oria" path is documented in the public repo's technical FAQ. By design — if we go away, your funds shouldn't go with us.
         </p>
       </>
     ),
   },
   {
-    q: "Est-ce que je peux retirer quand je veux ?",
+    q: "Can I withdraw whenever I want?",
     a: (
       <>
-        <p>Oui. Pas de période de blocage, pas de préavis.</p>
+        <p>Yes. No lock-up, no notice.</p>
         <p>
-          Un tap sur Withdraw depuis l'onglet Wallet, tu choisis le montant, ton wallet Privy signe, et les USDC reviennent sur ton wallet en quelques secondes. Les coffres Morpho qu'on utilise sont liquides en permanence.
+          Tap Withdraw in the Wallet tab, pick the amount, your Privy wallet signs, and the USDC is back in your wallet in seconds. The Morpho vaults we use are liquid at all times.
         </p>
         <p>
-          Seule subtilité : tu paies les <em>gas fees</em> du réseau (Base ou Ethereum) — généralement entre quelques centimes sur Base et quelques euros sur Ethereum mainnet en période d'engorgement. Ces frais vont aux validateurs du réseau, pas à Oria.
+          One catch: you pay the network <em>gas fees</em> (Base or Ethereum) — usually a few cents on Base, a few euros on Ethereum mainnet when it's congested. Those go to network validators, not Oria.
         </p>
       </>
     ),
   },
   {
-    q: "Qu'est-ce qui se passe si le marché s'effondre ?",
+    q: "What if the market crashes?",
     a: (
       <>
-        <p>Deux scénarios à distinguer.</p>
+        <p>Two scenarios worth separating.</p>
         <p>
-          <strong>Crash crypto général</strong> (BTC, ETH s'effondrent) : tes <strong>USDC ne bougent pas</strong> parce qu'ils sont adossés au dollar, pas à du crypto. Le coffre Morpho continue de tourner.
+          <strong>General crypto crash</strong> (BTC, ETH tank): your <strong>USDC doesn't move</strong> — it's pegged to the dollar, not to crypto. The Morpho vault keeps running.
         </p>
         <p>
-          <strong>Crise sur le crédit DeFi</strong> (les emprunteurs ne remboursent plus) : Morpho liquide automatiquement leur collatéral pour rembourser les prêteurs. Tant que le collatéral vaut plus que le prêt, tu es couvert. Le risque réel apparaît seulement si la valeur du collatéral baisse plus vite que la liquidation — c'est arrivé une fois ou deux en 2022, jamais sur des montants significatifs chez Morpho.
+          <strong>DeFi credit crunch</strong> (borrowers stop repaying): Morpho automatically liquidates their collateral to repay lenders. As long as the collateral is worth more than the loan, you're covered. The real risk shows up only if collateral value drops faster than the liquidation engine can act — that happened once or twice in 2022, never at scale on Morpho.
         </p>
         <p>
-          <strong>Dépeg de l'USDC</strong> (rare mais possible — c'est arrivé brièvement en mars 2023) : le 1 USDC peut temporairement valoir 0,97 $ ou 0,98 $ pendant quelques heures avant de retrouver le peg. Pas de risque structurel à ce jour, mais un risque à connaître.
+          <strong>USDC depeg</strong> (rare but possible — happened briefly in March 2023): 1 USDC can trade at $0.97 or $0.98 for a few hours before reverting. No structural risk to date, but a risk to be aware of.
         </p>
       </>
     ),
   },
   {
-    q: "Si je perds l'accès à mon compte Privy ?",
+    q: "What if I lose access to my Privy account?",
     a: (
       <>
         <p>
-          Privy propose plusieurs façons de récupérer un compte : par email, par compte Google, par compte Apple. Tant que tu peux te reconnecter par l'un de ces canaux, tu retrouves ton wallet et tes USDC.
+          Privy supports several recovery paths: email, Google, Apple. As long as you can sign in through one of those, you get your wallet — and your USDC — back.
         </p>
         <p>
-          Si tu perds tous tes accès (mail, Google, Apple) — c'est rare mais possible — Privy propose un mécanisme de récupération par <em>backup key</em> que tu peux configurer dans leur app. On recommande de le faire si tu déposes des montants significatifs.
+          If you lose all of those (rare but possible), Privy offers a <em>backup key</em> recovery mechanism in their app. Worth setting up if you're depositing meaningful amounts.
         </p>
       </>
     ),
   },
   {
-    q: "Pourquoi vous me garantissez 3 % alors que le marché peut baisser plus bas ?",
+    q: "Why do you guarantee 3% when the market could drop lower?",
     a: (
       <>
         <p>
-          Honnêtement : on ne peut pas garantir le 3 % sur la durée. Aujourd'hui le rendement du coffre Morpho est bien au-dessus de 3 % + notre marge, donc on peut tenir cette baseline. Si demain le marché tombait à 2 %, le baseline tomberait à ce niveau aussi.
+          The 3% baseline isn't permanently locked. Today the Morpho vault generates well above 3% + our spread, so we can hold the line. If the market dropped below that, the baseline would drop too.
         </p>
         <p>
-          Le 3 % est donc une <strong>promesse conditionnelle</strong> au marché. On la maintient tant qu'on peut, et on le dira clairement si jamais il fallait l'ajuster.
+          So the 3% is a <strong>market-conditional promise</strong>. We hold it as long as we can and we'll say so clearly if it ever needs to move.
         </p>
       </>
     ),
@@ -96,10 +96,7 @@ const QUESTIONS: QA[] = [
 export default function SecurityFaqPage() {
   const [open, setOpen] = useState<number | null>(0);
   return (
-    <LearnShell
-      title="FAQ sécurité"
-      intro="Les questions qu'on pose normalement à un ami qui bosse dans la finance avant de bouger 100 €. Réponses courtes, factuelles, sans sur-promettre."
-    >
+    <LearnShell title="Security FAQ" intro="The hard questions you'd ask a friend in finance before moving money. Short answers.">
       <div className="flex flex-col gap-2 mt-2">
         {QUESTIONS.map((qa, i) => {
           const isOpen = open === i;
