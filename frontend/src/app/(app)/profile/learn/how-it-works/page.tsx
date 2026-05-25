@@ -9,56 +9,68 @@ export default function HowItWorksPage() {
   const streakCount = streak?.currentCount ?? 0;
   const effectiveApy = streak?.effectiveApy ?? 3;
   const targetKm = user?.targetKm ?? 10;
+  const sport = user?.goalType === "cycling" ? "ride" : "run";
 
   return (
-    <LearnShell title="How it works" intro="Four stages, three minutes.">
-      <h2>1. You deposit USDC</h2>
+    <LearnShell title="How it works" intro="No crypto background needed — start here.">
+      <h2>First, what lending on a blockchain even is</h2>
       <p>
-        USDC is a <strong>stablecoin</strong> pegged to the US dollar: 1 USDC = $1. Issued by Circle, a regulated US company. Each USDC in circulation is backed by an actual dollar (or a US Treasury bill) held in a bank.
-      </p>
-      <p>
-        You fund your Oria wallet with USDC — from an exchange, from another wallet, anywhere — and tap Invest in the Wallet tab.
+        A bank takes your savings, lends it out, and keeps most of the interest. <strong>DeFi</strong> — decentralised finance — does the same job, except the bank is replaced by open software running on a blockchain. Anyone can lend, anyone can borrow, and the rules are public code instead of a back office. When someone borrows the money you've put in, they pay interest — and that interest is your yield.
       </p>
 
-      <h2>2. Your USDC goes into a Morpho vault</h2>
+      <h2>Why a borrower can&apos;t walk off with your money</h2>
       <p>
-        We deposit it into a <strong>Morpho</strong> vault — a decentralised lending protocol on Ethereum. About <strong>$7.4B</strong> sits in Morpho today. Borrowers post collateral and pay interest to borrow USDC; that interest is your yield.
+        The obvious worry with lending is simple: what if the borrower never pays back? DeFi answers it with <strong>over-collateralised lending</strong>. To borrow anything, you must first lock up <em>more</em> value than you take out — borrow $100 and you might have to post $150 of crypto as collateral.
       </p>
       <p>
-        The wallet that holds the vault shares is <strong>yours</strong> — Privy-issued, no seed phrase. Oria doesn't sign on your behalf.
+        If a borrower stops repaying, or their collateral starts losing value, the system automatically sells that collateral to pay the lenders back — this is called <strong>liquidation</strong>, and it fires before the loan can ever go underwater. So your loan is always backed by collateral worth more than the loan itself. That&apos;s the core protection, and it runs without anyone having to step in.
       </p>
 
-      <h2>3. You hit your weekly goal, your APY climbs</h2>
+      <h2>What you actually deposit</h2>
       <p>
-        You picked a weekly target ({targetKm} km/week). Every week you hit it, your <strong>streak</strong> ticks up and your share of the bonus pool grows.
+        You don&apos;t lend regular dollars — you lend a <strong>stablecoin</strong> called <strong>USDC</strong>: a digital token worth exactly $1, issued by Circle (a regulated US company) and backed one-for-one by real dollars and US Treasury bills. Think of it as the dollar in a form a blockchain can move instantly.
       </p>
+      <p>
+        You fund your Oria wallet with USDC and tap Invest. It goes into a <strong>Morpho</strong> vault — the lending protocol that matches your USDC with those over-collateralised borrowers (about <strong>$7.4B</strong> sits in Morpho today). The wallet holding your position is <strong>yours</strong> — Privy-issued, no seed phrase — and Oria never signs on your behalf.
+      </p>
+
+      <h2>How Oria turns that yield into your rate</h2>
+      <p>
+        The Morpho vault pays a yield. Oria captures it as a set rate for the week, then splits it between users by how consistent they&apos;ve been with their training. Everyone earns the <strong>3% baseline</strong> no matter what — your activity only decides how the bonus pool on top gets divided.
+      </p>
+      <p>Your weekly activity score is built from four things:</p>
       <ul>
-        <li><strong>Guaranteed baseline</strong>: 3% APY whatever you do</li>
-        <li><strong>Bonus pool</strong>: yield the inactive users don't claim is redistributed by activity score</li>
+        <li><strong>Consistency</strong> — your streak: each week in a row you hit your {targetKm} km goal (the biggest factor)</li>
+        <li><strong>Regularity</strong> — three or more sessions in the week</li>
+        <li><strong>Long {sport}</strong> — hitting your long-session target</li>
+        <li><strong>Progression</strong> — {sport === "ride" ? "riding" : "running"} faster than your recent average</li>
       </ul>
+      <p>
+        Your score moves with how the week actually went. <strong>Every Sunday at 12:00, the scores are recalculated and your rate is locked in for the week ahead</strong> — so a strong week now shows up as a bigger slice of the pool next week.
+      </p>
       {streakCount > 0 ? (
         <p>
-          You're on <strong>{streakCount} week{streakCount > 1 ? "s" : ""} of streak</strong>, sitting at <strong>{effectiveApy.toFixed(2)}%</strong> today. At 16 weeks, your slice of the pool maxes out.
+          You&apos;re on <strong>{streakCount} week{streakCount > 1 ? "s" : ""}</strong> of streak, sitting at <strong>{effectiveApy.toFixed(2)}%</strong>. The consistency factor maxes out at 16 weeks.
         </p>
       ) : (
         <p>
-          Hit your first weekly goal and your APY starts climbing above the baseline. The streak component caps at 16 weeks.
+          Hit your first weekly goal and your rate starts climbing above the 3% baseline. The consistency factor maxes out at 16 weeks.
         </p>
       )}
 
-      <h2>4. You withdraw whenever</h2>
+      <h2>You withdraw whenever</h2>
       <p>
-        No lock-up. Tap Withdraw in the Wallet tab, sign with your Privy wallet, and your USDC is back in your wallet in seconds. Oria doesn't have a switch to flip — there's nothing to ask permission for.
+        No lock-up. Tap Withdraw in the Wallet tab, sign with your Privy wallet, and your USDC is back in your wallet in seconds. Oria has no switch to flip — there&apos;s nothing to ask permission for.
       </p>
 
-      <h2>What Oria doesn't do</h2>
+      <h2>What Oria doesn&apos;t do</h2>
       <ul>
-        <li>Touch your funds (the wallet is non-custodial)</li>
-        <li>Use leverage (your deposit = your exposure, full stop)</li>
-        <li>Promise a fixed return (the market moves, we say so)</li>
+        <li>Touch your funds — the wallet is non-custodial</li>
+        <li>Use leverage — your deposit is your exposure, full stop</li>
+        <li>Promise a permanently fixed return — the market moves, and we set the rate fresh each week</li>
       </ul>
       <p>
-        For security questions (what happens if Oria shuts down, etc.), see <strong>Security FAQ</strong> in the Understand Oria menu.
+        For the harder questions — what happens if Oria shuts down, what if the market crashes — see the <strong>Security FAQ</strong> in the Understand Oria menu.
       </p>
     </LearnShell>
   );
