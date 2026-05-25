@@ -4,11 +4,7 @@ import { env } from "../../config/env.js";
 
 // Initialize web-push with VAPID keys
 if (env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY && env.VAPID_SUBJECT) {
-  webpush.setVapidDetails(
-    env.VAPID_SUBJECT,
-    env.VAPID_PUBLIC_KEY,
-    env.VAPID_PRIVATE_KEY,
-  );
+  webpush.setVapidDetails(env.VAPID_SUBJECT, env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY);
 }
 
 interface SubscriptionPayload {
@@ -32,11 +28,7 @@ export async function subscribe(
   });
 }
 
-export async function unsubscribe(
-  prisma: PrismaClient,
-  userId: string,
-  endpoint: string,
-) {
+export async function unsubscribe(prisma: PrismaClient, userId: string, endpoint: string) {
   return prisma.pushSubscription.deleteMany({
     where: { userId, endpoint },
   });
@@ -51,11 +43,7 @@ interface PushPayload {
   tag?: string;
 }
 
-export async function sendPushToUser(
-  prisma: PrismaClient,
-  userId: string,
-  payload: PushPayload,
-) {
+export async function sendPushToUser(prisma: PrismaClient, userId: string, payload: PushPayload) {
   if (!env.VAPID_PUBLIC_KEY) return;
 
   const subscriptions = await prisma.pushSubscription.findMany({

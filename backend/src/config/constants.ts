@@ -9,15 +9,15 @@ export const APY = {
   LONG_RUN_MULTIPLIER: 1.5,
   PROGRESSION_BONUS: 0.2,
   /// New pool-based model
-  BASELINE: 3.0,             // guaranteed for everyone
-  SPREAD: 1.0,               // Oria keeps 1% of vault APY
-  POOL_CAP_MULTIPLIER: 4.0,  // max individual bonus = pool × this. The hard ceiling is the vault rate itself (see computePoolApy), so this just shapes the curve below it.
-  FALLBACK_VAULT_APY: 5.5,   // used if Morpho fetch fails (rough Steakhouse Prime USDC avg)
+  BASELINE: 3.0, // guaranteed for everyone
+  SPREAD: 1.0, // Oria keeps 1% of vault APY
+  POOL_CAP_MULTIPLIER: 4.0, // max individual bonus = pool × this. The hard ceiling is the vault rate itself (see computePoolApy), so this just shapes the curve below it.
+  FALLBACK_VAULT_APY: 5.5, // used if Morpho fetch fails (rough Steakhouse Prime USDC avg)
   /// Score weights (must sum to 1.0)
   SCORE_STREAK_WEIGHT: 0.6,
   SCORE_REGULARITY_WEIGHT: 0.15,
   SCORE_LONGRUN_WEIGHT: 0.15,
-  SCORE_PROGRESSION_WEIGHT: 0.10,
+  SCORE_PROGRESSION_WEIGHT: 0.1,
 } as const;
 
 export const MORPHO_VAULT = {

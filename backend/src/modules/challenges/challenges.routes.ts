@@ -12,11 +12,7 @@ import {
 export default async function challengesRoutes(app: FastifyInstance) {
   app.post("/challenges", async (request, reply) => {
     const body = createChallengeSchema.parse(request.body);
-    const challenge = await createChallenge(
-      app.prisma,
-      request.userId,
-      body,
-    );
+    const challenge = await createChallenge(app.prisma, request.userId, body);
     return reply.status(201).send(challenge);
   });
 

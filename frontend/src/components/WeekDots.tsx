@@ -16,8 +16,8 @@ export function WeekDots({ days }: WeekDotsProps) {
               met === true
                 ? "gradient-brand text-white shadow-[0_2px_8px_rgba(124,58,237,0.2)]"
                 : met === false
-                ? "bg-error-100 text-error-500"
-                : "bg-purple-100 border-2 border-dashed border-oria text-text-muted"
+                  ? "bg-error-100 text-error-500"
+                  : "bg-purple-100 border-2 border-dashed border-oria text-text-muted"
             }`}
           >
             {met === true ? "✓" : met === false ? "✗" : "·"}

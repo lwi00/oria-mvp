@@ -30,6 +30,6 @@ self.addEventListener("notificationclick", (event) => {
       }
       // Open new tab
       return clients.openWindow(url);
-    })
+    }),
   );
 });

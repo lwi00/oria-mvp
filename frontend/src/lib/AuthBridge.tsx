@@ -18,8 +18,7 @@ export function AuthBridge() {
       logout();
     };
     window.addEventListener("oria:unauthorized", handleUnauthorized);
-    return () =>
-      window.removeEventListener("oria:unauthorized", handleUnauthorized);
+    return () => window.removeEventListener("oria:unauthorized", handleUnauthorized);
   }, [logout]);
 
   return null;

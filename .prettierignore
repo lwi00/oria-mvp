@@ -1,0 +1,9 @@
+node_modules
+.next
+dist
+pnpm-lock.yaml
+_archived
+documentation/gitbook
+frontend/src/lib/docs-content.ts
+backend/prisma/migrations
+*.md

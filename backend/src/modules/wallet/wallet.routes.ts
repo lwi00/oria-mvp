@@ -21,12 +21,7 @@ export default async function walletRoutes(app: FastifyInstance) {
 
   app.post("/deposit", async (request, reply) => {
     const { amount, token } = depositSchema.parse(request.body);
-    const deposit = await recordDeposit(
-      app.prisma,
-      request.userId,
-      amount,
-      token,
-    );
+    const deposit = await recordDeposit(app.prisma, request.userId, amount, token);
     return reply.status(201).send(deposit);
   });
 

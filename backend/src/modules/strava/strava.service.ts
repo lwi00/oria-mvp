@@ -28,11 +28,7 @@ function getWeekStart(date: Date = new Date()): Date {
   return d;
 }
 
-export async function exchangeStravaCode(
-  prisma: PrismaClient,
-  userId: string,
-  code: string,
-) {
+export async function exchangeStravaCode(prisma: PrismaClient, userId: string, code: string) {
   const res = await fetch(STRAVA_TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -49,7 +45,7 @@ export async function exchangeStravaCode(
     throw new Error(`Strava token exchange failed: ${JSON.stringify(err)}`);
   }
 
-  const data = await res.json() as StravaTokenResponse;
+  const data = (await res.json()) as StravaTokenResponse;
   const { access_token, refresh_token } = data;
 
   // Store refresh token + set dataSource to strava
@@ -77,7 +73,7 @@ async function getAccessToken(refreshToken: string): Promise<string> {
   });
 
   if (!res.ok) throw new Error("Failed to refresh Strava token");
-  const data = await res.json() as StravaTokenResponse;
+  const data = (await res.json()) as StravaTokenResponse;
   return data.access_token;
 }
 
@@ -91,7 +87,7 @@ export async function getLastRun(prisma: PrismaClient, userId: string) {
   });
 
   if (!res.ok) return { lastRun: null };
-  const activities = await res.json() as StravaActivity[];
+  const activities = (await res.json()) as StravaActivity[];
   const a = activities[0];
   if (!a) return { lastRun: null };
 
@@ -118,18 +114,19 @@ export async function syncStravaActivities(
 
   // Fetch last 8 weeks of activities
   const after = Math.floor(Date.now() / 1000) - 8 * 7 * 86400;
-  const res = await fetch(
-    `${STRAVA_ACTIVITIES_URL}?per_page=100&after=${after}`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
+  const res = await fetch(`${STRAVA_ACTIVITIES_URL}?per_page=100&after=${after}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
   if (!res.ok) {
     const errBody = await res.text().catch(() => "");
     throw new Error(`Failed to fetch Strava activities (${res.status}): ${errBody.slice(0, 200)}`);
   }
-  const activities = await res.json() as StravaActivity[];
+  const activities = (await res.json()) as StravaActivity[];
 
-  console.log(`[strava-sync] userId=${userId} fetched ${activities.length} activities, types: ${[...new Set(activities.map(a => a.type))].join(", ")}`);
+  console.log(
+    `[strava-sync] userId=${userId} fetched ${activities.length} activities, types: ${[...new Set(activities.map((a) => a.type))].join(", ")}`,
+  );
 
   // Group by week, sum distances
   const weekMap = new Map<string, number>();
@@ -145,7 +142,12 @@ export async function syncStravaActivities(
   // min/km run with a 2 min/km ride gives a meaningless number).
   const categoryOf = (type: string): "running" | "cycling" | null => {
     if (/(^|\b)(Run|TrailRun|VirtualRun)\b/i.test(type)) return "running";
-    if (/(^|\b)(Ride|VirtualRide|EBikeRide|GravelRide|MountainBikeRide|Handcycle|Velomobile)\b/i.test(type)) return "cycling";
+    if (
+      /(^|\b)(Ride|VirtualRide|EBikeRide|GravelRide|MountainBikeRide|Handcycle|Velomobile)\b/i.test(
+        type,
+      )
+    )
+      return "cycling";
     return null;
   };
 
@@ -187,7 +189,7 @@ export async function syncStravaActivities(
     // Pace tracking (min/km) — only for activities matching the user's
     // dominant category, with meaningful distance.
     if (paceCategory && categoryOf(act.type) === paceCategory && km >= 1 && act.moving_time > 0) {
-      const paceMinPerKm = (act.moving_time / 60) / km;
+      const paceMinPerKm = act.moving_time / 60 / km;
       if (date >= thisMonthStart) {
         thisMonthPaceSum += paceMinPerKm;
         thisMonthPaceCount++;
@@ -198,12 +200,10 @@ export async function syncStravaActivities(
     }
   }
 
-  const monthAvgPace = thisMonthPaceCount > 0
-    ? Math.round((thisMonthPaceSum / thisMonthPaceCount) * 100) / 100
-    : 0;
-  const prevMonthAvgPace = lastMonthPaceCount > 0
-    ? Math.round((lastMonthPaceSum / lastMonthPaceCount) * 100) / 100
-    : 0;
+  const monthAvgPace =
+    thisMonthPaceCount > 0 ? Math.round((thisMonthPaceSum / thisMonthPaceCount) * 100) / 100 : 0;
+  const prevMonthAvgPace =
+    lastMonthPaceCount > 0 ? Math.round((lastMonthPaceSum / lastMonthPaceCount) * 100) / 100 : 0;
 
   // Upsert one activity record per week
   let touchedCurrentWeek = false;
@@ -224,24 +224,49 @@ export async function syncStravaActivities(
         const newCount = streak.currentCount + 1;
         const baseApy = computeApy(newCount);
         const longRunThreshold = user.targetKm * APY.LONG_RUN_MULTIPLIER;
-        const m = computeMultipliers(baseApy, weekSessions, weekLongestRun, longRunThreshold, monthAvgPace, prevMonthAvgPace);
+        const m = computeMultipliers(
+          baseApy,
+          weekSessions,
+          weekLongestRun,
+          longRunThreshold,
+          monthAvgPace,
+          prevMonthAvgPace,
+        );
         await prisma.streak.update({
           where: { userId },
           data: {
-            currentCount: newCount, lastWeekMet: true, currentApy: baseApy,
-            weekSessions, weekLongestRun, monthAvgPace, prevMonthAvgPace, paceCategory,
+            currentCount: newCount,
+            lastWeekMet: true,
+            currentApy: baseApy,
+            weekSessions,
+            weekLongestRun,
+            monthAvgPace,
+            prevMonthAvgPace,
+            paceCategory,
             ...m,
           },
         });
       } else if (streak) {
         const baseApy = computeApy(streak.currentCount);
         const longRunThreshold = user.targetKm * APY.LONG_RUN_MULTIPLIER;
-        const m = computeMultipliers(baseApy, weekSessions, weekLongestRun, longRunThreshold, monthAvgPace, prevMonthAvgPace);
+        const m = computeMultipliers(
+          baseApy,
+          weekSessions,
+          weekLongestRun,
+          longRunThreshold,
+          monthAvgPace,
+          prevMonthAvgPace,
+        );
         await prisma.streak.update({
           where: { userId },
           data: {
-            lastWeekMet: true, currentApy: baseApy,
-            weekSessions, weekLongestRun, monthAvgPace, prevMonthAvgPace, paceCategory,
+            lastWeekMet: true,
+            currentApy: baseApy,
+            weekSessions,
+            weekLongestRun,
+            monthAvgPace,
+            prevMonthAvgPace,
+            paceCategory,
             ...m,
           },
         });
@@ -253,14 +278,18 @@ export async function syncStravaActivities(
   // dashboard "X/Y runs this week" tile updates before the weekly goal is hit.
   // If the user did Strava activities outside the current week only, we still
   // want to zero out the current week here (touchedCurrentWeek === false → 0).
-  await prisma.streak.update({
-    where: { userId },
-    data: {
-      weekSessions: touchedCurrentWeek ? weekSessions : 0,
-      weekLongestRun: touchedCurrentWeek ? weekLongestRun : 0,
-      monthAvgPace, prevMonthAvgPace, paceCategory,
-    },
-  }).catch(() => {});
+  await prisma.streak
+    .update({
+      where: { userId },
+      data: {
+        weekSessions: touchedCurrentWeek ? weekSessions : 0,
+        weekLongestRun: touchedCurrentWeek ? weekLongestRun : 0,
+        monthAvgPace,
+        prevMonthAvgPace,
+        paceCategory,
+      },
+    })
+    .catch(() => {});
 
   // Find the most recent individual activity for "last run" display
   const lastActivity = activities
@@ -277,7 +306,9 @@ export async function syncStravaActivities(
       }
     : null;
 
-  console.log(`[strava-sync] userId=${userId} synced ${weekMap.size} weeks, weekSessions=${weekSessions}, weekLongestRun=${weekLongestRun.toFixed(1)}km`);
+  console.log(
+    `[strava-sync] userId=${userId} synced ${weekMap.size} weeks, weekSessions=${weekSessions}, weekLongestRun=${weekLongestRun.toFixed(1)}km`,
+  );
 
   return { synced: weekMap.size, lastRun };
 }

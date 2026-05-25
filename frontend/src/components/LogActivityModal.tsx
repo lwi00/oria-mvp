@@ -20,17 +20,15 @@ export function LogActivityModal({ open, onClose }: LogActivityModalProps) {
   const [km, setKm] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [showCelebration, setShowCelebration] = useState(false);
-  const [celebrationData, setCelebrationData] = useState<{ distanceKm: number; goalMet: boolean }>({ distanceKm: 0, goalMet: false });
+  const [celebrationData, setCelebrationData] = useState<{ distanceKm: number; goalMet: boolean }>({
+    distanceKm: 0,
+    goalMet: false,
+  });
 
   if (!open) return null;
 
   const goalType = user?.goalType ?? "running";
-  const goalLabel =
-    goalType === "cycling"
-      ? "Cycling"
-      : goalType === "steps"
-        ? "Steps"
-        : "Running";
+  const goalLabel = goalType === "cycling" ? "Cycling" : goalType === "steps" ? "Steps" : "Running";
 
   const handleSubmit = () => {
     if (!km) return;
@@ -55,10 +53,7 @@ export function LogActivityModal({ open, onClose }: LogActivityModalProps) {
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
 
       {/* Sheet */}
       <div className="relative w-full max-w-[390px] bg-white rounded-t-2xl sm:rounded-2xl p-6 pb-8 shadow-card-hover animate-[slideUp_0.3s_ease-out]">
@@ -69,15 +64,22 @@ export function LogActivityModal({ open, onClose }: LogActivityModalProps) {
 
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-text-primary tracking-tight">
-            Log Activity
-          </h2>
+          <h2 className="text-xl font-bold text-text-primary tracking-tight">Log Activity</h2>
           <button
             onClick={onClose}
             aria-label="Close"
             className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center border-none cursor-pointer"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#6b7280"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
@@ -86,26 +88,18 @@ export function LogActivityModal({ open, onClose }: LogActivityModalProps) {
         {/* Activity type badge */}
         <div className="flex items-center gap-2 mb-6">
           <div className="px-3 py-1.5 rounded-lg gradient-brand">
-            <span className="text-xs font-semibold text-white">
-              {goalLabel}
-            </span>
+            <span className="text-xs font-semibold text-white">{goalLabel}</span>
           </div>
           <div className="px-3 py-1.5 rounded-lg bg-purple-50 border border-oria">
-            <span className="text-xs font-medium text-text-muted">
-              Manual entry
-            </span>
+            <span className="text-xs font-medium text-text-muted">Manual entry</span>
           </div>
           {healthStatus?.connected ? (
             <div className="px-3 py-1.5 rounded-lg gradient-brand">
-              <span className="text-xs font-semibold text-white">
-                Apple Health
-              </span>
+              <span className="text-xs font-semibold text-white">Apple Health</span>
             </div>
           ) : (
             <div className="px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 opacity-50">
-              <span className="text-xs font-medium text-text-muted">
-                Strava
-              </span>
+              <span className="text-xs font-medium text-text-muted">Strava</span>
             </div>
           )}
         </div>
@@ -158,8 +152,16 @@ export function LogActivityModal({ open, onClose }: LogActivityModalProps) {
       {/* Celebration overlay */}
       <Celebration
         show={showCelebration}
-        onDone={() => { setShowCelebration(false); onClose(); }}
-        streakCount={(streak?.currentWeek?.distanceKm ?? 0) + celebrationData.distanceKm >= (user?.targetKm ?? 10) ? (streak?.currentCount ?? 0) + 1 : streak?.currentCount}
+        onDone={() => {
+          setShowCelebration(false);
+          onClose();
+        }}
+        streakCount={
+          (streak?.currentWeek?.distanceKm ?? 0) + celebrationData.distanceKm >=
+          (user?.targetKm ?? 10)
+            ? (streak?.currentCount ?? 0) + 1
+            : streak?.currentCount
+        }
         distanceKm={celebrationData.distanceKm}
         goalMet={celebrationData.goalMet}
       />

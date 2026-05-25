@@ -2,11 +2,7 @@ import type { PrismaClient } from "@prisma/client";
 import type { VerifyBody } from "./auth.schemas.js";
 import { APY } from "../../config/constants.js";
 
-export async function verifyAndUpsertUser(
-  prisma: PrismaClient,
-  privyId: string,
-  body: VerifyBody,
-) {
+export async function verifyAndUpsertUser(prisma: PrismaClient, privyId: string, body: VerifyBody) {
   const existing = await prisma.user.findUnique({
     where: { privyId },
     include: { streak: true },

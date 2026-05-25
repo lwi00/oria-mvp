@@ -23,8 +23,22 @@ export default function ApyDetailPage() {
     return (
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3 pt-1 pb-2">
-          <Link href="/dashboard" className="w-9 h-9 rounded-xl bg-oria-card border border-oria flex items-center justify-center">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          <Link
+            href="/dashboard"
+            className="w-9 h-9 rounded-xl bg-oria-card border border-oria flex items-center justify-center"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#A78BFA"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
           </Link>
           <div className="h-7 w-32 skeleton-shimmer rounded" />
         </div>
@@ -52,7 +66,12 @@ export default function ApyDetailPage() {
   const streakComp = 0.6 * Math.min(1, Math.max(0, count / 16));
   const regularityComp = weekSessions >= 3 ? 0.15 : 0;
   const longRunComp = longestRun >= longRunTarget ? 0.15 : 0;
-  const progressionComp = (streak?.monthAvgPace ?? 0) > 0 && (streak?.prevMonthAvgPace ?? 0) > 0 && (streak?.monthAvgPace ?? 0) < (streak?.prevMonthAvgPace ?? 0) ? 0.1 : 0;
+  const progressionComp =
+    (streak?.monthAvgPace ?? 0) > 0 &&
+    (streak?.prevMonthAvgPace ?? 0) > 0 &&
+    (streak?.monthAvgPace ?? 0) < (streak?.prevMonthAvgPace ?? 0)
+      ? 0.1
+      : 0;
   const scoreComponents: Record<string, number> = {
     streak: streakComp,
     regularity: regularityComp,
@@ -66,8 +85,22 @@ export default function ApyDetailPage() {
     <div className="flex flex-col gap-4">
       {/* Header */}
       <div className="flex items-center gap-3 pt-1 pb-2">
-        <Link href="/dashboard" className="w-9 h-9 rounded-xl bg-oria-card border border-oria flex items-center justify-center cursor-pointer active:scale-95 transition-transform">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+        <Link
+          href="/dashboard"
+          className="w-9 h-9 rounded-xl bg-oria-card border border-oria flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#A78BFA"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
         </Link>
         <h1 className="text-xl font-bold text-text-primary tracking-tight flex-1">APY Details</h1>
         <button
@@ -88,7 +121,9 @@ export default function ApyDetailPage() {
       <Card className="relative overflow-hidden !p-6 text-center">
         <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-[300px] h-[300px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.2)_0%,transparent_60%)] blur-[30px] pointer-events-none" />
         <div className="relative">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">Your effective APY</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+            Your effective APY
+          </p>
           <p className="text-[56px] font-extrabold text-accent-purple-bright mt-2 leading-none tabular-nums animate-count-pop">
             {effective.toFixed(2)}
             <span className="text-[24px] text-text-muted">%</span>
@@ -104,28 +139,51 @@ export default function ApyDetailPage() {
           underlying yield source: surfacing the raw vault rate or the
           Oria margin would push savvy users to bypass the app entirely. */}
       <Card className="!p-5">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-4">How your APY is built</p>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-4">
+          How your APY is built
+        </p>
         <div className="flex flex-col gap-2">
-          <Row label="Baseline (guaranteed)" value={`${baseline.toFixed(2)}%`} color="text-accent-purple-bright" />
+          <Row
+            label="Baseline (guaranteed)"
+            value={`${baseline.toFixed(2)}%`}
+            color="text-accent-purple-bright"
+          />
           <Row label="Bonus pool available" value={`${poolRate.toFixed(2)}%`} muted />
           <div className="h-px bg-oria my-1.5" />
-          <Row label="Your activity bonus" value={`+${myBonus.toFixed(2)}%`} color="text-success-500" bold />
-          <Row label="Your total" value={`${effective.toFixed(2)}%`} color="text-accent-purple-bright" bold large />
+          <Row
+            label="Your activity bonus"
+            value={`+${myBonus.toFixed(2)}%`}
+            color="text-success-500"
+            bold
+          />
+          <Row
+            label="Your total"
+            value={`${effective.toFixed(2)}%`}
+            color="text-accent-purple-bright"
+            bold
+            large
+          />
         </div>
         <p className="text-[11px] text-text-muted mt-4 leading-relaxed">
-          Everyone earns the {baseline.toFixed(2)}% baseline. The {poolRate.toFixed(2)}% bonus pool is redistributed weekly based on your activity score — the more consistent you are, the bigger your slice.
+          Everyone earns the {baseline.toFixed(2)}% baseline. The {poolRate.toFixed(2)}% bonus pool
+          is redistributed weekly based on your activity score — the more consistent you are, the
+          bigger your slice.
         </p>
       </Card>
 
       {/* Score breakdown */}
       <Card className="!p-5">
         <div className="flex items-baseline justify-between mb-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">Your activity score</p>
-          <p className="text-[20px] font-extrabold text-accent-purple-bright tabular-nums leading-none">{score.toFixed(2)}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+            Your activity score
+          </p>
+          <p className="text-[20px] font-extrabold text-accent-purple-bright tabular-nums leading-none">
+            {score.toFixed(2)}
+          </p>
         </div>
         <p className="text-[11px] text-text-muted mb-4">
           {relativeRatio > 1.1
-            ? `You're ${(relativeRatio).toFixed(1)}× more active than the average user → bigger slice of the pool.`
+            ? `You're ${relativeRatio.toFixed(1)}× more active than the average user → bigger slice of the pool.`
             : relativeRatio < 0.9
               ? `You're below average (×${relativeRatio.toFixed(2)}). More activity unlocks more bonus.`
               : "You're around the average. Get more active to climb above."}
@@ -138,7 +196,9 @@ export default function ApyDetailPage() {
               <div key={c.key}>
                 <div className="flex justify-between items-center mb-1">
                   <span className="text-[13px] text-text-secondary">{c.label}</span>
-                  <span className={`text-[12px] font-semibold tabular-nums ${val > 0 ? "text-text-primary" : "text-text-muted"}`}>
+                  <span
+                    className={`text-[12px] font-semibold tabular-nums ${val > 0 ? "text-text-primary" : "text-text-muted"}`}
+                  >
                     {val.toFixed(2)} / {c.weight.toFixed(2)}
                   </span>
                 </div>
@@ -159,7 +219,9 @@ export default function ApyDetailPage() {
 
       {/* How to maximize */}
       <Card className="!p-5">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-3">How to maximize your bonus</p>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-3">
+          How to maximize your bonus
+        </p>
         <div className="flex flex-col gap-3">
           <Tip
             color="purple"
@@ -187,18 +249,44 @@ export default function ApyDetailPage() {
   );
 }
 
-function Row({ label, value, color, muted, bold, large }: {
-  label: string; value: string; color?: string; muted?: boolean; bold?: boolean; large?: boolean;
+function Row({
+  label,
+  value,
+  color,
+  muted,
+  bold,
+  large,
+}: {
+  label: string;
+  value: string;
+  color?: string;
+  muted?: boolean;
+  bold?: boolean;
+  large?: boolean;
 }) {
   return (
     <div className="flex justify-between items-center">
-      <span className={`text-[13px] ${muted ? "text-text-muted" : "text-text-secondary"}`}>{label}</span>
-      <span className={`tabular-nums ${large ? "text-[18px]" : "text-[14px]"} ${bold ? "font-extrabold" : "font-semibold"} ${color ?? "text-text-primary"}`}>{value}</span>
+      <span className={`text-[13px] ${muted ? "text-text-muted" : "text-text-secondary"}`}>
+        {label}
+      </span>
+      <span
+        className={`tabular-nums ${large ? "text-[18px]" : "text-[14px]"} ${bold ? "font-extrabold" : "font-semibold"} ${color ?? "text-text-primary"}`}
+      >
+        {value}
+      </span>
     </div>
   );
 }
 
-function Tip({ color, title, desc }: { color: "purple" | "green" | "orange" | "gold"; title: string; desc: string }) {
+function Tip({
+  color,
+  title,
+  desc,
+}: {
+  color: "purple" | "green" | "orange" | "gold";
+  title: string;
+  desc: string;
+}) {
   const bg = {
     purple: "bg-accent-purple/15 border-accent-purple/25",
     green: "bg-success-500/15 border-success-500/25",
@@ -207,7 +295,9 @@ function Tip({ color, title, desc }: { color: "purple" | "green" | "orange" | "g
   }[color];
   return (
     <div className="flex items-start gap-3">
-      <div className={`w-8 h-8 rounded-lg ${bg} border flex items-center justify-center flex-shrink-0 mt-0.5`}>
+      <div
+        className={`w-8 h-8 rounded-lg ${bg} border flex items-center justify-center flex-shrink-0 mt-0.5`}
+      >
         <span className="w-2 h-2 rounded-full bg-current opacity-80" />
       </div>
       <div>

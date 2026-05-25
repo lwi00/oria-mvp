@@ -16,5 +16,4 @@ export const TOKEN_DECIMALS: Record<string, number> = {
 
 // Vault/treasury address where deposits are sent
 export const VAULT_ADDRESS =
-  process.env.NEXT_PUBLIC_VAULT_ADDRESS ??
-  "0x0000000000000000000000000000000000000000";
+  process.env.NEXT_PUBLIC_VAULT_ADDRESS ?? "0x0000000000000000000000000000000000000000";

@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mockChallenges, mockUser } from "@/lib/mock-data";
 
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const challenge = mockChallenges.find((c) => c.id === id);
   if (!challenge) {

@@ -96,9 +96,7 @@ export function useOnChainDeposit() {
         if (code === 4001) {
           setError("Transaction cancelled");
         } else {
-          setError(
-            err instanceof Error ? err.message : "Transaction failed",
-          );
+          setError(err instanceof Error ? err.message : "Transaction failed");
         }
         throw err;
       }
@@ -107,9 +105,7 @@ export function useOnChainDeposit() {
   );
 
   const isPending =
-    status === "switching-chain" ||
-    status === "awaiting-approval" ||
-    status === "confirming";
+    status === "switching-chain" || status === "awaiting-approval" || status === "confirming";
 
   const buttonText = (defaultText: string) => {
     switch (status) {

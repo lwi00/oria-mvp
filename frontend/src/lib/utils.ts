@@ -3,7 +3,10 @@ export const EUR_PER_USD = 0.92;
 
 export type Currency = "USD" | "EUR";
 
-export function formatMoney(amountUsd: number, currency: Currency = "USD"): { symbol: string; intPart: string; decPart: string } {
+export function formatMoney(
+  amountUsd: number,
+  currency: Currency = "USD",
+): { symbol: string; intPart: string; decPart: string } {
   const value = currency === "EUR" ? amountUsd * EUR_PER_USD : amountUsd;
   const [intRaw, decRaw = "00"] = value.toFixed(2).split(".");
   return {
@@ -33,7 +36,13 @@ export function timeAgo(dateStr: string): string {
 
 /// Deterministic per-user color derived from a stable seed (user id or name),
 /// so the same person always shows the same hue across the feed.
-export function userColor(seed: string): { from: string; to: string; text: string; soft: string; solid: string } {
+export function userColor(seed: string): {
+  from: string;
+  to: string;
+  text: string;
+  soft: string;
+  solid: string;
+} {
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
   const hue = Math.abs(h) % 360;

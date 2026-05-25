@@ -11,7 +11,7 @@ function apyFromStreak(s: number): number {
 }
 
 // AVAX price in USD for demo display
-export const AVAX_PRICE_USD = 9.40;
+export const AVAX_PRICE_USD = 9.4;
 
 function hoursAgo(h: number): string {
   return new Date(Date.now() - h * 3600_000).toISOString();
@@ -55,7 +55,14 @@ export const mockStreak = {
 
 // ── Activities ──
 export const mockActivities = [
-  { id: "a-1", userId: mockUser.id, weekStart: weekStart.toISOString(), distanceKm: 6.2, source: "manual", goalMet: false },
+  {
+    id: "a-1",
+    userId: mockUser.id,
+    weekStart: weekStart.toISOString(),
+    distanceKm: 6.2,
+    source: "manual",
+    goalMet: false,
+  },
 ];
 
 // ── Friends for leaderboard + feed ──
@@ -69,24 +76,128 @@ const friends = [
 
 // ── Leaderboard ──
 export const mockLeaderboard = [
-  { rank: 1, id: friends[0].id, displayName: friends[0].displayName, avatarUrl: null, streak: 8, apy: apyFromStreak(8), isMe: false },
-  { rank: 2, id: friends[1].id, displayName: friends[1].displayName, avatarUrl: null, streak: 6, apy: apyFromStreak(6), isMe: false },
-  { rank: 3, id: mockUser.id, displayName: mockUser.displayName, avatarUrl: null, streak: 4, apy: apyFromStreak(4), isMe: true },
-  { rank: 4, id: friends[2].id, displayName: friends[2].displayName, avatarUrl: null, streak: 3, apy: apyFromStreak(3), isMe: false },
-  { rank: 5, id: friends[3].id, displayName: friends[3].displayName, avatarUrl: null, streak: 2, apy: apyFromStreak(2), isMe: false },
-  { rank: 6, id: friends[4].id, displayName: friends[4].displayName, avatarUrl: null, streak: 1, apy: apyFromStreak(1), isMe: false },
+  {
+    rank: 1,
+    id: friends[0].id,
+    displayName: friends[0].displayName,
+    avatarUrl: null,
+    streak: 8,
+    apy: apyFromStreak(8),
+    isMe: false,
+  },
+  {
+    rank: 2,
+    id: friends[1].id,
+    displayName: friends[1].displayName,
+    avatarUrl: null,
+    streak: 6,
+    apy: apyFromStreak(6),
+    isMe: false,
+  },
+  {
+    rank: 3,
+    id: mockUser.id,
+    displayName: mockUser.displayName,
+    avatarUrl: null,
+    streak: 4,
+    apy: apyFromStreak(4),
+    isMe: true,
+  },
+  {
+    rank: 4,
+    id: friends[2].id,
+    displayName: friends[2].displayName,
+    avatarUrl: null,
+    streak: 3,
+    apy: apyFromStreak(3),
+    isMe: false,
+  },
+  {
+    rank: 5,
+    id: friends[3].id,
+    displayName: friends[3].displayName,
+    avatarUrl: null,
+    streak: 2,
+    apy: apyFromStreak(2),
+    isMe: false,
+  },
+  {
+    rank: 6,
+    id: friends[4].id,
+    displayName: friends[4].displayName,
+    avatarUrl: null,
+    streak: 1,
+    apy: apyFromStreak(1),
+    isMe: false,
+  },
 ];
 
 // ── Feed ──
 export const mockFeed = [
-  { id: "fe-1", userId: friends[0].id, eventType: "streak_milestone", payload: { streakCount: 8 }, createdAt: hoursAgo(1), user: friends[0] },
-  { id: "fe-2", userId: friends[1].id, eventType: "goal_met", payload: { distanceKm: 12.5 }, createdAt: hoursAgo(3), user: friends[1] },
-  { id: "fe-3", userId: friends[2].id, eventType: "deposit", payload: { amount: 500, token: "USDC" }, createdAt: hoursAgo(5), user: friends[2] },
-  { id: "fe-4", userId: mockUser.id, eventType: "goal_met", payload: { distanceKm: 10 }, createdAt: hoursAgo(26), user: { id: mockUser.id, displayName: mockUser.displayName, avatarUrl: null } },
-  { id: "fe-5", userId: friends[3].id, eventType: "challenge_joined", payload: { title: "March Madness 5K" }, createdAt: hoursAgo(30), user: friends[3] },
-  { id: "fe-6", userId: friends[4].id, eventType: "streak_lost", payload: { previousCount: 3 }, createdAt: hoursAgo(48), user: friends[4] },
-  { id: "fe-7", userId: friends[0].id, eventType: "goal_met", payload: { distanceKm: 15 }, createdAt: hoursAgo(50), user: friends[0] },
-  { id: "fe-8", userId: friends[1].id, eventType: "deposit", payload: { amount: 1000, token: "USDC" }, createdAt: hoursAgo(72), user: friends[1] },
+  {
+    id: "fe-1",
+    userId: friends[0].id,
+    eventType: "streak_milestone",
+    payload: { streakCount: 8 },
+    createdAt: hoursAgo(1),
+    user: friends[0],
+  },
+  {
+    id: "fe-2",
+    userId: friends[1].id,
+    eventType: "goal_met",
+    payload: { distanceKm: 12.5 },
+    createdAt: hoursAgo(3),
+    user: friends[1],
+  },
+  {
+    id: "fe-3",
+    userId: friends[2].id,
+    eventType: "deposit",
+    payload: { amount: 500, token: "USDC" },
+    createdAt: hoursAgo(5),
+    user: friends[2],
+  },
+  {
+    id: "fe-4",
+    userId: mockUser.id,
+    eventType: "goal_met",
+    payload: { distanceKm: 10 },
+    createdAt: hoursAgo(26),
+    user: { id: mockUser.id, displayName: mockUser.displayName, avatarUrl: null },
+  },
+  {
+    id: "fe-5",
+    userId: friends[3].id,
+    eventType: "challenge_joined",
+    payload: { title: "March Madness 5K" },
+    createdAt: hoursAgo(30),
+    user: friends[3],
+  },
+  {
+    id: "fe-6",
+    userId: friends[4].id,
+    eventType: "streak_lost",
+    payload: { previousCount: 3 },
+    createdAt: hoursAgo(48),
+    user: friends[4],
+  },
+  {
+    id: "fe-7",
+    userId: friends[0].id,
+    eventType: "goal_met",
+    payload: { distanceKm: 15 },
+    createdAt: hoursAgo(50),
+    user: friends[0],
+  },
+  {
+    id: "fe-8",
+    userId: friends[1].id,
+    eventType: "deposit",
+    payload: { amount: 1000, token: "USDC" },
+    createdAt: hoursAgo(72),
+    user: friends[1],
+  },
 ];
 
 // ── Challenges ──
@@ -103,7 +214,13 @@ export const mockChallenges = [
     status: "active",
     members: [
       { id: "cm-1", userId: friends[0].id, weeksMet: 2, weeksTotal: 2, user: friends[0] },
-      { id: "cm-2", userId: mockUser.id, weeksMet: 1, weeksTotal: 2, user: { id: mockUser.id, displayName: mockUser.displayName, avatarUrl: null } },
+      {
+        id: "cm-2",
+        userId: mockUser.id,
+        weeksMet: 1,
+        weeksTotal: 2,
+        user: { id: mockUser.id, displayName: mockUser.displayName, avatarUrl: null },
+      },
       { id: "cm-3", userId: friends[2].id, weeksMet: 2, weeksTotal: 2, user: friends[2] },
       { id: "cm-4", userId: friends[3].id, weeksMet: 1, weeksTotal: 2, user: friends[3] },
     ],
@@ -120,7 +237,13 @@ export const mockChallenges = [
     maxMembers: 6,
     status: "active",
     members: [
-      { id: "cm-5", userId: mockUser.id, weeksMet: 1, weeksTotal: 1, user: { id: mockUser.id, displayName: mockUser.displayName, avatarUrl: null } },
+      {
+        id: "cm-5",
+        userId: mockUser.id,
+        weeksMet: 1,
+        weeksTotal: 1,
+        user: { id: mockUser.id, displayName: mockUser.displayName, avatarUrl: null },
+      },
       { id: "cm-6", userId: friends[1].id, weeksMet: 1, weeksTotal: 1, user: friends[1] },
     ],
     _count: { members: 2 },
@@ -140,8 +263,8 @@ export const mockEarnings = {
   totalDeposited: initialDeposited,
   totalEarned: 18.42,
   currentApy: apyFromStreak(4),
-  projectedWeekly: parseFloat((initialDeposited * apyFromStreak(4) / 100 / 52).toFixed(2)),
-  projectedAnnual: parseFloat((initialDeposited * apyFromStreak(4) / 100).toFixed(2)),
+  projectedWeekly: parseFloat(((initialDeposited * apyFromStreak(4)) / 100 / 52).toFixed(2)),
+  projectedAnnual: parseFloat(((initialDeposited * apyFromStreak(4)) / 100).toFixed(2)),
 };
 
 // ── Deposit ledger ──
@@ -155,9 +278,30 @@ interface MockDeposit {
 }
 
 const mockDeposits: MockDeposit[] = [
-  { id: "dep-init-1", amount: 1000, token: "USDC", status: "earning", createdAt: hoursAgo(14 * 24), txHash: null },
-  { id: "dep-init-2", amount: 5.5, token: "AVAX", status: "earning", createdAt: hoursAgo(10 * 24), txHash: null },
-  { id: "dep-init-3", amount: 250, token: "USDC", status: "earning", createdAt: hoursAgo(3 * 24), txHash: null },
+  {
+    id: "dep-init-1",
+    amount: 1000,
+    token: "USDC",
+    status: "earning",
+    createdAt: hoursAgo(14 * 24),
+    txHash: null,
+  },
+  {
+    id: "dep-init-2",
+    amount: 5.5,
+    token: "AVAX",
+    status: "earning",
+    createdAt: hoursAgo(10 * 24),
+    txHash: null,
+  },
+  {
+    id: "dep-init-3",
+    amount: 250,
+    token: "USDC",
+    status: "earning",
+    createdAt: hoursAgo(3 * 24),
+    txHash: null,
+  },
 ];
 let depositCounter = 3;
 
@@ -174,10 +318,10 @@ export function recalcEarnings() {
   }
   mockEarnings.totalEarned = parseFloat(totalYield.toFixed(2));
   mockEarnings.projectedWeekly = parseFloat(
-    ((mockEarnings.totalDeposited * mockEarnings.currentApy / 100) / 52).toFixed(2),
+    ((mockEarnings.totalDeposited * mockEarnings.currentApy) / 100 / 52).toFixed(2),
   );
   mockEarnings.projectedAnnual = parseFloat(
-    (mockEarnings.totalDeposited * mockEarnings.currentApy / 100).toFixed(2),
+    ((mockEarnings.totalDeposited * mockEarnings.currentApy) / 100).toFixed(2),
   );
 }
 
@@ -203,7 +347,7 @@ export function logActivity(distanceKm: number) {
 }
 
 export function deposit(amount: number, token: string, txHash?: string) {
-  const usdValue = (token === "USDC") ? amount : amount * AVAX_PRICE_USD;
+  const usdValue = token === "USDC" ? amount : amount * AVAX_PRICE_USD;
   mockEarnings.totalDeposited += usdValue;
   if (token === "USDC") mockWallet.balances.USDC += amount;
   else mockWallet.balances.AVAX += amount;
@@ -235,7 +379,12 @@ export function deposit(amount: number, token: string, txHash?: string) {
 
 let challengeCounter = 10;
 
-export function createChallenge(data: { title: string; goalKmWeek: number; durationWeeks: number; maxMembers?: number }) {
+export function createChallenge(data: {
+  title: string;
+  goalKmWeek: number;
+  durationWeeks: number;
+  maxMembers?: number;
+}) {
   const id = `ch-${++challengeCounter}`;
   const challenge = {
     id,
@@ -248,7 +397,13 @@ export function createChallenge(data: { title: string; goalKmWeek: number; durat
     maxMembers: data.maxMembers ?? 10,
     status: "active",
     members: [
-      { id: `cm-${Date.now()}`, userId: mockUser.id, weeksMet: 0, weeksTotal: 0, user: { id: mockUser.id, displayName: mockUser.displayName, avatarUrl: null } },
+      {
+        id: `cm-${Date.now()}`,
+        userId: mockUser.id,
+        weeksMet: 0,
+        weeksTotal: 0,
+        user: { id: mockUser.id, displayName: mockUser.displayName, avatarUrl: null },
+      },
     ],
     _count: { members: 1 },
   };
@@ -256,7 +411,11 @@ export function createChallenge(data: { title: string; goalKmWeek: number; durat
   return challenge;
 }
 
-export function updateUser(updates: { displayName?: string; goalType?: string; targetKm?: number }) {
+export function updateUser(updates: {
+  displayName?: string;
+  goalType?: string;
+  targetKm?: number;
+}) {
   if (updates.displayName !== undefined) mockUser.displayName = updates.displayName;
   if (updates.goalType !== undefined) mockUser.goalType = updates.goalType;
   if (updates.targetKm !== undefined) mockUser.targetKm = updates.targetKm;

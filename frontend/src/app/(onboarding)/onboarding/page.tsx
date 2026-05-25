@@ -59,17 +59,15 @@ function WelcomeStep({ onNext, onSignIn }: { onNext: () => void; onSignIn: () =>
             />
           </svg>
         </div>
-        <span className="text-[32px] font-extrabold text-text-primary tracking-tight">
-          Oria
-        </span>
+        <span className="text-[32px] font-extrabold text-text-primary tracking-tight">Oria</span>
       </div>
 
       <h1 className="text-[22px] font-bold text-text-primary text-center tracking-tight mb-3">
         Save more. Move more. Earn more.
       </h1>
       <p className="text-[15px] text-text-secondary text-center leading-relaxed max-w-[300px]">
-        Deposit crypto, stay active, and watch your savings grow with higher
-        yields for every streak you build.
+        Deposit crypto, stay active, and watch your savings grow with higher yields for every streak
+        you build.
       </p>
 
       <div className="w-full mt-12 flex flex-col items-center gap-4">
@@ -115,10 +113,10 @@ function ConnectWalletStep({
       // step (NameStep) is forced to collect one — otherwise we'd silently
       // create accounts called "User" that nobody can search for.
       try {
-        const data = await apiFetch("/api/auth/verify", {
+        const data = (await apiFetch("/api/auth/verify", {
           method: "POST",
           body: JSON.stringify({ walletAddr }),
-        }) as { isNew?: boolean };
+        })) as { isNew?: boolean };
         if (data?.isNew === false) isNew = false;
       } catch {
         // ignore — treat as new user on error
@@ -152,7 +150,16 @@ function ConnectWalletStep({
           onClick={onBack}
           className="w-10 h-10 rounded-md flex items-center justify-center bg-purple-50 border-none cursor-pointer"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#7c3aed"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </button>
@@ -162,9 +169,7 @@ function ConnectWalletStep({
         <p className="text-xs font-semibold text-purple-600 tracking-widest uppercase mb-2">
           Step 1 of 4
         </p>
-        <h1 className="text-2xl font-bold text-text-primary tracking-tight">
-          Connect Your Wallet
-        </h1>
+        <h1 className="text-2xl font-bold text-text-primary tracking-tight">Connect Your Wallet</h1>
         <p className="text-sm text-text-secondary mt-2 leading-relaxed">
           Sign in securely with Privy. No seed phrase needed.
         </p>
@@ -181,8 +186,8 @@ function ConnectWalletStep({
       </div>
 
       <p className="text-[13px] text-text-muted text-center mt-6 leading-relaxed">
-        Sign in with email, Google, or Apple. Privy will create an embedded
-        wallet for you automatically.
+        Sign in with email, Google, or Apple. Privy will create an embedded wallet for you
+        automatically.
       </p>
 
       <div className="mt-auto pt-8">
@@ -218,7 +223,10 @@ function ChooseNameStep({
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 500_000) { toast("Image too large (max 500 KB)", "error"); return; }
+    if (file.size > 500_000) {
+      toast("Image too large (max 500 KB)", "error");
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => setAvatarUrl(reader.result as string);
     reader.readAsDataURL(file);
@@ -237,9 +245,10 @@ function ChooseNameStep({
       });
       onNext();
     } catch (e) {
-      const msg = e instanceof Error && e.message && !e.message.startsWith("API error")
-        ? e.message
-        : "Couldn't save your name — please retry";
+      const msg =
+        e instanceof Error && e.message && !e.message.startsWith("API error")
+          ? e.message
+          : "Couldn't save your name — please retry";
       toast(msg, "error");
     } finally {
       setSaving(false);
@@ -253,7 +262,16 @@ function ChooseNameStep({
           onClick={onBack}
           className="w-10 h-10 rounded-md flex items-center justify-center bg-purple-50 border-none cursor-pointer"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#7c3aed"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </button>
@@ -293,13 +311,24 @@ function ChooseNameStep({
               style={{
                 width: 100,
                 height: 100,
-                background: "linear-gradient(160deg, rgba(167,139,250,0.18), rgba(124,58,237,0.10))",
+                background:
+                  "linear-gradient(160deg, rgba(167,139,250,0.18), rgba(124,58,237,0.10))",
                 border: "2px solid #A78BFA",
                 boxShadow: "0 4px 16px rgba(139,92,246,0.4)",
               }}
               aria-label="No profile photo set"
             >
-              <svg width={100} height={100} viewBox="0 0 64 64" fill="none" stroke="#E9D5FF" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg
+                width={100}
+                height={100}
+                viewBox="0 0 64 64"
+                fill="none"
+                stroke="#E9D5FF"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
                 <circle cx="32" cy="24" r="11" />
                 <path d="M11 60c0-11.6 9.4-21 21-21s21 9.4 21 21" />
               </svg>
@@ -311,7 +340,16 @@ function ChooseNameStep({
             aria-label="Upload profile photo"
             type="button"
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
               <circle cx="12" cy="13" r="4" />
             </svg>
@@ -335,7 +373,10 @@ function ChooseNameStep({
 
       {/* Name input */}
       <div>
-        <label htmlFor="onb-name" className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-2 block">
+        <label
+          htmlFor="onb-name"
+          className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-2 block"
+        >
           Display name
         </label>
         <input
@@ -346,7 +387,9 @@ function ChooseNameStep({
           placeholder="Eve, Marco, sarah_k…"
           autoComplete="name"
           autoFocus
-          onKeyDown={(e) => { if (e.key === "Enter" && canContinue) submit(); }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && canContinue) submit();
+          }}
           className="w-full px-4 py-3.5 rounded-2xl border border-oria bg-oria-section text-[15px] text-text-primary placeholder:text-text-muted focus:border-accent-purple outline-none"
         />
         <p className="text-[11px] text-text-muted mt-2">
@@ -389,7 +432,16 @@ function ChooseGoalStep({
       id: "running",
       label: "Running",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <circle cx="17" cy="4" r="2" />
           <path d="M15.59 13.51l2.66-2.66a1 1 0 00-1.42-1.42l-3.07 3.07a2 2 0 01-1.41.59H10.5L8 15.5" />
           <path d="M5.11 18.39A2 2 0 107.94 15.56L10.5 13H8l-4.5 4.5" />
@@ -401,7 +453,16 @@ function ChooseGoalStep({
       id: "cycling",
       label: "Cycling",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <circle cx="18.5" cy="17.5" r="3.5" />
           <circle cx="5.5" cy="17.5" r="3.5" />
           <circle cx="15" cy="5" r="1" />
@@ -413,7 +474,16 @@ function ChooseGoalStep({
       id: "steps",
       label: "Steps",
       icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5 10 7 9.33 8.5 8 10" />
           <path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 1.5.67 3 2 4.5" />
         </svg>
@@ -430,7 +500,16 @@ function ChooseGoalStep({
           onClick={onBack}
           className="w-10 h-10 rounded-md flex items-center justify-center bg-purple-50 border-none cursor-pointer"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#7c3aed"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </button>
@@ -440,12 +519,9 @@ function ChooseGoalStep({
         <p className="text-xs font-semibold text-purple-600 tracking-widest uppercase mb-2">
           Step 3 of 4
         </p>
-        <h1 className="text-2xl font-bold text-text-primary tracking-tight">
-          Set Your Goal
-        </h1>
+        <h1 className="text-2xl font-bold text-text-primary tracking-tight">Set Your Goal</h1>
         <p className="text-sm text-text-secondary mt-2 leading-relaxed">
-          Choose your activity and weekly target. Hit it each week to grow your
-          streak and APY.
+          Choose your activity and weekly target. Hit it each week to grow your streak and APY.
         </p>
       </div>
 
@@ -520,14 +596,22 @@ function ChooseGoalStep({
       <Card className="!p-4 mt-2">
         <div className="flex gap-3 items-start">
           <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#7c3aed"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <circle cx="12" cy="12" r="10" />
               <path d="M12 16v-4M12 8h.01" />
             </svg>
           </div>
           <p className="text-[13px] text-text-secondary leading-relaxed">
-            Start realistic. You can always adjust your target later in
-            settings.
+            Start realistic. You can always adjust your target later in settings.
           </p>
         </div>
       </Card>
@@ -546,13 +630,7 @@ function ChooseGoalStep({
 }
 
 // ─── Step 5: Fund Wallet — show address + QR for the user to receive crypto ───
-function FundWalletStep({
-  onNext,
-  onBack,
-}: {
-  onNext: () => void;
-  onBack: () => void;
-}) {
+function FundWalletStep({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
   const { data: wallet } = useWalletBalance();
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
@@ -578,7 +656,16 @@ function FundWalletStep({
           onClick={onBack}
           className="w-10 h-10 rounded-md flex items-center justify-center bg-purple-50 border-none cursor-pointer"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#7c3aed"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </button>
@@ -592,7 +679,8 @@ function FundWalletStep({
           Fund your Oria wallet
         </h1>
         <p className="text-sm text-text-secondary mt-2 leading-relaxed">
-          Scan or copy your address to fund your wallet from any exchange or other wallet. Funds start earning yield as soon as they arrive.
+          Scan or copy your address to fund your wallet from any exchange or other wallet. Funds
+          start earning yield as soon as they arrive.
         </p>
       </div>
 
@@ -617,23 +705,52 @@ function FundWalletStep({
         >
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-9 h-9 rounded-full bg-accent-purple/15 border border-accent-purple/25 flex items-center justify-center flex-shrink-0">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#A78BFA"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <rect x="2" y="7" width="20" height="14" rx="2" />
                 <path d="M16 3H8a2 2 0 00-2 2v2h12V5a2 2 0 00-2-2z" />
               </svg>
             </div>
             <div className="min-w-0 text-left">
-              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Your Oria wallet</p>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+                Your Oria wallet
+              </p>
               <p className="text-[13px] font-mono text-text-primary truncate">{short}</p>
             </div>
           </div>
           <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-oria-chip border border-oria flex items-center justify-center group-hover:bg-accent-purple/15 transition-colors">
             {copied ? (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#10B981"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             ) : (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#9CA0AC"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <rect x="9" y="9" width="13" height="13" rx="2" />
                 <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
               </svg>
@@ -643,13 +760,24 @@ function FundWalletStep({
       )}
 
       <div className="flex items-start gap-2.5 p-3 rounded-xl bg-warning-100 border border-warning-500/25">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 mt-0.5">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#F59E0B"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="flex-shrink-0 mt-0.5"
+        >
           <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
           <line x1="12" y1="9" x2="12" y2="13" />
           <line x1="12" y1="17" x2="12.01" y2="17" />
         </svg>
         <p className="text-[12px] text-warning-500 leading-relaxed">
-          Make sure you&apos;re sending on a supported network. Transfers on unsupported chains may result in loss of funds.
+          Make sure you&apos;re sending on a supported network. Transfers on unsupported chains may
+          result in loss of funds.
         </p>
       </div>
 
@@ -739,9 +867,7 @@ export default function OnboardingPage() {
           onBack={() => setStep(2)}
         />
       )}
-      {step === 4 && (
-        <FundWalletStep onNext={finish} onBack={() => setStep(3)} />
-      )}
+      {step === 4 && <FundWalletStep onNext={finish} onBack={() => setStep(3)} />}
     </>
   );
 }

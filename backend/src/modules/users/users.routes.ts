@@ -1,6 +1,13 @@
 import type { FastifyInstance } from "fastify";
 import { updateUserSchema } from "./users.schemas.js";
-import { getMe, updateMe, getUser, getUserProfile, discoverUsers, searchUsers } from "./users.service.js";
+import {
+  getMe,
+  updateMe,
+  getUser,
+  getUserProfile,
+  discoverUsers,
+  searchUsers,
+} from "./users.service.js";
 
 export default async function usersRoutes(app: FastifyInstance) {
   app.get("/me", async (request, reply) => {

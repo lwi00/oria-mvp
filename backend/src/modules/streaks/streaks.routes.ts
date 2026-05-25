@@ -1,8 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import {
-  logActivitySchema,
-  activityQuerySchema,
-} from "./streaks.schemas.js";
+import { logActivitySchema, activityQuerySchema } from "./streaks.schemas.js";
 import {
   logActivity,
   getActivities,

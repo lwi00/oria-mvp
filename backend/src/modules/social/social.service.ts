@@ -141,19 +141,12 @@ export async function rejectFriendRequest(
   });
 }
 
-export async function removeFriend(
-  prisma: PrismaClient,
-  userId: string,
-  friendshipId: string,
-) {
+export async function removeFriend(prisma: PrismaClient, userId: string, friendshipId: string) {
   const friendship = await prisma.friendship.findUnique({
     where: { id: friendshipId },
   });
   if (!friendship) throw new NotFoundError("Friendship");
-  if (
-    friendship.requesterId !== userId &&
-    friendship.addresseeId !== userId
-  ) {
+  if (friendship.requesterId !== userId && friendship.addresseeId !== userId) {
     throw new BadRequestError("Not part of this friendship");
   }
 
@@ -172,9 +165,8 @@ export async function getFriends(prisma: PrismaClient, userId: string) {
     },
   });
 
-  return friendships.map((f: typeof friendships[0]) => {
-    const friend =
-      f.requesterId === userId ? f.addressee : f.requester;
+  return friendships.map((f: (typeof friendships)[0]) => {
+    const friend = f.requesterId === userId ? f.addressee : f.requester;
     return {
       friendshipId: f.id,
       user: {
@@ -201,7 +193,7 @@ export async function getFeed(
     },
   });
 
-  const friendIds = friendships.map((f: typeof friendships[0]) =>
+  const friendIds = friendships.map((f: (typeof friendships)[0]) =>
     f.requesterId === userId ? f.addresseeId : f.requesterId,
   );
 
@@ -229,7 +221,7 @@ export async function getFeed(
 
   // Flatten the streak into the user payload so the feed UI can show a
   // "this user is on an N-week streak" badge without a second round trip.
-  return events.map((e: typeof events[0]) => ({
+  return events.map((e: (typeof events)[0]) => ({
     ...e,
     user: {
       id: e.user.id,
@@ -256,7 +248,7 @@ export async function getPendingRequests(prisma: PrismaClient, userId: string) {
     orderBy: { createdAt: "desc" },
   });
 
-  return pending.map((f: typeof pending[0]) => ({
+  return pending.map((f: (typeof pending)[0]) => ({
     friendshipId: f.id,
     user: {
       id: f.requester.id,
@@ -284,7 +276,7 @@ export async function getSentRequests(prisma: PrismaClient, userId: string) {
     orderBy: { createdAt: "desc" },
   });
 
-  return sent.map((f: typeof sent[0]) => ({
+  return sent.map((f: (typeof sent)[0]) => ({
     friendshipId: f.id,
     user: {
       id: f.addressee.id,
@@ -336,10 +328,7 @@ export async function markNotificationsRead(prisma: PrismaClient, userId: string
   });
 }
 
-export async function getFriendsWeeklyProgress(
-  prisma: PrismaClient,
-  userId: string,
-) {
+export async function getFriendsWeeklyProgress(prisma: PrismaClient, userId: string) {
   // Get current week start (Monday)
   const now = new Date();
   const day = now.getUTCDay();
@@ -355,7 +344,7 @@ export async function getFriendsWeeklyProgress(
       OR: [{ requesterId: userId }, { addresseeId: userId }],
     },
   });
-  const friendIds = friendships.map((f: typeof friendships[0]) =>
+  const friendIds = friendships.map((f: (typeof friendships)[0]) =>
     f.requesterId === userId ? f.addresseeId : f.requesterId,
   );
 
@@ -384,20 +373,22 @@ export async function getFriendsWeeklyProgress(
     },
   });
 
-  return users.map((u: typeof users[0]) => {
-    const activity = u.activities[0];
-    return {
-      id: u.id,
-      displayName: u.displayName,
-      avatarUrl: u.avatarUrl,
-      targetKm: u.targetKm,
-      isMe: u.id === userId,
-      distanceKm: activity?.distanceKm ?? 0,
-      goalMet: activity?.goalMet ?? false,
-      streakCount: u.streak?.currentCount ?? 0,
-      weekSessions: u.streak?.weekSessions ?? 0,
-    };
-  }).sort((a: { distanceKm: number }, b: { distanceKm: number }) => b.distanceKm - a.distanceKm);
+  return users
+    .map((u: (typeof users)[0]) => {
+      const activity = u.activities[0];
+      return {
+        id: u.id,
+        displayName: u.displayName,
+        avatarUrl: u.avatarUrl,
+        targetKm: u.targetKm,
+        isMe: u.id === userId,
+        distanceKm: activity?.distanceKm ?? 0,
+        goalMet: activity?.goalMet ?? false,
+        streakCount: u.streak?.currentCount ?? 0,
+        weekSessions: u.streak?.weekSessions ?? 0,
+      };
+    })
+    .sort((a: { distanceKm: number }, b: { distanceKm: number }) => b.distanceKm - a.distanceKm);
 }
 
 // ── Poke ──
@@ -424,11 +415,7 @@ const POKE_MESSAGES_DONE = [
   "{name} hit their goal! But hey, bonus km = bonus bragging rights!",
 ];
 
-function pickPokeMessage(
-  friendName: string,
-  targetKm: number,
-  distanceKm: number,
-): string {
+function pickPokeMessage(friendName: string, targetKm: number, distanceKm: number): string {
   const done = distanceKm.toFixed(1);
   const left = Math.max(0, targetKm - distanceKm).toFixed(1);
   const pct = Math.min(100, Math.round((distanceKm / targetKm) * 100));
@@ -447,11 +434,7 @@ function pickPokeMessage(
     .replace(/{pct}/g, String(pct));
 }
 
-export async function pokeFriend(
-  prisma: PrismaClient,
-  userId: string,
-  friendUserId: string,
-) {
+export async function pokeFriend(prisma: PrismaClient, userId: string, friendUserId: string) {
   if (userId === friendUserId) throw new BadRequestError("Can't poke yourself!");
 
   // Verify they are friends
@@ -508,15 +491,14 @@ export async function pokeFriend(
 
   // Respect friend's notification preferences
   if (!getUserSetting(friend.settings, "notifPokes")) {
-    return { poked: true, message: `${friend.displayName ?? "Your friend"} has poke notifications turned off` };
+    return {
+      poked: true,
+      message: `${friend.displayName ?? "Your friend"} has poke notifications turned off`,
+    };
   }
 
   const distanceKm = friend.activities[0]?.distanceKm ?? 0;
-  const message = pickPokeMessage(
-    friend.displayName ?? "friend",
-    friend.targetKm,
-    distanceKm,
-  );
+  const message = pickPokeMessage(friend.displayName ?? "friend", friend.targetKm, distanceKm);
 
   await prisma.notification.create({
     data: {
@@ -542,10 +524,7 @@ export async function pokeFriend(
   return { poked: true, message };
 }
 
-export async function getWeeklyLeaderboard(
-  prisma: PrismaClient,
-  userId: string,
-) {
+export async function getWeeklyLeaderboard(prisma: PrismaClient, userId: string) {
   // Get current week Monday
   const now = new Date();
   const day = now.getUTCDay();
@@ -558,7 +537,7 @@ export async function getWeeklyLeaderboard(
   const friendships = await prisma.friendship.findMany({
     where: { status: "accepted", OR: [{ requesterId: userId }, { addresseeId: userId }] },
   });
-  const friendIds = friendships.map((f: typeof friendships[0]) =>
+  const friendIds = friendships.map((f: (typeof friendships)[0]) =>
     f.requesterId === userId ? f.addresseeId : f.requesterId,
   );
   const allIds = [userId, ...friendIds];
@@ -566,15 +545,21 @@ export async function getWeeklyLeaderboard(
   const users = await prisma.user.findMany({
     where: { id: { in: allIds } },
     select: {
-      id: true, displayName: true, avatarUrl: true, targetKm: true,
+      id: true,
+      displayName: true,
+      avatarUrl: true,
+      targetKm: true,
       activities: { where: { weekStart }, select: { distanceKm: true, goalMet: true } },
     },
   });
 
   return users
-    .map((u: typeof users[0]) => ({
-      id: u.id, displayName: u.displayName, avatarUrl: u.avatarUrl,
-      targetKm: u.targetKm, isMe: u.id === userId,
+    .map((u: (typeof users)[0]) => ({
+      id: u.id,
+      displayName: u.displayName,
+      avatarUrl: u.avatarUrl,
+      targetKm: u.targetKm,
+      isMe: u.id === userId,
       distanceKm: u.activities[0]?.distanceKm ?? 0,
       goalMet: u.activities[0]?.goalMet ?? false,
     }))
@@ -582,11 +567,7 @@ export async function getWeeklyLeaderboard(
     .map((u, i) => ({ ...u, rank: i + 1 }));
 }
 
-export async function likeFeedEvent(
-  prisma: PrismaClient,
-  userId: string,
-  eventId: string,
-) {
+export async function likeFeedEvent(prisma: PrismaClient, userId: string, eventId: string) {
   const event = await prisma.feedEvent.findUnique({ where: { id: eventId } });
   if (!event) throw new NotFoundError("Feed event");
 
@@ -595,7 +576,10 @@ export async function likeFeedEvent(
     // Unlike
     return prisma.feedEvent.update({
       where: { id: eventId },
-      data: { likes: Math.max(0, event.likes - 1), likedBy: likedBy.filter((id: string) => id !== userId) },
+      data: {
+        likes: Math.max(0, event.likes - 1),
+        likedBy: likedBy.filter((id: string) => id !== userId),
+      },
     });
   }
   // Like
@@ -605,10 +589,7 @@ export async function likeFeedEvent(
   });
 }
 
-export async function getLeaderboard(
-  prisma: PrismaClient,
-  userId: string,
-) {
+export async function getLeaderboard(prisma: PrismaClient, userId: string) {
   // Get friend IDs
   const friendships = await prisma.friendship.findMany({
     where: {
@@ -617,7 +598,7 @@ export async function getLeaderboard(
     },
   });
 
-  const friendIds = friendships.map((f: typeof friendships[0]) =>
+  const friendIds = friendships.map((f: (typeof friendships)[0]) =>
     f.requesterId === userId ? f.addresseeId : f.requesterId,
   );
 
@@ -637,7 +618,7 @@ export async function getLeaderboard(
   // tied on streak don't end up in arbitrary order — the one earning more
   // takes the higher rank. Without this, e.g. Eva on streak 8 / 3.36 % was
   // landing above Emma D. on streak 8 / 3.54 %.
-  const rows = users.map((u: typeof users[0]) => {
+  const rows = users.map((u: (typeof users)[0]) => {
     const isMe = u.id === userId;
     const apy = isMe
       ? (myLive?.effectiveApy ?? myLive?.currentApy ?? u.streak?.effectiveApy ?? APY.BASELINE)
@@ -651,6 +632,6 @@ export async function getLeaderboard(
       isMe,
     };
   });
-  rows.sort((a, b) => (b.streak - a.streak) || (b.apy - a.apy));
+  rows.sort((a, b) => b.streak - a.streak || b.apy - a.apy);
   return rows.map((r, i) => ({ rank: i + 1, ...r }));
 }

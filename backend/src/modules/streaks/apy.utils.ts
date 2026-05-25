@@ -10,7 +10,7 @@ export function computeApy(streakCount: number): number {
 }
 
 export interface ScoreInputs {
-  currentCount: number;       // streak weeks (0..MAX_STREAK)
+  currentCount: number; // streak weeks (0..MAX_STREAK)
   weekSessions: number;
   weekLongestRun: number;
   longRunThresholdKm: number; // user's plan long-run target (km), or 0 if none
@@ -45,11 +45,11 @@ export function activityScore(s: ScoreInputs): number {
 }
 
 export interface PoolApyResult {
-  baseline: number;     // baseline percentage (3%)
-  poolRate: number;     // available bonus pool rate (percentage points)
-  bonus: number;        // user's bonus from the pool (percentage points)
-  effective: number;    // baseline + bonus, rounded
-  vaultRate: number;    // reference Morpho rate (%)
+  baseline: number; // baseline percentage (3%)
+  poolRate: number; // available bonus pool rate (percentage points)
+  bonus: number; // user's bonus from the pool (percentage points)
+  effective: number; // baseline + bonus, rounded
+  vaultRate: number; // reference Morpho rate (%)
 }
 
 /// Compute a user's effective APY using the redistribution-pool model.
@@ -57,11 +57,7 @@ export interface PoolApyResult {
 /// - pool = max(0, (vaultRate - spread) - baseline) distributed proportionally to activity score
 /// - bonus per user = pool × (score / meanScore), capped at pool × POOL_CAP_MULTIPLIER
 /// - When market rate < baseline + spread, pool is 0 and everyone falls back to whatever is left.
-export function computePoolApy(
-  score: number,
-  meanScore: number,
-  vaultRate: number,
-): PoolApyResult {
+export function computePoolApy(score: number, meanScore: number, vaultRate: number): PoolApyResult {
   const distributable = Math.max(0, vaultRate - APY.SPREAD);
 
   // Low-rate market: everyone gets what's available, no bonus
@@ -121,12 +117,9 @@ export function computeMultipliers(
   monthAvgPace: number,
   prevMonthAvgPace: number,
 ): MultiplierResult {
-  const regularity =
-    weekSessions >= APY.REGULARITY_MIN_SESSIONS ? APY.REGULARITY_BONUS : 0;
+  const regularity = weekSessions >= APY.REGULARITY_MIN_SESSIONS ? APY.REGULARITY_BONUS : 0;
   const longRun =
-    longRunThresholdKm > 0 && weekLongestRunKm >= longRunThresholdKm
-      ? APY.LONG_RUN_BONUS
-      : 0;
+    longRunThresholdKm > 0 && weekLongestRunKm >= longRunThresholdKm ? APY.LONG_RUN_BONUS : 0;
   const progression =
     monthAvgPace > 0 && prevMonthAvgPace > 0 && monthAvgPace < prevMonthAvgPace
       ? APY.PROGRESSION_BONUS

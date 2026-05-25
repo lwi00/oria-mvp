@@ -70,9 +70,7 @@ async function main() {
         // Hit goal at `rate` probability; either way pick a distance
         const hit = r() < rate;
         const goal = c.goalKmWeek;
-        const distance = hit
-          ? goal + r() * goal * 0.3
-          : r() * goal * 0.9;
+        const distance = hit ? goal + r() * goal * 0.3 : r() * goal * 0.9;
         try {
           await prisma.activity.upsert({
             where: { userId_weekStart: { userId: m.userId, weekStart: w } },
@@ -100,4 +98,7 @@ async function main() {
   await prisma.$disconnect();
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

@@ -29,7 +29,9 @@ async function main() {
       continue;
     }
     await prisma.user.update({ where: { id: u.id }, data: { avatarUrl: null } });
-    console.log(`cleared: ${u.displayName ?? "(no name)"} ← ${url.slice(0, 60)}${url.length > 60 ? "…" : ""}`);
+    console.log(
+      `cleared: ${u.displayName ?? "(no name)"} ← ${url.slice(0, 60)}${url.length > 60 ? "…" : ""}`,
+    );
     cleared += 1;
   }
 
@@ -38,4 +40,7 @@ async function main() {
   await prisma.$disconnect();
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

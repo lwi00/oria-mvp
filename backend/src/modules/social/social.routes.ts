@@ -23,31 +23,19 @@ import {
 export default async function socialRoutes(app: FastifyInstance) {
   app.post("/friends/request", async (request, reply) => {
     const { addresseeId } = friendRequestSchema.parse(request.body);
-    const friendship = await sendFriendRequest(
-      app.prisma,
-      request.userId,
-      addresseeId,
-    );
+    const friendship = await sendFriendRequest(app.prisma, request.userId, addresseeId);
     return reply.status(201).send(friendship);
   });
 
   app.post("/friends/:id/accept", async (request, reply) => {
     const { id } = request.params as { id: string };
-    const friendship = await acceptFriendRequest(
-      app.prisma,
-      request.userId,
-      id,
-    );
+    const friendship = await acceptFriendRequest(app.prisma, request.userId, id);
     return reply.send(friendship);
   });
 
   app.post("/friends/:id/reject", async (request, reply) => {
     const { id } = request.params as { id: string };
-    const friendship = await rejectFriendRequest(
-      app.prisma,
-      request.userId,
-      id,
-    );
+    const friendship = await rejectFriendRequest(app.prisma, request.userId, id);
     return reply.send(friendship);
   });
 
@@ -117,7 +105,10 @@ export default async function socialRoutes(app: FastifyInstance) {
   app.post("/feed/:id/like", async (request, reply) => {
     const { id } = request.params as { id: string };
     const event = await likeFeedEvent(app.prisma, request.userId, id);
-    return reply.send({ likes: event.likes, liked: ((event.likedBy as string[]) ?? []).includes(request.userId) });
+    return reply.send({
+      likes: event.likes,
+      liked: ((event.likedBy as string[]) ?? []).includes(request.userId),
+    });
   });
 
   // POST /api/friends/:userId/poke — poke a friend with a fun motivational message

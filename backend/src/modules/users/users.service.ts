@@ -11,11 +11,7 @@ export async function getMe(prisma: PrismaClient, userId: string) {
   return user;
 }
 
-export async function updateMe(
-  prisma: PrismaClient,
-  userId: string,
-  data: UpdateUserBody,
-) {
+export async function updateMe(prisma: PrismaClient, userId: string, data: UpdateUserBody) {
   // Verify user exists before updating
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw new NotFoundError("User");
@@ -98,14 +94,22 @@ export async function getUserProfile(prisma: PrismaClient, userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
-      id: true, displayName: true, avatarUrl: true, goalType: true, targetKm: true, createdAt: true,
+      id: true,
+      displayName: true,
+      avatarUrl: true,
+      goalType: true,
+      targetKm: true,
+      createdAt: true,
       streak: true,
       activities: { orderBy: { weekStart: "desc" }, take: 12 },
     },
   });
   if (!user) throw new NotFoundError("User");
 
-  const totalKm = user.activities.reduce((sum: number, a: { distanceKm: number }) => sum + a.distanceKm, 0);
+  const totalKm = user.activities.reduce(
+    (sum: number, a: { distanceKm: number }) => sum + a.distanceKm,
+    0,
+  );
   const weeksActive = user.activities.length;
   const goalMetWeeks = user.activities.filter((a: { goalMet: boolean }) => a.goalMet).length;
 

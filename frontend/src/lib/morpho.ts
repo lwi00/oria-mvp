@@ -70,17 +70,23 @@ export const VAULTS: readonly Vault[] = [
 export const DEFAULT_VAULT = VAULTS[0];
 
 const SEL = {
-  balanceOf:        "0x70a08231",
-  allowance:        "0xdd62ed3e",
-  approve:          "0x095ea7b3",
-  deposit:          "0x6e553f65",
-  redeem:           "0xba087652",
-  convertToAssets:  "0x07a2d13a",
+  balanceOf: "0x70a08231",
+  allowance: "0xdd62ed3e",
+  approve: "0x095ea7b3",
+  deposit: "0x6e553f65",
+  redeem: "0xba087652",
+  convertToAssets: "0x07a2d13a",
 };
 
-function padHex(hex: string): string { return hex.padStart(64, "0"); }
-function addr(a: string): string { return padHex(a.toLowerCase().replace(/^0x/, "")); }
-function uint(v: bigint): string { return padHex(v.toString(16)); }
+function padHex(hex: string): string {
+  return hex.padStart(64, "0");
+}
+function addr(a: string): string {
+  return padHex(a.toLowerCase().replace(/^0x/, ""));
+}
+function uint(v: bigint): string {
+  return padHex(v.toString(16));
+}
 
 export function parseUnits(amount: number, decimals: number): bigint {
   const [whole = "0", frac = ""] = String(amount).split(".");
@@ -100,7 +106,9 @@ async function rpcCall(rpcUrl: string, to: string, data: string): Promise<bigint
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      jsonrpc: "2.0", id: 1, method: "eth_call",
+      jsonrpc: "2.0",
+      id: 1,
+      method: "eth_call",
       params: [{ to, data }, "latest"],
     }),
   });
@@ -126,7 +134,11 @@ export async function getVaultAssets(vault: Vault, walletAddr: string): Promise<
 }
 
 export async function getAllowance(vault: Vault, walletAddr: string): Promise<bigint> {
-  return rpcCall(vault.rpcUrl, vault.usdcAddress, SEL.allowance + addr(walletAddr) + addr(vault.address));
+  return rpcCall(
+    vault.rpcUrl,
+    vault.usdcAddress,
+    SEL.allowance + addr(walletAddr) + addr(vault.address),
+  );
 }
 
 async function ensureChain(wallet: ConnectedWallet, chainId: number): Promise<void> {
@@ -148,7 +160,10 @@ async function waitForTx(rpcUrl: string, hash: string): Promise<boolean> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        jsonrpc: "2.0", id: 1, method: "eth_getTransactionReceipt", params: [hash],
+        jsonrpc: "2.0",
+        id: 1,
+        method: "eth_getTransactionReceipt",
+        params: [hash],
       }),
     });
     const json = await res.json();
@@ -158,7 +173,10 @@ async function waitForTx(rpcUrl: string, hash: string): Promise<boolean> {
   return false;
 }
 
-export interface DepositResult { steps: { label: string; hash: string }[]; finalHash: string }
+export interface DepositResult {
+  steps: { label: string; hash: string }[];
+  finalHash: string;
+}
 
 export async function approveAndDeposit(
   vault: Vault,
@@ -207,7 +225,10 @@ export async function redeemFromVault(
   return hash;
 }
 
-export interface VaultLiveData { netApy: number; totalAssets: number }
+export interface VaultLiveData {
+  netApy: number;
+  totalAssets: number;
+}
 
 export async function fetchVaultApys(): Promise<Record<string, number>> {
   const query = `{

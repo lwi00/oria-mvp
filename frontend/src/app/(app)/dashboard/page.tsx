@@ -12,16 +12,29 @@ import { CardSkeleton, ErrorCard } from "@/components/Skeleton";
 import { Celebration } from "@/components/Celebration";
 import { RunWelcome } from "@/components/RunWelcome";
 import {
-  useUser, useStreak, useEarnings,
-  useStravaStatus, useStravaSync,
+  useUser,
+  useStreak,
+  useEarnings,
+  useStravaStatus,
+  useStravaSync,
   useActivities,
 } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
 import { formatMoney, lastNWeeks } from "@/lib/utils";
 
 export default function DashboardPage() {
-  const { data: user, isLoading: userLoading, isError: userError, refetch: refetchUser } = useUser();
-  const { data: streak, isLoading: streakLoading, isError: streakError, refetch: refetchStreak } = useStreak();
+  const {
+    data: user,
+    isLoading: userLoading,
+    isError: userError,
+    refetch: refetchUser,
+  } = useUser();
+  const {
+    data: streak,
+    isLoading: streakLoading,
+    isError: streakError,
+    refetch: refetchStreak,
+  } = useStreak();
   const { data: earnings } = useEarnings();
   const { data: activities } = useActivities(8);
   const { data: stravaStatus } = useStravaStatus();
@@ -76,7 +89,12 @@ export default function DashboardPage() {
         <div className="pt-1 pb-2">
           <h1 className="text-2xl font-bold text-text-primary tracking-tight">Home</h1>
         </div>
-        <ErrorCard onRetry={() => { refetchUser(); refetchStreak(); }} />
+        <ErrorCard
+          onRetry={() => {
+            refetchUser();
+            refetchStreak();
+          }}
+        />
       </div>
     );
   }
@@ -95,7 +113,6 @@ export default function DashboardPage() {
   const earnedFmt = formatMoney(earned, currency);
   const intWithCommas = bal.intPart;
   const decPartRaw = bal.decPart;
-
 
   const vacationUntil = streak?.vacationUntil ? new Date(streak.vacationUntil) : null;
   const vacationActive = !!vacationUntil && vacationUntil > new Date();
@@ -117,7 +134,17 @@ export default function DashboardPage() {
               Streak frozen — {vacationDaysLeft} day{vacationDaysLeft === 1 ? "" : "s"} left
             </p>
           </div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FC4C02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#FC4C02"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="flex-shrink-0"
+          >
             <path d="M9 18l6-6-6-6" />
           </svg>
         </Link>
@@ -143,12 +170,27 @@ export default function DashboardPage() {
         </div>
         <div className="mt-2 flex items-center gap-3 text-[13px]">
           <span className="text-success-500 font-semibold tabular-nums">
-            +{earnedFmt.symbol}{earnedFmt.intPart}.{earnedFmt.decPart}
+            +{earnedFmt.symbol}
+            {earnedFmt.intPart}.{earnedFmt.decPart}
           </span>
           <span className="text-text-muted">total earned</span>
-          <Link href="/apy" className="ml-auto px-2.5 py-1 rounded-full bg-accent-purple/15 border border-accent-purple/25 text-accent-purple-bright text-[11px] font-semibold tabular-nums active:scale-95 transition-transform flex items-center gap-1">
+          <Link
+            href="/apy"
+            className="ml-auto px-2.5 py-1 rounded-full bg-accent-purple/15 border border-accent-purple/25 text-accent-purple-bright text-[11px] font-semibold tabular-nums active:scale-95 transition-transform flex items-center gap-1"
+          >
             {effectiveApy.toFixed(2)}% APY
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+            <svg
+              width="10"
+              height="10"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 18l6-6-6-6" />
+            </svg>
           </Link>
         </div>
       </section>
@@ -177,7 +219,17 @@ export default function DashboardPage() {
             });
           }}
           icon={
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={stravaSync.isPending ? "animate-spin" : ""}>
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={stravaSync.isPending ? "animate-spin" : ""}
+            >
               <path d="M1 4v6h6" />
               <path d="M23 20v-6h-6" />
               <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" />
@@ -189,7 +241,16 @@ export default function DashboardPage() {
           tint="gold"
           href="/wallet"
           icon={
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M12 5v14M5 12h14" />
             </svg>
           }
@@ -199,7 +260,16 @@ export default function DashboardPage() {
           tint="purple"
           onClick={() => setShowReferModal(true)}
           icon={
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
               <circle cx="9" cy="7" r="4" />
               <path d="M19 8v6M22 11h-6" />
@@ -211,7 +281,16 @@ export default function DashboardPage() {
           tint="neutral"
           href="/stats"
           icon={
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M3 3v18h18" />
               <path d="M7 14l4-4 3 3 5-6" />
             </svg>
@@ -253,16 +332,31 @@ export default function DashboardPage() {
                 Earning <span className="font-extrabold">{effectiveApy.toFixed(2)}% APY</span>
               </p>
             </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-text-muted flex-shrink-0"><path d="M9 18l6-6-6-6" /></svg>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-text-muted flex-shrink-0"
+            >
+              <path d="M9 18l6-6-6-6" />
+            </svg>
           </div>
         </Link>
 
         {/* Middle row: this week's progress */}
         <div className="mt-5 pt-4 border-t border-oria relative">
           <div className="flex justify-between items-baseline mb-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">This week</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+              This week
+            </p>
             <p className="text-[13px] font-bold text-text-primary tabular-nums">
-              {currentKm.toFixed(1)}<span className="text-text-secondary font-medium"> / {targetKm} km</span>
+              {currentKm.toFixed(1)}
+              <span className="text-text-secondary font-medium"> / {targetKm} km</span>
             </p>
           </div>
           <div className="h-1.5 rounded-full bg-oria-chip overflow-hidden">
@@ -298,8 +392,18 @@ export default function DashboardPage() {
                 {stravaSync.isPending ? (
                   <span className="inline-block w-3 h-3 border-2 border-accent-purple-bright/30 border-t-accent-purple-bright rounded-full animate-spin" />
                 ) : (
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M1 4v6h6" /><path d="M23 20v-6h-6" />
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M1 4v6h6" />
+                    <path d="M23 20v-6h-6" />
                     <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" />
                   </svg>
                 )}
@@ -320,7 +424,9 @@ export default function DashboardPage() {
           const range = Math.max(0.01, vaultMax - baselineApy);
 
           // 8 most recent ISO weeks, oldest first.
-          const padded = lastNWeeks(activities ?? [], 8).slice().reverse();
+          const padded = lastNWeeks(activities ?? [], 8)
+            .slice()
+            .reverse();
 
           // Derive the streak trajectory *backwards* from the current streak
           // count so the rightmost point always matches what the rest of the
@@ -353,10 +459,11 @@ export default function DashboardPage() {
 
           // SVG geometry
           const W = 100; // viewBox width (%) — responsive via preserveAspectRatio="none" on the line area
-          const H = 80;  // viewBox height
+          const H = 80; // viewBox height
           const padX = 4;
           const padY = 6;
-          const x = (i: number) => padX + ((W - 2 * padX) * (points.length <= 1 ? 0 : i / (points.length - 1)));
+          const x = (i: number) =>
+            padX + (W - 2 * padX) * (points.length <= 1 ? 0 : i / (points.length - 1));
           const y = (apy: number) => {
             const t = (apy - baselineApy) / range; // 0..1+
             const clamped = Math.max(0, Math.min(1, t));
@@ -366,12 +473,17 @@ export default function DashboardPage() {
           // boundary when the next goal-met week ticks the streak up a tier.
           // Render as a staircase (hold then riser), not a diagonal line.
           const stair = points
-            .map((p, i) => (i === 0 ? `${x(i)} ${y(p.apy)}` : `${x(i)} ${y(points[i - 1].apy)} L ${x(i)} ${y(p.apy)}`))
+            .map((p, i) =>
+              i === 0
+                ? `${x(i)} ${y(p.apy)}`
+                : `${x(i)} ${y(points[i - 1].apy)} L ${x(i)} ${y(p.apy)}`,
+            )
             .join(" L ");
           const linePath = points.length > 0 ? `M ${stair}` : "";
-          const areaPath = points.length > 0
-            ? `M ${x(0)} ${H - padY} L ${stair} L ${x(points.length - 1)} ${H - padY} Z`
-            : "";
+          const areaPath =
+            points.length > 0
+              ? `M ${x(0)} ${H - padY} L ${stair} L ${x(points.length - 1)} ${H - padY} Z`
+              : "";
 
           const remainingWeeks = Math.max(0, 16 - streakCount);
           const subtitle =
@@ -384,7 +496,9 @@ export default function DashboardPage() {
           return (
             <div className="mt-5 pt-4 border-t border-oria relative">
               <div className="flex justify-between items-baseline mb-2">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">Streak → APY · last {points.length}w</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+                  Streak → APY · last {points.length}w
+                </p>
                 <Link href="/apy" className="text-[10px] font-semibold text-accent-purple-bright">
                   Details →
                 </Link>
@@ -409,11 +523,35 @@ export default function DashboardPage() {
                     </linearGradient>
                   </defs>
                   {/* grid: baseline + ceiling */}
-                  <line x1={padX} x2={W - padX} y1={y(baselineApy)} y2={y(baselineApy)} stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" strokeDasharray="2 2" />
-                  <line x1={padX} x2={W - padX} y1={y(vaultMax)} y2={y(vaultMax)} stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" strokeDasharray="2 2" />
+                  <line
+                    x1={padX}
+                    x2={W - padX}
+                    y1={y(baselineApy)}
+                    y2={y(baselineApy)}
+                    stroke="rgba(255,255,255,0.06)"
+                    strokeWidth="0.5"
+                    strokeDasharray="2 2"
+                  />
+                  <line
+                    x1={padX}
+                    x2={W - padX}
+                    y1={y(vaultMax)}
+                    y2={y(vaultMax)}
+                    stroke="rgba(255,255,255,0.06)"
+                    strokeWidth="0.5"
+                    strokeDasharray="2 2"
+                  />
                   {/* area + line */}
                   {areaPath && <path d={areaPath} fill="url(#apyGrad)" />}
-                  {linePath && <path d={linePath} stroke="#a78bfa" strokeWidth="1.5" fill="none" vectorEffect="non-scaling-stroke" />}
+                  {linePath && (
+                    <path
+                      d={linePath}
+                      stroke="#a78bfa"
+                      strokeWidth="1.5"
+                      fill="none"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  )}
                   {/* dots */}
                   {points.map((p, i) => (
                     <circle
@@ -433,14 +571,23 @@ export default function DashboardPage() {
               {/* x labels (just first + last to keep it light) */}
               {points.length > 0 && (
                 <div className="flex justify-between text-[9px] text-text-muted tabular-nums mt-1 ml-9">
-                  <span>{new Date(points[0].weekStart).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
+                  <span>
+                    {new Date(points[0].weekStart).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
                   <span>This week</span>
                 </div>
               )}
 
               <div className="flex items-center gap-3 mt-3 text-[10px] text-text-muted">
-                <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-success-500" /> goal met</span>
-                <span className="inline-flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-accent-sport" /> missed</span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success-500" /> goal met
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent-sport" /> missed
+                </span>
               </div>
               <p className="text-[11px] text-text-secondary mt-2 leading-relaxed">{subtitle}</p>
             </div>
@@ -468,9 +615,9 @@ export default function DashboardPage() {
         // Sessions/week: prefer the user's configured plan, fallback to runSchedule, then default.
         const plan = user?.settings?.runPlan;
         const scheduledDays = user?.runSchedule?.length ?? 0;
-        const sessionsPerWeek = plan?.sessionsPerWeek ?? (scheduledDays > 0
-          ? scheduledDays
-          : Math.max(3, Math.min(5, Math.ceil(targetKm / 3))));
+        const sessionsPerWeek =
+          plan?.sessionsPerWeek ??
+          (scheduledDays > 0 ? scheduledDays : Math.max(3, Math.min(5, Math.ceil(targetKm / 3))));
         const longRunKm = plan?.longRunKm ?? 0;
         const progressionPct = user?.settings?.monthlyProgressionPct ?? 10;
         const nextMonthTarget = Math.round(targetKm * (1 + progressionPct / 100) * 10) / 10;
@@ -486,17 +633,31 @@ export default function DashboardPage() {
                 className="block text-left bg-oria-card rounded-xl border border-oria backdrop-blur-[18px] shadow-card hover:bg-oria-card-hover transition-colors cursor-pointer p-4 h-full flex flex-col"
               >
                 <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-accent-purple-bright">Plan</p>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64697A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-accent-purple-bright">
+                    Plan
+                  </p>
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#64697A"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M9 18l6-6-6-6" />
                   </svg>
                 </div>
                 <p className="text-[20px] font-extrabold text-text-primary mt-1 leading-none tabular-nums">
                   <span className="animate-count-pop inline-block">{weekSessions}</span>
-                  <span className="text-[12px] text-text-muted font-semibold">/{sessionsPerWeek}</span>
+                  <span className="text-[12px] text-text-muted font-semibold">
+                    /{sessionsPerWeek}
+                  </span>
                 </p>
                 <p className="text-[11px] text-text-secondary mt-1.5">
-                  {sessionWord}{sessionsPerWeek > 1 ? "s" : ""} this week
+                  {sessionWord}
+                  {sessionsPerWeek > 1 ? "s" : ""} this week
                 </p>
                 <div className="mt-2 flex gap-1">
                   {Array.from({ length: sessionsPerWeek }).map((_, i) => (
@@ -509,7 +670,9 @@ export default function DashboardPage() {
                 </div>
                 <p className="text-[10px] text-text-muted mt-auto pt-2">
                   {plan
-                    ? (longRunKm > 0 ? `1 long ${sessionWord}: ${longRunKm} ${unitLabel}` : "Tap to edit")
+                    ? longRunKm > 0
+                      ? `1 long ${sessionWord}: ${longRunKm} ${unitLabel}`
+                      : "Tap to edit"
                     : "Tap to configure"}
                 </p>
               </button>
@@ -518,13 +681,28 @@ export default function DashboardPage() {
               <Link href="/settings" className="block h-full">
                 <Card className="!p-4 cursor-pointer hover:bg-oria-card-hover transition-colors h-full flex flex-col">
                   <div className="flex items-center justify-between">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-accent-gold">Next month</p>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64697A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-accent-gold">
+                      Next month
+                    </p>
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#64697A"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M9 18l6-6-6-6" />
                     </svg>
                   </div>
                   <p className="text-[20px] font-extrabold text-text-primary mt-1 leading-none tabular-nums">
-                    {nextMonthTarget}<span className="text-[12px] text-text-muted font-semibold"> {unitLabel}/wk</span>
+                    {nextMonthTarget}
+                    <span className="text-[12px] text-text-muted font-semibold">
+                      {" "}
+                      {unitLabel}/wk
+                    </span>
                   </p>
                   <p className="text-[11px] text-text-secondary mt-1.5">
                     {progressionPct === 0 ? "Maintenance" : `+${progressionPct}% overload`}
@@ -544,7 +722,9 @@ export default function DashboardPage() {
         targetKm={targetKm}
         goalType={user?.goalType ?? "running"}
         initial={{
-          sessionsPerWeek: user?.settings?.runPlan?.sessionsPerWeek ?? Math.max(3, Math.min(5, Math.ceil(targetKm / 3))),
+          sessionsPerWeek:
+            user?.settings?.runPlan?.sessionsPerWeek ??
+            Math.max(3, Math.min(5, Math.ceil(targetKm / 3))),
           longRunKm: user?.settings?.runPlan?.longRunKm ?? 0,
         }}
         onSaved={() => refetchUser()}
@@ -578,7 +758,16 @@ export default function DashboardPage() {
             label: "Events",
             description: "Run together with the community",
             icon: (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <rect x="3" y="4" width="18" height="18" rx="2" />
                 <path d="M16 2v4M8 2v4M3 10h18" />
               </svg>
@@ -588,7 +777,16 @@ export default function DashboardPage() {
             label: "Map",
             description: "Discover Oria runners near you",
             icon: (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" />
                 <path d="M8 2v16M16 6v16" />
               </svg>
@@ -607,7 +805,9 @@ export default function DashboardPage() {
               {item.icon}
             </div>
             <p className="text-[13px] font-bold text-text-primary">{item.label}</p>
-            <p className="text-[11px] text-text-muted mt-0.5 leading-snug line-clamp-2">{item.description}</p>
+            <p className="text-[11px] text-text-muted mt-0.5 leading-snug line-clamp-2">
+              {item.description}
+            </p>
           </button>
         ))}
       </section>

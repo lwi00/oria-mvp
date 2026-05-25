@@ -1,9 +1,4 @@
-import {
-  FUJI_CHAIN_ID,
-  TOKEN_ADDRESSES,
-  TOKEN_DECIMALS,
-  VAULT_ADDRESS,
-} from "./constants";
+import { FUJI_CHAIN_ID, TOKEN_ADDRESSES, TOKEN_DECIMALS, VAULT_ADDRESS } from "./constants";
 import type { ConnectedWallet } from "@privy-io/react-auth";
 
 // ERC-20 transfer(address,uint256) selector

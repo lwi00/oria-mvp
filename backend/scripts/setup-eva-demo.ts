@@ -38,7 +38,10 @@ const FRIENDS: FriendSpec[] = [
 async function main() {
   const prisma = new PrismaClient();
 
-  const eva = await prisma.user.findFirst({ where: { displayName: EVA_NAME }, include: { streak: true } });
+  const eva = await prisma.user.findFirst({
+    where: { displayName: EVA_NAME },
+    include: { streak: true },
+  });
   if (!eva) {
     console.error(`Eva account not found (looking for displayName = "${EVA_NAME}")`);
     process.exit(1);
@@ -95,7 +98,10 @@ async function main() {
     // longest may have been higher already; fetch + max to be safe
     const cur = await prisma.streak.findUnique({ where: { userId: friend.id } });
     if (cur && cur.longestCount < cur.currentCount) {
-      await prisma.streak.update({ where: { userId: friend.id }, data: { longestCount: cur.currentCount } });
+      await prisma.streak.update({
+        where: { userId: friend.id },
+        data: { longestCount: cur.currentCount },
+      });
     }
 
     // 2) Friendship: collapse any existing row (either direction) into a single
@@ -119,7 +125,9 @@ async function main() {
       });
     }
 
-    console.log(`  ✓ ${spec.displayName.padEnd(10)} streak=${spec.streakCount}  friendship=accepted`);
+    console.log(
+      `  ✓ ${spec.displayName.padEnd(10)} streak=${spec.streakCount}  friendship=accepted`,
+    );
   }
 
   await prisma.$disconnect();
@@ -127,4 +135,7 @@ async function main() {
   console.log("Done. Run backfill-pool-apy.ts next to refresh activityScore + effective APY.");
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

@@ -16,7 +16,8 @@ async function main() {
     orderBy: { weekStart: "desc" },
   });
 
-  let created = 0, skipped = 0;
+  let created = 0,
+    skipped = 0;
   for (const a of wins) {
     const iso = a.weekStart.toISOString();
     const existing = await prisma.feedEvent.findFirst({
@@ -28,7 +29,10 @@ async function main() {
       },
       select: { id: true },
     });
-    if (existing) { skipped += 1; continue; }
+    if (existing) {
+      skipped += 1;
+      continue;
+    }
     await prisma.feedEvent.create({
       data: {
         userId: a.userId,
@@ -44,4 +48,7 @@ async function main() {
   await prisma.$disconnect();
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

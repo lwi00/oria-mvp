@@ -1,11 +1,18 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { VAULTS, getUsdcBalance, getVaultAssets, getVaultShares, fetchVaultApys, type Vault } from "@/lib/morpho";
+import {
+  VAULTS,
+  getUsdcBalance,
+  getVaultAssets,
+  getVaultShares,
+  fetchVaultApys,
+  type Vault,
+} from "@/lib/morpho";
 
 export interface VaultPosition {
   vault: Vault;
-  assets: number;     // USDC equivalent in the vault
+  assets: number; // USDC equivalent in the vault
   shares: bigint;
   apy: number | null; // net APY in % (null if fetch failed)
 }
@@ -18,14 +25,21 @@ export interface ChainIdle {
 
 export interface MorphoPositionsData {
   positions: VaultPosition[];
-  idle: ChainIdle[];        // USDC sitting on the wallet, per chain
-  invested: number;         // sum of all vault positions in USDC
-  idleTotal: number;        // sum of idle USDC across chains
-  total: number;            // invested + idle
+  idle: ChainIdle[]; // USDC sitting on the wallet, per chain
+  invested: number; // sum of all vault positions in USDC
+  idleTotal: number; // sum of idle USDC across chains
+  total: number; // invested + idle
   apys: Record<string, number>;
 }
 
-const EMPTY: MorphoPositionsData = { positions: [], idle: [], invested: 0, idleTotal: 0, total: 0, apys: {} };
+const EMPTY: MorphoPositionsData = {
+  positions: [],
+  idle: [],
+  invested: 0,
+  idleTotal: 0,
+  total: 0,
+  apys: {},
+};
 
 async function fetchAll(walletAddr: string): Promise<MorphoPositionsData> {
   // Fetch APYs once for all vaults

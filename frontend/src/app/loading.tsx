@@ -21,18 +21,18 @@ const FACTS = [
 ];
 
 const STAR_CONFIG = [
-  { top: 8,  left: 12, dur: 1.4, delay: 0.0, w: 90  },
-  { top: 22, left: 65, dur: 1.1, delay: 1.7, w: 70  },
-  { top: 5,  left: 40, dur: 1.6, delay: 0.8, w: 110 },
-  { top: 35, left: 80, dur: 0.9, delay: 2.5, w: 60  },
-  { top: 50, left: 5,  dur: 1.3, delay: 1.2, w: 80  },
-  { top: 15, left: 90, dur: 1.0, delay: 3.1, w: 65  },
-  { top: 70, left: 30, dur: 1.5, delay: 0.4, w: 95  },
-  { top: 60, left: 55, dur: 1.2, delay: 2.0, w: 75  },
+  { top: 8, left: 12, dur: 1.4, delay: 0.0, w: 90 },
+  { top: 22, left: 65, dur: 1.1, delay: 1.7, w: 70 },
+  { top: 5, left: 40, dur: 1.6, delay: 0.8, w: 110 },
+  { top: 35, left: 80, dur: 0.9, delay: 2.5, w: 60 },
+  { top: 50, left: 5, dur: 1.3, delay: 1.2, w: 80 },
+  { top: 15, left: 90, dur: 1.0, delay: 3.1, w: 65 },
+  { top: 70, left: 30, dur: 1.5, delay: 0.4, w: 95 },
+  { top: 60, left: 55, dur: 1.2, delay: 2.0, w: 75 },
   { top: 80, left: 75, dur: 1.7, delay: 1.0, w: 105 },
-  { top: 42, left: 18, dur: 1.0, delay: 3.5, w: 55  },
-  { top: 90, left: 45, dur: 1.4, delay: 0.6, w: 85  },
-  { top: 28, left: 95, dur: 1.1, delay: 2.8, w: 72  },
+  { top: 42, left: 18, dur: 1.0, delay: 3.5, w: 55 },
+  { top: 90, left: 45, dur: 1.4, delay: 0.6, w: 85 },
+  { top: 28, left: 95, dur: 1.1, delay: 2.8, w: 72 },
 ];
 
 export default function Loading() {
@@ -48,14 +48,21 @@ export default function Loading() {
   }, []);
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden"
-         style={{ background: "linear-gradient(160deg, #0d0818 0%, #140d2e 50%, #0a0620 100%)" }}>
-
+    <div
+      className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden"
+      style={{ background: "linear-gradient(160deg, #0d0818 0%, #140d2e 50%, #0a0620 100%)" }}
+    >
       {/* Ambient glow blobs */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full pointer-events-none"
-           style={{ background: "radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%)" }} />
-      <div className="absolute bottom-1/4 left-1/4 w-[250px] h-[250px] rounded-full pointer-events-none"
-           style={{ background: "radial-gradient(circle, rgba(167,139,250,0.08) 0%, transparent 70%)" }} />
+      <div
+        className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%)" }}
+      />
+      <div
+        className="absolute bottom-1/4 left-1/4 w-[250px] h-[250px] rounded-full pointer-events-none"
+        style={{
+          background: "radial-gradient(circle, rgba(167,139,250,0.08) 0%, transparent 70%)",
+        }}
+      />
 
       {/* Shooting stars */}
       {STAR_CONFIG.map((s, i) => (
@@ -75,10 +82,18 @@ export default function Loading() {
       {/* Logo */}
       <div className="relative z-10 flex flex-col items-center gap-10">
         <div className="flex items-center gap-3">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center oria-logo-glow"
-               style={{ background: "linear-gradient(135deg, #7c3aed, #a78bfa)" }}>
+          <div
+            className="w-14 h-14 rounded-2xl flex items-center justify-center oria-logo-glow"
+            style={{ background: "linear-gradient(135deg, #7c3aed, #a78bfa)" }}
+          >
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z" fill="white" stroke="white" strokeWidth="1" strokeLinejoin="round"/>
+              <path
+                d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z"
+                fill="white"
+                stroke="white"
+                strokeWidth="1"
+                strokeLinejoin="round"
+              />
             </svg>
           </div>
           <span className="text-white text-4xl font-bold tracking-tight select-none">Oria</span>

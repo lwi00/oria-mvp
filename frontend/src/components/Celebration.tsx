@@ -69,7 +69,13 @@ export function Celebration({ show, onDone, streakCount, distanceKm, goalMet }: 
   return (
     <div
       className={`fixed inset-0 z-[300] flex items-center justify-center transition-opacity duration-400 ${phase === "done" ? "opacity-0" : "opacity-100"}`}
-      onClick={() => { setPhase("done"); setTimeout(() => { setVisible(false); onDone(); }, 300); }}
+      onClick={() => {
+        setPhase("done");
+        setTimeout(() => {
+          setVisible(false);
+          onDone();
+        }, 300);
+      }}
     >
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
@@ -80,51 +86,45 @@ export function Celebration({ show, onDone, streakCount, distanceKm, goalMet }: 
           <div
             key={p.id}
             className="absolute rounded-sm"
-            style={{
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              width: p.size,
-              height: p.size * 0.6,
-              backgroundColor: p.color,
-              transform: `rotate(${p.rotation}deg)`,
-              animation: `confetti-fall 1.8s ease-out forwards`,
-              animationDelay: `${Math.random() * 0.2}s`,
-              // CSS custom properties for unique trajectories
-              "--tx": `${p.speedX * 20}px`,
-              "--ty": `${p.speedY * 40}px`,
-              "--rot": `${p.rotation + Math.random() * 720}deg`,
-            } as React.CSSProperties}
+            style={
+              {
+                left: `${p.x}%`,
+                top: `${p.y}%`,
+                width: p.size,
+                height: p.size * 0.6,
+                backgroundColor: p.color,
+                transform: `rotate(${p.rotation}deg)`,
+                animation: `confetti-fall 1.8s ease-out forwards`,
+                animationDelay: `${Math.random() * 0.2}s`,
+                // CSS custom properties for unique trajectories
+                "--tx": `${p.speedX * 20}px`,
+                "--ty": `${p.speedY * 40}px`,
+                "--rot": `${p.rotation + Math.random() * 720}deg`,
+              } as React.CSSProperties
+            }
           />
         ))}
       </div>
 
       {/* Center content */}
-      <div className={`relative z-10 flex flex-col items-center gap-4 transition-all duration-500 ${phase === "stats" ? "scale-100 opacity-100" : phase === "burst" ? "scale-50 opacity-0" : "scale-110 opacity-0"}`}>
+      <div
+        className={`relative z-10 flex flex-col items-center gap-4 transition-all duration-500 ${phase === "stats" ? "scale-100 opacity-100" : phase === "burst" ? "scale-50 opacity-0" : "scale-110 opacity-0"}`}
+      >
         {/* Fire emoji burst */}
-        <div className="text-[72px] animate-[bounceIn_0.5s_ease-out]">
-          {goalMet ? "🎉" : "🏃‍♂️"}
-        </div>
+        <div className="text-[72px] animate-[bounceIn_0.5s_ease-out]">{goalMet ? "🎉" : "🏃‍♂️"}</div>
 
         {/* Main message */}
         <div className="text-center">
           {goalMet ? (
             <>
-              <p className="text-[28px] font-extrabold text-white tracking-tight">
-                Goal crushed!
-              </p>
-              <p className="text-[15px] text-white/70 mt-1">
-                Weekly target complete
-              </p>
+              <p className="text-[28px] font-extrabold text-white tracking-tight">Goal crushed!</p>
+              <p className="text-[15px] text-white/70 mt-1">Weekly target complete</p>
             </>
           ) : (
             <>
-              <p className="text-[28px] font-extrabold text-white tracking-tight">
-                Nice run!
-              </p>
+              <p className="text-[28px] font-extrabold text-white tracking-tight">Nice run!</p>
               {distanceKm && (
-                <p className="text-[15px] text-white/70 mt-1">
-                  {distanceKm.toFixed(1)} km logged
-                </p>
+                <p className="text-[15px] text-white/70 mt-1">{distanceKm.toFixed(1)} km logged</p>
               )}
             </>
           )}
@@ -143,9 +143,7 @@ export function Celebration({ show, onDone, streakCount, distanceKm, goalMet }: 
         )}
 
         {/* Tap to dismiss hint */}
-        <p className="text-[12px] text-white/40 mt-4 animate-pulse">
-          Tap to dismiss
-        </p>
+        <p className="text-[12px] text-white/40 mt-4 animate-pulse">Tap to dismiss</p>
       </div>
     </div>
   );

@@ -46,7 +46,11 @@ export function Avatar({ initials, size = 36, highlight = false, src, colorSeed 
         fontSize: size * 0.38,
         color: highlight ? "#ffffff" : tint ? tint.text : "#E9D5FF",
         letterSpacing: "-0.02em",
-        border: highlight ? "none" : tint ? `1px solid ${tint.soft}` : "1px solid rgba(255,255,255,0.08)",
+        border: highlight
+          ? "none"
+          : tint
+            ? `1px solid ${tint.soft}`
+            : "1px solid rgba(255,255,255,0.08)",
         boxShadow: highlight ? "0 4px 16px rgba(139,92,246,0.4)" : "none",
       }}
     >
