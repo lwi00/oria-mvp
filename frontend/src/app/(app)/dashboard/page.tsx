@@ -364,11 +364,15 @@ export default function DashboardPage() {
             const clamped = Math.max(0, Math.min(1, t));
             return H - padY - clamped * (H - 2 * padY);
           };
-          const linePath = points.length > 0
-            ? "M " + points.map((p, i) => `${x(i)} ${y(p.apy)}`).join(" L ")
-            : "";
+          // Step chart: APY holds flat across a week, then jumps at the week
+          // boundary when the next goal-met week ticks the streak up a tier.
+          // Render as a staircase (hold then riser), not a diagonal line.
+          const stair = points
+            .map((p, i) => (i === 0 ? `${x(i)} ${y(p.apy)}` : `${x(i)} ${y(points[i - 1].apy)} L ${x(i)} ${y(p.apy)}`))
+            .join(" L ");
+          const linePath = points.length > 0 ? `M ${stair}` : "";
           const areaPath = points.length > 0
-            ? `M ${x(0)} ${H - padY} L ${points.map((p, i) => `${x(i)} ${y(p.apy)}`).join(" L ")} L ${x(points.length - 1)} ${H - padY} Z`
+            ? `M ${x(0)} ${H - padY} L ${stair} L ${x(points.length - 1)} ${H - padY} Z`
             : "";
 
           const remainingWeeks = Math.max(0, 16 - streakCount);
