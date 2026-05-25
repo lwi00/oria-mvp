@@ -8,6 +8,7 @@ import { ReferFriendsModal } from "@/components/ReferFriendsModal";
 import { Avatar } from "@/components/Avatar";
 import { QuickAction } from "@/components/QuickAction";
 import { DisciplinePicker } from "@/components/DisciplinePicker";
+import { LearnBottomSheet } from "@/components/LearnBottomSheet";
 import { CardSkeleton, ErrorCard } from "@/components/Skeleton";
 import { Celebration } from "@/components/Celebration";
 import { RunWelcome } from "@/components/RunWelcome";
@@ -35,6 +36,7 @@ export default function DashboardPage() {
   const [showRunWelcome, setShowRunWelcome] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [showReferModal, setShowReferModal] = useState(false);
+  const [showLearnSheet, setShowLearnSheet] = useState(false);
   const welcomeChecked = useRef(false);
   const autoSynced = useRef(false);
 
@@ -148,12 +150,29 @@ export default function DashboardPage() {
             +{earnedFmt.symbol}{earnedFmt.intPart}.{earnedFmt.decPart}
           </span>
           <span className="text-text-muted">total earned</span>
-          <Link href="/apy" className="ml-auto px-2.5 py-1 rounded-full bg-accent-purple/15 border border-accent-purple/25 text-accent-purple-bright text-[11px] font-semibold tabular-nums active:scale-95 transition-transform flex items-center gap-1">
-            {effectiveApy.toFixed(2)}% APY
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-          </Link>
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={() => setShowLearnSheet(true)}
+              className="text-[11px] font-semibold text-text-muted hover:text-accent-purple-bright underline underline-offset-2 decoration-text-muted/40 hover:decoration-accent-purple-bright transition-colors"
+              aria-label="Comprendre comment l'APY fonctionne"
+            >
+              Comment ça marche ?
+            </button>
+            <Link href="/apy" className="px-2.5 py-1 rounded-full bg-accent-purple/15 border border-accent-purple/25 text-accent-purple-bright text-[11px] font-semibold tabular-nums active:scale-95 transition-transform flex items-center gap-1">
+              {effectiveApy.toFixed(2)}% APY
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+            </Link>
+          </div>
         </div>
       </section>
+
+      <LearnBottomSheet
+        open={showLearnSheet}
+        onClose={() => setShowLearnSheet(false)}
+        streakCount={streakCount}
+        effectiveApy={effectiveApy}
+        baselineApy={streak?.apyBreakdown?.baseline ?? 3}
+      />
 
       {/* Quick actions */}
       <section className="grid grid-cols-4 gap-2 py-2">

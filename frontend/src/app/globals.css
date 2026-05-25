@@ -132,6 +132,18 @@ textarea:-webkit-autofill {
 .docs-prose tr:last-child td { border-bottom: none; }
 .docs-prose p { color: rgba(245, 245, 247, 0.85); }
 
+/* Typography for the in-app "Comprendre Oria" pages — warm, scannable. */
+.learn-prose { color: rgba(245, 245, 247, 0.85); line-height: 1.65; font-size: 14.5px; }
+.learn-prose > * + * { margin-top: 1em; }
+.learn-prose h2 { color: #ffffff; font-size: 16px; font-weight: 800; margin-top: 1.8em; margin-bottom: 0.4em; letter-spacing: -0.01em; }
+.learn-prose h3 { color: #ffffff; font-size: 14px; font-weight: 700; margin-top: 1.4em; margin-bottom: 0.3em; }
+.learn-prose strong { color: #ffffff; font-weight: 700; }
+.learn-prose p { color: rgba(245, 245, 247, 0.85); }
+.learn-prose ul, .learn-prose ol { padding-left: 1.4em; }
+.learn-prose ul { list-style: disc; }
+.learn-prose li::marker { color: rgba(196, 181, 253, 0.45); }
+.learn-prose li + li { margin-top: 0.3em; }
+
 /* Eliminate 300ms tap delay on all interactive elements */
 button,
 a,

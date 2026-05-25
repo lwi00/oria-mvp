@@ -369,6 +369,36 @@ export default function ProfilePage() {
         </div>
       </Card>
 
+      {/* Comprendre Oria — educational entry points, between Connected Apps
+          and Settings. Sized as a single card with 5 child rows. */}
+      <Card className="!p-3">
+        <div className="px-2 pt-1 pb-2">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-purple-bright">Comprendre Oria</p>
+          <p className="text-[11px] text-text-muted mt-0.5">Honnête, court, sans jargon.</p>
+        </div>
+        {[
+          { slug: "how-it-works", title: "Comment ça marche ?", sub: "Le tour complet en 3 minutes" },
+          { slug: "yield", title: "D'où vient le rendement ?", sub: "Pool, baseline, vault Morpho" },
+          { slug: "crypto", title: "C'est de la crypto ?", sub: "Oui — et pourquoi c'est OK" },
+          { slug: "security", title: "FAQ sécurité", sub: "Les vraies questions, dans l'ordre" },
+          { slug: "glossary", title: "Glossaire", sub: "Tous les mots qu'on utilise" },
+        ].map((entry) => (
+          <Link
+            key={entry.slug}
+            href={`/profile/learn/${entry.slug}`}
+            className="flex items-center justify-between gap-3 px-3 py-3 rounded-xl hover:bg-oria-card-hover transition-colors cursor-pointer"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="text-[13.5px] font-semibold text-text-primary">{entry.title}</p>
+              <p className="text-[11px] text-text-muted mt-0.5 leading-snug truncate">{entry.sub}</p>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64697A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </Link>
+        ))}
+      </Card>
+
       {/* Settings link */}
       <Link
         href="/settings"
