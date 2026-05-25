@@ -7,6 +7,7 @@ import { useUser, useAppleHealthStatus, useConnectAppleHealth, useStravaStatus, 
 import { useToast } from "@/components/Toast";
 import { apiFetch } from "@/lib/api";
 import { usePrivy } from "@privy-io/react-auth";
+import { RunningIcon, BikeIcon, SleepIcon, WalkIcon } from "@/components/DisciplinePicker";
 import Link from "next/link";
 
 export default function ProfilePage() {
@@ -92,10 +93,12 @@ export default function ProfilePage() {
     }
   };
 
-  const activities = [
-    { id: "running", label: "Running" },
-    { id: "cycling", label: "Cycling" },
-    { id: "steps", label: "Steps" },
+  // Mirror the Home discipline picker: Running is live, the rest ship "Soon".
+  const disciplines = [
+    { id: "running", label: "Running", icon: <RunningIcon size={20} />, live: true },
+    { id: "cycling", label: "Cycling", icon: <BikeIcon size={20} />, live: false },
+    { id: "sleep", label: "Sleep", icon: <SleepIcon size={20} />, live: false },
+    { id: "walking", label: "Walking", icon: <WalkIcon size={20} />, live: false },
   ];
 
   return (
@@ -203,20 +206,50 @@ export default function ProfilePage() {
         <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-3 block">
           Activity type
         </label>
-        <div className="flex gap-2 mb-5">
-          {activities.map((a) => (
-            <button
-              key={a.id}
-              onClick={() => setGoalType(a.id)}
-              className={`flex-1 py-2.5 rounded-xl text-[13px] font-semibold cursor-pointer transition-colors border ${
-                goalType === a.id
-                  ? "gradient-brand text-white border-transparent shadow-button"
-                  : "bg-oria-chip text-text-secondary border-oria"
-              }`}
-            >
-              {a.label}
-            </button>
-          ))}
+        <div className="grid grid-cols-2 gap-2.5 mb-5">
+          {disciplines.map((d) => {
+            const isActive = goalType === d.id;
+            const content = (
+              <>
+                <span className={isActive ? "text-white" : "text-text-secondary"}>{d.icon}</span>
+                <span className="text-[13px] font-semibold">{d.label}</span>
+                <span
+                  className={`absolute top-2 right-2 text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${
+                    d.live
+                      ? "bg-success-500/15 border-success-500/30 text-success-500"
+                      : "bg-accent-purple/20 border-accent-purple/30 text-accent-purple-bright"
+                  }`}
+                >
+                  {d.live ? "Live" : "Soon"}
+                </span>
+              </>
+            );
+            if (!d.live) {
+              return (
+                <button
+                  key={d.id}
+                  onClick={() => toast(`${d.label} — Coming soon`)}
+                  aria-disabled
+                  className="relative flex items-center gap-2.5 py-3 px-3 rounded-xl border border-oria bg-oria-chip text-text-secondary opacity-60 cursor-pointer"
+                >
+                  {content}
+                </button>
+              );
+            }
+            return (
+              <button
+                key={d.id}
+                onClick={() => setGoalType(d.id)}
+                className={`relative flex items-center gap-2.5 py-3 px-3 rounded-xl border cursor-pointer transition-colors ${
+                  isActive
+                    ? "gradient-brand text-white border-transparent shadow-button"
+                    : "bg-oria-chip text-text-secondary border-oria"
+                }`}
+              >
+                {content}
+              </button>
+            );
+          })}
         </div>
 
         <label className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-2 block">

@@ -177,7 +177,7 @@ function DisciplineTile({
 }
 
 /* ── Icons ── */
-function RunningIcon({ size = 14 }: { size?: number }) {
+export function RunningIcon({ size = 14 }: { size?: number }) {
   // Material Symbols "directions_run" — a clearer running silhouette
   // (head + tilted torso + bent legs in motion) than the previous outline,
   // which looked more like a generic abstract shape.
@@ -187,7 +187,7 @@ function RunningIcon({ size = 14 }: { size?: number }) {
     </svg>
   );
 }
-function BikeIcon({ size = 16 }: { size?: number }) {
+export function BikeIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="18.5" cy="17.5" r="3.5" />
@@ -197,14 +197,14 @@ function BikeIcon({ size = 16 }: { size?: number }) {
     </svg>
   );
 }
-function SleepIcon({ size = 16 }: { size?: number }) {
+export function SleepIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
     </svg>
   );
 }
-function WalkIcon({ size = 16 }: { size?: number }) {
+export function WalkIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="13" cy="4" r="2" />
