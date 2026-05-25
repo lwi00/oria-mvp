@@ -5,25 +5,23 @@ import Link from "next/link";
 import { Card } from "@/components/Card";
 import { PlanModal } from "@/components/PlanModal";
 import { ReferFriendsModal } from "@/components/ReferFriendsModal";
-import { Avatar } from "@/components/Avatar";
 import { QuickAction } from "@/components/QuickAction";
 import { DisciplinePicker } from "@/components/DisciplinePicker";
+import { ActivityFeed } from "@/components/ActivityFeed";
 import { CardSkeleton, ErrorCard } from "@/components/Skeleton";
 import { Celebration } from "@/components/Celebration";
 import { RunWelcome } from "@/components/RunWelcome";
 import {
-  useUser, useStreak, useFeed, useEarnings,
+  useUser, useStreak, useEarnings,
   useStravaStatus, useStravaSync,
-  useActivities, useLikeFeedEvent,
+  useActivities,
 } from "@/lib/hooks";
 import { useToast } from "@/components/Toast";
-import { timeAgo, getInitials, formatFeedEvent, formatMoney, lastNWeeks } from "@/lib/utils";
+import { formatMoney, lastNWeeks } from "@/lib/utils";
 
 export default function DashboardPage() {
   const { data: user, isLoading: userLoading, isError: userError, refetch: refetchUser } = useUser();
   const { data: streak, isLoading: streakLoading, isError: streakError, refetch: refetchStreak } = useStreak();
-  const { data: feed } = useFeed(15);
-  const likeFeed = useLikeFeedEvent();
   const { data: earnings } = useEarnings();
   const { data: activities } = useActivities(8);
   const { data: stravaStatus } = useStravaStatus();
@@ -569,122 +567,8 @@ export default function DashboardPage() {
         goalMet={currentKm + syncedKm >= targetKm}
       />
 
-      {/* Activity feed — friends' recent events + reactions (moved from /social) */}
-      {(() => {
-        const events = (feed ?? []).slice(0, 10);
-        const ACCENT: Record<string, { bg: string; ring: string }> = {
-          streak_milestone: { bg: "bg-accent-gold/15", ring: "ring-accent-gold/30" },
-          goal_met: { bg: "bg-success-500/15", ring: "ring-success-500/30" },
-          challenge_completed: { bg: "bg-accent-purple/15", ring: "ring-accent-purple/30" },
-          challenge_joined: { bg: "bg-accent-purple/10", ring: "" },
-          deposit: { bg: "bg-accent-gold/10", ring: "" },
-          streak_lost: { bg: "bg-error-500/10", ring: "" },
-        };
-        return (
-          <Card className="!p-5">
-            <div className="flex justify-between items-center mb-3">
-              <div>
-                <p className="text-sm font-bold text-text-primary tracking-tight">Activity feed</p>
-                <p className="text-[11px] text-text-muted mt-0.5">React to keep the energy alive</p>
-              </div>
-              <Link href="/social" className="text-[12px] text-accent-purple-bright font-semibold hover:text-accent-purple">
-                Friends →
-              </Link>
-            </div>
-            {events.length > 0 ? (
-              <div className="flex flex-col gap-2.5">
-                {events.map((f) => {
-                  const { text, emoji } = formatFeedEvent(f.eventType, f.payload as Record<string, unknown>);
-                  const liked = !!user?.id && f.likedBy.includes(user.id);
-                  const isMine = user?.id === f.userId;
-                  const accent = ACCENT[f.eventType] ?? { bg: "bg-oria-section", ring: "" };
-                  const streakCount = f.user.streakCount ?? 0;
-                  const isHotStreak = streakCount >= 5;
-                  return (
-                    <div
-                      key={f.id}
-                      className={`flex items-start gap-3 p-3 rounded-2xl ${accent.bg} ${accent.ring ? `ring-1 ${accent.ring}` : ""} border border-oria`}
-                    >
-                      <div className="relative shrink-0">
-                        <Avatar initials={getInitials(f.user.displayName)} size={40} src={f.user.avatarUrl} />
-                        {streakCount > 0 && (
-                          <div
-                            className={`absolute -bottom-1 -right-1 min-w-[22px] h-[22px] px-1.5 rounded-full flex items-center justify-center gap-0.5 border-2 border-[#07070B] shadow-button ${
-                              isHotStreak
-                                ? "bg-gradient-to-br from-accent-sport to-accent-gold"
-                                : "bg-gradient-to-br from-accent-purple to-accent-purple-bright"
-                            }`}
-                            title={`${streakCount}-week streak`}
-                          >
-                            <span className="text-[10px]" aria-hidden>{isHotStreak ? "🔥" : "✦"}</span>
-                            <span className="text-[10px] font-extrabold text-white tabular-nums leading-none">{streakCount}</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] text-text-primary leading-snug">
-                          {isMine ? (
-                            <span className="font-semibold">You</span>
-                          ) : (
-                            <Link
-                              href={`/friend/${f.userId}`}
-                              className="font-semibold hover:text-accent-purple-bright transition-colors"
-                            >
-                              {f.user.displayName ?? "User"}
-                            </Link>
-                          )}{" "}
-                          <span className="text-text-secondary">{text}</span>
-                          <span className="ml-1">{emoji}</span>
-                        </p>
-                        <p className="text-[11px] text-text-muted mt-0.5 flex items-center gap-2">
-                          <span>{timeAgo(f.createdAt)}</span>
-                          {streakCount > 0 && (
-                            <span className={`tabular-nums font-semibold ${isHotStreak ? "text-accent-sport" : "text-accent-purple-bright"}`}>
-                              · {streakCount}w streak
-                            </span>
-                          )}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => {
-                          if (isMine) return;
-                          likeFeed.mutate(f.id);
-                        }}
-                        disabled={isMine || likeFeed.isPending}
-                        className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-[11px] font-semibold tabular-nums shrink-0 transition-colors cursor-pointer disabled:cursor-default ${
-                          liked
-                            ? "bg-accent-sport/15 border-accent-sport/30 text-accent-sport"
-                            : "bg-oria-chip border-oria text-text-secondary hover:text-text-primary hover:bg-oria-elevated"
-                        } ${isMine ? "opacity-60" : ""}`}
-                        aria-label={liked ? "Unlike" : "Cheer"}
-                      >
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill={liked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-                        </svg>
-                        {f.likes > 0 && <span>{f.likes}</span>}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-6 px-4">
-                <div className="w-12 h-12 rounded-full bg-oria-chip border border-oria flex items-center justify-center mb-2">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA0AC" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M22 11l-3 3-3-3M19 14V4" />
-                  </svg>
-                </div>
-                <p className="text-[13px] text-text-secondary text-center">Nothing in the feed yet.</p>
-                <Link href="/social" className="text-[11px] text-accent-purple-bright font-semibold mt-1">
-                  Invite friends →
-                </Link>
-              </div>
-            )}
-          </Card>
-        );
-      })()}
+      {/* Activity feed — two-tier card system (moved from /social) */}
+      <ActivityFeed />
 
       {/* Coming soon — explore. Sits at the bottom of Home so the focal
           area stays on streak/yield/feed; events + map are aspirational. */}

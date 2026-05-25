@@ -31,6 +31,21 @@ export function timeAgo(dateStr: string): string {
   return `${Math.floor(days / 7)}w ago`;
 }
 
+/// Deterministic per-user color derived from a stable seed (user id or name),
+/// so the same person always shows the same hue across the feed.
+export function userColor(seed: string): { from: string; to: string; text: string; soft: string; solid: string } {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
+  const hue = Math.abs(h) % 360;
+  return {
+    from: `hsl(${hue} 60% 24%)`,
+    to: `hsl(${hue} 55% 15%)`,
+    text: `hsl(${hue} 85% 80%)`,
+    soft: `hsl(${hue} 70% 55% / 0.16)`,
+    solid: `hsl(${hue} 70% 60%)`,
+  };
+}
+
 export function getInitials(name: string | null): string {
   if (!name) return "??";
   return name

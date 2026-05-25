@@ -1,13 +1,18 @@
 "use client";
 
+import { userColor } from "@/lib/utils";
+
 interface AvatarProps {
   initials: string;
   size?: number;
   highlight?: boolean;
   src?: string | null;
+  /// When set (and no src / not highlighted), tints the avatar with a stable
+  /// per-user color so the same person reads the same across the feed.
+  colorSeed?: string;
 }
 
-export function Avatar({ initials, size = 36, highlight = false, src }: AvatarProps) {
+export function Avatar({ initials, size = 36, highlight = false, src, colorSeed }: AvatarProps) {
   if (src) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
@@ -26,6 +31,7 @@ export function Avatar({ initials, size = 36, highlight = false, src }: AvatarPr
   }
 
   const noName = !initials || initials === "??";
+  const tint = colorSeed && !highlight ? userColor(colorSeed) : null;
   return (
     <div
       className="flex-shrink-0 flex items-center justify-center rounded-full font-bold select-none"
@@ -34,11 +40,13 @@ export function Avatar({ initials, size = 36, highlight = false, src }: AvatarPr
         height: size,
         background: highlight
           ? "linear-gradient(135deg, #A78BFA, #6D28D9)"
-          : "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04))",
+          : tint
+            ? `linear-gradient(135deg, ${tint.from}, ${tint.to})`
+            : "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04))",
         fontSize: size * 0.38,
-        color: highlight ? "#ffffff" : "#E9D5FF",
+        color: highlight ? "#ffffff" : tint ? tint.text : "#E9D5FF",
         letterSpacing: "-0.02em",
-        border: highlight ? "none" : "1px solid rgba(255,255,255,0.08)",
+        border: highlight ? "none" : tint ? `1px solid ${tint.soft}` : "1px solid rgba(255,255,255,0.08)",
         boxShadow: highlight ? "0 4px 16px rgba(139,92,246,0.4)" : "none",
       }}
     >
