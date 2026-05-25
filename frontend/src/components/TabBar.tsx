@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import { useI18n } from "@/lib/i18n";
 
 function HomeIcon({ active }: { active: boolean }) {
   return (
@@ -44,15 +45,16 @@ function WalletIcon({ active }: { active: boolean }) {
 }
 
 const tabs = [
-  { id: "dashboard", path: "/dashboard", label: "Home", Icon: HomeIcon },
-  { id: "social", path: "/social", label: "Friends", Icon: SocialIcon },
-  { id: "challenges", path: "/challenges", label: "Challenges", Icon: TrophyIcon },
-  { id: "wallet", path: "/wallet", label: "Wallet", Icon: WalletIcon },
+  { id: "dashboard", path: "/dashboard", labelKey: "nav.home", Icon: HomeIcon },
+  { id: "social", path: "/social", labelKey: "nav.friends", Icon: SocialIcon },
+  { id: "challenges", path: "/challenges", labelKey: "nav.challenges", Icon: TrophyIcon },
+  { id: "wallet", path: "/wallet", labelKey: "nav.wallet", Icon: WalletIcon },
 ];
 
 export function TabBar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { t } = useI18n();
 
   return (
     <div className="sticky bottom-0 z-50 pb-safe pt-2 px-3 bg-gradient-to-t from-oria-bg via-oria-bg/90 to-transparent">
@@ -62,11 +64,12 @@ export function TabBar() {
       >
         {tabs.map((tab) => {
           const active = pathname === tab.path;
+          const label = t(tab.labelKey);
           return (
             <button
               key={tab.id}
               onClick={() => router.push(tab.path)}
-              aria-label={tab.label}
+              aria-label={label}
               aria-current={active ? "page" : undefined}
               className={`relative flex flex-col items-center gap-0.5 bg-transparent border-none cursor-pointer px-4 py-2 min-w-[48px] rounded-full transition-all ${
                 active ? "text-accent-purple-bright" : "text-text-muted hover:text-text-secondary"
@@ -77,7 +80,7 @@ export function TabBar() {
               )}
               <tab.Icon active={active} />
               <span className={`text-[10px] leading-none ${active ? "font-semibold" : "font-normal"}`}>
-                {tab.label}
+                {label}
               </span>
             </button>
           );

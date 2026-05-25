@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, useEffect, createContext, useContext } from "react";
 import { ToastProvider } from "@/components/Toast";
+import { LanguageProvider } from "@/lib/i18n";
 import { PrivyProvider, usePrivy } from "@privy-io/react-auth";
 import { setAuthTokenGetter } from "@/lib/api";
 
@@ -97,7 +98,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   const inner = (
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>{children}</ToastProvider>
+      <LanguageProvider>
+        <ToastProvider>{children}</ToastProvider>
+      </LanguageProvider>
     </QueryClientProvider>
   );
 
@@ -105,7 +108,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
         <AuthContext.Provider value={{ ready: true, authenticated: true, authVerified: true }}>
-          <ToastProvider>{children}</ToastProvider>
+          <LanguageProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </LanguageProvider>
         </AuthContext.Provider>
       </QueryClientProvider>
     );

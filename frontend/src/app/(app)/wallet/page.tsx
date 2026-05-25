@@ -10,6 +10,7 @@ import { ReceiveSheet } from "@/components/ReceiveSheet";
 import { InvestModal } from "@/components/InvestModal";
 import { WithdrawModal } from "@/components/WithdrawModal";
 import { useToast } from "@/components/Toast";
+import { useI18n } from "@/lib/i18n";
 import { timeAgo, formatMoney } from "@/lib/utils";
 
 interface Deposit {
@@ -46,6 +47,7 @@ export default function WalletPage() {
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+  const { t } = useI18n();
 
   const grouped = useMemo(() => groupByDate(deposits ?? []), [deposits]);
 
@@ -65,7 +67,7 @@ export default function WalletPage() {
     return (
       <div className="flex flex-col gap-4">
         <div className="pt-1 pb-2">
-          <h1 className="text-2xl font-bold text-text-primary tracking-tight">Wallet</h1>
+          <h1 className="text-2xl font-bold text-text-primary tracking-tight">{t("wallet.title")}</h1>
         </div>
         <ErrorCard onRetry={refetch} />
       </div>
@@ -101,7 +103,7 @@ export default function WalletPage() {
         {/* Top shimmer line */}
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         <p className="text-[12px] font-semibold uppercase tracking-wider text-text-muted">
-          Total balance
+          {t("wallet.totalBalance")}
         </p>
         <div className="mt-3 flex items-baseline justify-center">
           <span className="text-[18px] text-text-muted font-medium mr-1 mt-2">{bal.symbol}</span>
@@ -118,7 +120,7 @@ export default function WalletPage() {
             <polyline points="17 6 23 6 23 12" />
           </svg>
           <span className="text-[13px] text-success-500 font-semibold tabular-nums">
-            +{earnedFmt.symbol}{earnedFmt.intPart}.{earnedFmt.decPart} earned · {apy.toFixed(2)}% APY
+            {t("wallet.earnedApy", { earned: `${earnedFmt.symbol}${earnedFmt.intPart}.${earnedFmt.decPart}`, apy: apy.toFixed(2) })}
           </span>
         </div>
       </section>
@@ -126,7 +128,7 @@ export default function WalletPage() {
       {/* Quick actions */}
       <section className="grid grid-cols-4 gap-2">
         <QuickAction
-          label="Deposit"
+          label={t("wallet.deposit")}
           tint="gold"
           onClick={() => setShowDeposit(true)}
           icon={
@@ -136,7 +138,7 @@ export default function WalletPage() {
           }
         />
         <QuickAction
-          label="Invest"
+          label={t("wallet.invest")}
           tint="sport"
           onClick={() => setShowInvest(true)}
           icon={
@@ -147,7 +149,7 @@ export default function WalletPage() {
           }
         />
         <QuickAction
-          label="Withdraw"
+          label={t("wallet.withdraw")}
           tint="neutral"
           onClick={() => setShowWithdraw(true)}
           icon={
@@ -157,7 +159,7 @@ export default function WalletPage() {
           }
         />
         <QuickAction
-          label="Activity"
+          label={t("wallet.activity")}
           tint="purple"
           icon={
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -180,8 +182,8 @@ export default function WalletPage() {
       <Card>
         <div className="flex justify-between items-center">
           <div>
-            <p className="text-sm font-bold text-text-primary tracking-tight">Earning status</p>
-            <p className="text-[12px] text-text-muted mt-0.5">Across Morpho vaults · live on-chain</p>
+            <p className="text-sm font-bold text-text-primary tracking-tight">{t("wallet.earningStatus")}</p>
+            <p className="text-[12px] text-text-muted mt-0.5">{t("wallet.acrossVaults")}</p>
           </div>
           <div
             className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border ${
@@ -190,7 +192,7 @@ export default function WalletPage() {
                 : "bg-oria-chip text-text-muted border-oria"
             }`}
           >
-            {invested > 0 ? "Active" : "Inactive"}
+            {invested > 0 ? t("wallet.active") : t("wallet.inactive")}
           </div>
         </div>
         <div className="grid grid-cols-3 gap-2.5 mt-5">
@@ -198,9 +200,9 @@ export default function WalletPage() {
             const invFmt = formatMoney(invested, currency);
             const eFmt = formatMoney(earned, currency);
             return [
-              { label: "Invested", value: `${invFmt.symbol}${invFmt.intPart}.${invFmt.decPart}`, color: "text-text-primary" },
-              { label: "Earned",   value: `${eFmt.symbol}${eFmt.intPart}.${eFmt.decPart}`,        color: "text-success-500" },
-              { label: "Your APY", value: `${apy.toFixed(2)}%`,                                   color: "text-accent-purple-bright" },
+              { label: t("wallet.invested"), value: `${invFmt.symbol}${invFmt.intPart}.${invFmt.decPart}`, color: "text-text-primary" },
+              { label: t("wallet.earnedLabel"), value: `${eFmt.symbol}${eFmt.intPart}.${eFmt.decPart}`,        color: "text-success-500" },
+              { label: t("wallet.yourApy"), value: `${apy.toFixed(2)}%`,                                   color: "text-accent-purple-bright" },
             ];
           })().map((s) => (
             <div key={s.label} className="text-center py-3 rounded-xl bg-oria-section border border-oria">
@@ -215,19 +217,19 @@ export default function WalletPage() {
       {morpho && (morpho.positions.some(p => p.assets > 0) || morphoLoading) && (
         <Card>
           <div className="flex justify-between items-center mb-3">
-            <p className="text-sm font-bold text-text-primary tracking-tight">Your positions</p>
+            <p className="text-sm font-bold text-text-primary tracking-tight">{t("wallet.yourPositions")}</p>
             <button
               onClick={() => refetchMorpho()}
-              aria-label="Refresh"
+              aria-label={t("common.refresh")}
               className="text-[11px] text-accent-purple-bright font-semibold cursor-pointer"
             >
-              ↻ Refresh
+              ↻ {t("common.refresh")}
             </button>
           </div>
           <div className="flex flex-col gap-2">
             {morpho.positions.filter(p => p.assets > 0).length === 0 ? (
               <p className="text-[12px] text-text-muted py-2 text-center">
-                {morphoLoading ? "Loading…" : "No positions yet. Tap Invest to start earning."}
+                {morphoLoading ? t("common.loading") : t("wallet.noPositions")}
               </p>
             ) : morpho.positions.filter(p => p.assets > 0).map((p) => {
               const f = formatMoney(p.assets, currency);
@@ -252,13 +254,13 @@ export default function WalletPage() {
       {/* Idle USDC per chain */}
       {morpho && morpho.idle.some(c => c.usdc > 0) && (
         <Card>
-          <p className="text-sm font-bold text-text-primary mb-3 tracking-tight">Idle USDC</p>
+          <p className="text-sm font-bold text-text-primary mb-3 tracking-tight">{t("wallet.idleUsdc")}</p>
           <div className="flex flex-col">
             {morpho.idle.filter(c => c.usdc > 0).map((c) => {
               const f = formatMoney(c.usdc, currency);
               return (
                 <div key={c.chainKey} className="flex justify-between py-2.5 border-b border-oria last:border-b-0">
-                  <span className="text-sm text-text-secondary">USDC on {c.chainName}</span>
+                  <span className="text-sm text-text-secondary">{t("wallet.usdcOn", { chain: c.chainName })}</span>
                   <span className="text-sm font-bold text-text-primary tabular-nums">
                     {f.symbol}{f.intPart}.{f.decPart}
                   </span>
@@ -267,7 +269,7 @@ export default function WalletPage() {
             })}
           </div>
           <p className="text-[10px] text-text-muted mt-3">
-            Not earning yield yet — tap Invest to deploy into a Morpho vault.
+            {t("wallet.idleHint")}
           </p>
         </Card>
       )}
@@ -275,7 +277,7 @@ export default function WalletPage() {
       {/* Transactions (grouped) */}
       <Card id="wallet-tx" className="!p-0 overflow-hidden">
         <div className="p-5 pb-3">
-          <p className="text-sm font-bold text-text-primary tracking-tight">Recent transactions</p>
+          <p className="text-sm font-bold text-text-primary tracking-tight">{t("wallet.recentTx")}</p>
         </div>
         {deposits && deposits.length > 0 ? (
           <div className="px-5 pb-4">
@@ -283,7 +285,7 @@ export default function WalletPage() {
               grouped[group].length > 0 ? (
                 <div key={group} className="mb-2 last:mb-0">
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted py-2">
-                    {group}
+                    {group === "Today" ? t("common.today") : group === "This week" ? t("common.thisWeek") : t("common.earlier")}
                   </p>
                   {grouped[group].map((d) => (
                     <div
@@ -298,7 +300,7 @@ export default function WalletPage() {
                           </svg>
                         </div>
                         <div>
-                          <p className="text-[13px] font-semibold text-text-primary">Deposit</p>
+                          <p className="text-[13px] font-semibold text-text-primary">{t("wallet.deposit")}</p>
                           <p className="text-[11px] text-text-muted">{timeAgo(d.createdAt)}</p>
                         </div>
                       </div>
@@ -307,7 +309,7 @@ export default function WalletPage() {
                           +{d.amount.toLocaleString()} {d.token}
                         </p>
                         <p className={`text-[11px] font-medium ${d.status === "earning" ? "text-success-500" : "text-warning-500"}`}>
-                          {d.status === "earning" ? "Earning" : "Confirmed"}
+                          {d.status === "earning" ? t("wallet.earning") : t("wallet.confirmed")}
                         </p>
                       </div>
                     </div>
@@ -324,8 +326,8 @@ export default function WalletPage() {
                 <path d="M16 3H8a2 2 0 00-2 2v2h12V5a2 2 0 00-2-2z" />
               </svg>
             </div>
-            <p className="text-sm font-semibold text-text-primary mb-1">No transactions yet</p>
-            <p className="text-[12px] text-text-muted">Make your first deposit to start earning</p>
+            <p className="text-sm font-semibold text-text-primary mb-1">{t("wallet.noTx")}</p>
+            <p className="text-[12px] text-text-muted">{t("wallet.noTxHint")}</p>
           </div>
         )}
       </Card>
@@ -337,16 +339,16 @@ export default function WalletPage() {
             try {
               await navigator.clipboard.writeText(wallet.walletAddr!);
               setCopied(true);
-              toast("Address copied!");
+              toast(t("wallet.addressCopied"));
               setTimeout(() => setCopied(false), 2000);
             } catch {
-              toast("Failed to copy", "error");
+              toast(t("wallet.copyFailed"), "error");
             }
           }}
           className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-oria-card border border-oria cursor-pointer hover:bg-oria-card-hover transition-colors group"
         >
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">Wallet</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">{t("wallet.walletLabel")}</span>
             <span className="text-[12px] text-text-secondary font-mono truncate">
               {wallet.walletAddr.slice(0, 6)}…{wallet.walletAddr.slice(-4)}
             </span>

@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useWallets } from "@privy-io/react-auth";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/Toast";
+import { useI18n } from "@/lib/i18n";
 import { approveAndDeposit, getUsdcBalance, fetchVaultApys, VAULTS, DEFAULT_VAULT, type Vault } from "@/lib/morpho";
 
 interface Props {
@@ -16,6 +17,7 @@ export function InvestModal({ open, onClose }: Props) {
   const { wallets } = useWallets();
   const wallet = wallets[0];
   const { toast } = useToast();
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [mounted, setMounted] = useState(false);
   const [vault, setVault] = useState<Vault>(DEFAULT_VAULT);
@@ -59,21 +61,21 @@ export function InvestModal({ open, onClose }: Props) {
   const explorerUrl = txHash ? `${vault.explorerUrl}/${txHash}` : null;
 
   const submit = async () => {
-    if (!wallet) { toast("Wallet not connected", "error"); return; }
+    if (!wallet) { toast(t("invest.walletNotConnected"), "error"); return; }
     if (!valid) return;
     setBusy(true);
-    setStatus(`Switching to ${vault.chainName}…`);
+    setStatus(t("invest.switching", { chain: vault.chainName }));
     try {
       const result = await approveAndDeposit(vault, wallet, numAmount, setStatus);
       setTxHash(result.finalHash);
-      setStatus("Success!");
-      toast(`Invested ${numAmount} USDC in ${vault.name} ✓`);
+      setStatus(t("invest.success"));
+      toast(t("invest.done", { amount: numAmount, vault: vault.name }));
       queryClient.invalidateQueries({ queryKey: ["wallet"] });
       queryClient.invalidateQueries({ queryKey: ["morpho-position"] });
       setTimeout(() => onClose(), 1500);
     } catch (err: unknown) {
       const code = (err as { code?: number })?.code;
-      const msg = code === 4001 ? "Cancelled" : (err instanceof Error ? err.message : "Transaction failed");
+      const msg = code === 4001 ? t("invest.cancelled") : (err instanceof Error ? err.message : t("invest.failed"));
       setStatus(msg);
       toast(msg, "error");
     } finally {
@@ -93,7 +95,7 @@ export function InvestModal({ open, onClose }: Props) {
       >
         <div className="w-10 h-1 rounded-full bg-oria-strong mx-auto mb-5" />
         <div className="flex items-center justify-between mb-1">
-          <h3 className="text-lg font-bold text-text-primary">Invest in Morpho</h3>
+          <h3 className="text-lg font-bold text-text-primary">{t("invest.title")}</h3>
           <button
             onClick={onClose}
             disabled={busy}
@@ -106,7 +108,7 @@ export function InvestModal({ open, onClose }: Props) {
           </button>
         </div>
         <p className="text-[13px] text-text-muted mb-4 leading-relaxed">
-          Choose a Morpho vault. You can switch between them — each has its own yield and chain.
+          {t("invest.intro")}
         </p>
 
         {/* Vault picker */}
@@ -144,7 +146,7 @@ export function InvestModal({ open, onClose }: Props) {
 
         {/* USDC balance on selected chain */}
         <div className="flex items-center justify-between mb-2 px-3 py-2.5 rounded-xl bg-oria-section border border-oria">
-          <span className="text-[12px] text-text-muted">USDC on {vault.chainName}</span>
+          <span className="text-[12px] text-text-muted">{t("wallet.usdcOn", { chain: vault.chainName })}</span>
           <button
             onClick={() => usdcBalance != null && setAmount(usdcBalance.toString())}
             className="text-[14px] font-bold text-text-primary tabular-nums cursor-pointer hover:text-accent-purple-bright"
@@ -152,10 +154,10 @@ export function InvestModal({ open, onClose }: Props) {
             {loadingBal ? "…" : usdcBalance?.toFixed(2) ?? "—"}
           </button>
         </div>
-        <p className="text-[10px] text-text-muted mb-3 text-center">Tap balance to use max</p>
+        <p className="text-[10px] text-text-muted mb-3 text-center">{t("invest.tapMax")}</p>
 
         {/* Amount input */}
-        <label className="text-[12px] font-medium text-text-secondary mb-1.5 block">Amount</label>
+        <label className="text-[12px] font-medium text-text-secondary mb-1.5 block">{t("common.amount")}</label>
         <div className="relative mb-4">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[18px] text-text-muted font-medium">$</span>
           <input
@@ -178,7 +180,7 @@ export function InvestModal({ open, onClose }: Props) {
           }`}>
             {busy && <span className="inline-block w-3 h-3 border-2 border-current/30 border-t-current rounded-full animate-spin mr-2 align-middle" />}
             {status}
-            {explorerUrl && <a href={explorerUrl} target="_blank" rel="noopener noreferrer" className="ml-2 underline">view tx</a>}
+            {explorerUrl && <a href={explorerUrl} target="_blank" rel="noopener noreferrer" className="ml-2 underline">{t("common.viewTx")}</a>}
           </div>
         )}
 
@@ -188,14 +190,14 @@ export function InvestModal({ open, onClose }: Props) {
             disabled={busy}
             className="flex-1 py-3.5 rounded-xl border border-oria bg-oria-chip text-text-secondary font-semibold text-sm cursor-pointer disabled:opacity-50"
           >
-            Cancel
+            {t("common.cancel")}
           </button>
           <button
             onClick={submit}
             disabled={!valid || busy}
             className="flex-1 py-3.5 rounded-xl gradient-brand text-white font-semibold text-sm shadow-button cursor-pointer disabled:opacity-50"
           >
-            {busy ? "Processing…" : "Invest"}
+            {busy ? t("invest.processing") : t("invest.cta")}
           </button>
         </div>
       </div>
